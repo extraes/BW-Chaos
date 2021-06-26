@@ -357,6 +357,8 @@ namespace BW_Chaos
  * Adamdev - Helping me with FuckYourMagazine and Butterfingers
  * Lakatrazz - Telling me about PhysBody
  * Microsoft - C# documentation (duh)
+ * FatWrinkleZ - SusArrow, I dnspy'd it to get the code for bootleg gravity cube.
+ * C# - If else statements 🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏
  * Stackoverflow - Generate list of random numbers without repeats (https://stackoverflow.com/questions/30014901/generating-random-numbers-without-repeating-c)
  * Forums - Change gravity direction
  */

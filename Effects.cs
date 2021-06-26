@@ -225,7 +225,7 @@ namespace BW_Chaos_Effects
 
         public void EffectStarts()
         {
-            ModThatIsNotMod.RandomShit.AdManager.CreateDogAd();
+            ModThatIsNotMod.RandomShit.AdManager.CreateDogAd(); // This can crash MTINM because ???????????????????????? but it usually doesnt happen
         }
         public void EffectEnds()
         {
@@ -264,21 +264,28 @@ namespace BW_Chaos_Effects
         {
             if (CustomItems.customItemsExist)
             {
-                Vector3 spawnposition = Player.controllersExist ? Player.rightController.transform.position + Player.rightController.transform.forward : new Vector3(0, 5, 0);
+                Vector3 spawnposition = Player.controllersExist ? Player.rightController.transform.position + Player.rightController.transform.forward : new Vector3(0, 5, 0); // P.cE ? ...  : ... is for testing
+                
+                #region Spawn item
                 SpawnableObject spawnable = null;
                 while (spawnable == null || spawnable.title.Contains(".bcm") || spawnable.title.Contains("grenade") || spawnable.prefab.GetComponent<Magazine>() != null)
                     spawnable = CustomItems.GetRandomCustomSpawnable();
-                MelonLogger.Msg($"Attempting to spawn {spawnable.title} at ({spawnposition.x}, {spawnposition.y}, {spawnposition.z}) with a random rotation for bootleg ");
-                //GObj = CustomItems.SpawnFromPool(spawnable.title, spawnposition, UnityEngine.Random.rotation);
+                MelonLogger.Msg($"Attempting to spawn {spawnable.title} at ({spawnposition.x}, {spawnposition.y}, {spawnposition.z}) with a random rotation for bootleg gravity cube");
                 GObj = GameObject.Instantiate(spawnable.prefab, spawnposition, UnityEngine.Random.rotation);
+                #endregion
+
                 while (!EffectIsEnded)
                 {
-                    if (GObj != null && GObj.transform != null /*|| GObj.transform.up != Vector3.zero*/)
+                    if (GObj != null && GObj.transform != null)
                     {
                         MelonLogger.Msg($"{spawnable.title}.up = {GObj.transform.up.x} {GObj.transform.up.y} {GObj.transform.up.z}");
                         Physics.gravity = -GObj.transform.up * 12f;
                     }
-                    else MelonLogger.Warning("The spawned game object, or its transform, was null");
+                    else
+                    {
+                        MelonLogger.Warning("The spawned game object, or its transform, was null");
+                        EffectIsEnded = false; // Stop here to avoid console spam
+                    }
                     await Task.Delay(250);
                 }
             }
