@@ -285,7 +285,7 @@ namespace BW_Chaos
                 effect.EffectStarts();
                 ActiveEffects.Add(effect.Name);
                 await Task.Delay(effect.Duration * 1000);
-                MelonLogger.Msg("Ended effect " + effect.Name);
+                MelonLogger.Msg("Ending effect " + effect.Name);
                 effect.EffectEnds();
                 ActiveEffects.Remove(effect.Name);
             } catch (Exception err)
