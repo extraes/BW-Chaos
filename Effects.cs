@@ -698,7 +698,7 @@ namespace BW_Chaos_Effects
 
         private void OnGrab(Grip grip, Hand hand)
         {
-            grip.
+            hand.attachedInteractable
             gun.SetRpm(gun.roundsPerMinute / 10);
         }
         private void OnDrop(Grip grip, Hand hand)
