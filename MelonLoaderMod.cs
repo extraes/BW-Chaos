@@ -1,17 +1,18 @@
-﻿using BW_Chaos_Effects;
-using MelonLoader;
-using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System;
 using System.IO;
-using System.IO.Compression;
 using System.Net;
-using System.Reflection;
 using System.Text;
+using System.Reflection;
+using System.Diagnostics;
+using System.IO.Compression;
 using System.Threading.Tasks;
+using System.Collections.Generic;
+
 using UnityEngine;
+using MelonLoader;
 using WatsonWebsocket;
+using Newtonsoft.Json;
+using BW_Chaos.Effects;
 
 namespace BW_Chaos
 {

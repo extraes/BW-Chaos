@@ -1,14 +1,16 @@
-﻿using MelonLoader;
-using ModThatIsNotMod;
+﻿using System;
+using System.Threading.Tasks;
+
 using StressLevelZero.Data;
+using StressLevelZero.VRMK;
 using StressLevelZero.Interaction;
 using StressLevelZero.Props.Weapons;
-using StressLevelZero.VRMK;
-using System;
-using System.Threading.Tasks;
-using UnityEngine;
 
-namespace BW_Chaos_Effects
+using UnityEngine;
+using MelonLoader;
+using ModThatIsNotMod;
+
+namespace BW_Chaos.Effects
 {
     public interface ChaosEffect
     {
