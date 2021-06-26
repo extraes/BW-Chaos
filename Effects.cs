@@ -2,11 +2,13 @@
 using ModThatIsNotMod;
 using StressLevelZero.Data;
 using StressLevelZero.Interaction;
+using StressLevelZero.Pool;
 using StressLevelZero.Props.Weapons;
 using StressLevelZero.VRMK;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using WNP78.Grenades;
 
 namespace BW_Chaos_Effects
 {
@@ -253,7 +255,7 @@ namespace BW_Chaos_Effects
     public class BootlegGravityCube : ChaosEffect
     {
         public int Duration = 30;
-        public string Name = "Bootleg gravity cube";
+        public string Name = "(BROKEN) Bootleg gravity cube";
 
         int ChaosEffect.Duration { get => Duration; }
         string ChaosEffect.Name { get => Name; set => Name = value; }
@@ -266,13 +268,15 @@ namespace BW_Chaos_Effects
             {
                 SpawnableObject obj = CustomItems.GetRandomCustomSpawnable();
                 //GObj = GameObject.Instantiate(obj.prefab, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
-                GObj = CustomItems.SpawnFromPool(obj.title, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
+                //CustomItems.SpawnFromPool(obj.title, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
+                GObj = GameObject.Instantiate(PoolManager.GetPool("Crablet").Prefab, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
                 while (!EffectIsEnded)
                 {
-                    if (GObj != null || GObj.transform != null || GObj.transform.up != Vector3.zero)
+                    if (GObj != null && GObj.transform != null /*|| GObj.transform.up != Vector3.zero*/)
                     {
                         Physics.gravity = -GObj.transform.up * 12f;
                     }
+                    else MelonLogger.Warning("The spawned game object, or its transform, was null");
                     await Task.Delay(100);
                 }
             }
@@ -295,10 +299,11 @@ namespace BW_Chaos_Effects
         private bool EffectIsEnded = false;
         public async void EffectStarts()
         {
+            EffectIsEnded = false;
             while (!EffectIsEnded)
             {
                 Physics.gravity = Player.rightHand.transform.forward * 12f;
-                await Task.Delay(50);
+                await Task.Delay(100);
             }
         }
 
@@ -546,7 +551,7 @@ namespace BW_Chaos_Effects
                 {
                     while (!EffectIsEnded)
                     {
-                        if (rand.Next() % 2 ==0) Player.rightHand.rb.AddRelativeTorque(10 * new Vector3((float)rand.NextDouble() - 0.5f, 10 * (float)rand.NextDouble() - 0.5f, 10 * (float)rand.NextDouble() - 0.5f));
+                        if (rand.Next() % 2 == 0) Player.rightHand.rb.AddRelativeTorque(10 * new Vector3((float)rand.NextDouble() - 0.5f, 10 * (float)rand.NextDouble() - 0.5f, 10 * (float)rand.NextDouble() - 0.5f));
                         else Player.leftHand.rb.AddRelativeTorque(10 * new Vector3((float)rand.NextDouble() - 0.5f, 10 * (float)rand.NextDouble() - 0.5f, 10 * (float)rand.NextDouble() - 0.5f));
                         await Task.Delay(25);
                     }
@@ -570,7 +575,7 @@ namespace BW_Chaos_Effects
         public int Duration = 15;
         public string Name = "Paralyze";
 
-        int ChaosEffect.Duration { get => 30; }
+        int ChaosEffect.Duration { get => Duration; }
         string ChaosEffect.Name { get => Name; set => Name = value; }
 
         private Vector3 playerpos;
@@ -581,6 +586,48 @@ namespace BW_Chaos_Effects
             EffectIsEnded = false;
             try
             {
+                PhysBody PlayerPhysBody = GameObject.FindObjectOfType<PhysBody>();
+                if (PlayerPhysBody != null)
+                {
+                    playerpos = PlayerPhysBody.gameObject.transform.position;
+                    playerrot = PlayerPhysBody.gameObject.transform.rotation;
+                    while (!EffectIsEnded)
+                    {
+                        PlayerPhysBody.gameObject.transform.SetPositionAndRotation(playerpos, playerrot);
+                        await Task.Delay(250);
+                    }
+                }
+            }
+            catch (Exception err)
+            {
+                MelonLogger.Error("Error paralyzing player");
+                MelonLogger.Error(err);
+            }
+        }
+        public void EffectEnds()
+        {
+            EffectIsEnded = true;
+        }
+    }
+
+    public class VibeCheck : ChaosEffect
+    {
+        public int Duration = 15;
+        public string Name = "Vibe check";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        private Vector3 playerpos;
+        private Quaternion playerrot;
+        private bool EffectIsEnded = false;
+        public async void EffectStarts()
+        {
+            EffectIsEnded = false;
+            try
+            {
+                //var ande = new WNP78.Grenades.Grenade().explosion.Explode();
+                //Poolee[] pooled = PoolManager.GetPool("Grenade")._pooledObjects.ToArray();
                 PhysBody PlayerPhysBody = GameObject.FindObjectOfType<PhysBody>();
                 if (PlayerPhysBody != null)
                 {
