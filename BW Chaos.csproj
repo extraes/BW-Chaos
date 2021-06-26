@@ -46,6 +46,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\Documents\DSharpPlus-release-4.0\DSharpPlus\bin\Release\net461\DSharpPlus.dll</HintPath>
     </Reference>
+    <Reference Include="Grenades">
+      <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\Mods\Grenades.dll</HintPath>
+    </Reference>
     <Reference Include="Il2Cppmscorlib">
       <HintPath>..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
     </Reference>
