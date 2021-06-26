@@ -2,13 +2,11 @@
 using ModThatIsNotMod;
 using StressLevelZero.Data;
 using StressLevelZero.Interaction;
-using StressLevelZero.Pool;
 using StressLevelZero.Props.Weapons;
 using StressLevelZero.VRMK;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
-using WNP78.Grenades;
 
 namespace BW_Chaos_Effects
 {
@@ -255,7 +253,7 @@ namespace BW_Chaos_Effects
     public class BootlegGravityCube : ChaosEffect
     {
         public int Duration = 30;
-        public string Name = "(BROKEN) Bootleg gravity cube";
+        public string Name = "Bootleg gravity cube";
 
         int ChaosEffect.Duration { get => Duration; }
         string ChaosEffect.Name { get => Name; set => Name = value; }
@@ -266,25 +264,31 @@ namespace BW_Chaos_Effects
         {
             if (CustomItems.customItemsExist)
             {
-                SpawnableObject obj = CustomItems.GetRandomCustomSpawnable();
-                //GObj = GameObject.Instantiate(obj.prefab, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
-                //CustomItems.SpawnFromPool(obj.title, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
-                GObj = GameObject.Instantiate(PoolManager.GetPool("Crablet").Prefab, Player.rightController.transform.position + new Vector3(0, 10, 0), UnityEngine.Random.rotation);
+                Vector3 spawnposition = Player.controllersExist ? Player.rightController.transform.position + Player.rightController.transform.forward : new Vector3(0, 5, 0);
+                SpawnableObject spawnable = null;
+                while (spawnable == null || spawnable.title.Contains(".bcm") || spawnable.title.Contains("grenade") || spawnable.prefab.GetComponent<Magazine>() != null)
+                    spawnable = CustomItems.GetRandomCustomSpawnable();
+                MelonLogger.Msg($"Attempting to spawn {spawnable.title} at ({spawnposition.x}, {spawnposition.y}, {spawnposition.z}) with a random rotation for bootleg ");
+                //GObj = CustomItems.SpawnFromPool(spawnable.title, spawnposition, UnityEngine.Random.rotation);
+                GObj = GameObject.Instantiate(spawnable.prefab, spawnposition, UnityEngine.Random.rotation);
                 while (!EffectIsEnded)
                 {
                     if (GObj != null && GObj.transform != null /*|| GObj.transform.up != Vector3.zero*/)
                     {
+                        MelonLogger.Msg($"{spawnable.title}.up = {GObj.transform.up.x} {GObj.transform.up.y} {GObj.transform.up.z}");
                         Physics.gravity = -GObj.transform.up * 12f;
                     }
                     else MelonLogger.Warning("The spawned game object, or its transform, was null");
-                    await Task.Delay(100);
+                    await Task.Delay(250);
                 }
             }
+            else MelonLogger.Warning("No custom items - can't spawn bootleg gravity cube");
         }
 
         public void EffectEnds()
         {
             EffectIsEnded = true;
+            UnityEngine.Object.Destroy(GObj);
             Physics.gravity = new Vector3(0, -9.8f, 0);
         }
     }
@@ -651,6 +655,27 @@ namespace BW_Chaos_Effects
             EffectIsEnded = true;
         }
     }
+
+    public class NoRegen : ChaosEffect
+    {
+        public int Duration = 300;
+        public string Name = "No regen";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        public void EffectStarts()
+        {
+            Player_Health PlayerHealth = GameObject.FindObjectOfType<Player_Health>();
+            PlayerHealth.wait_Regen_t = 420;
+        }
+        public void EffectEnds()
+        {
+            Player_Health PlayerHealth = GameObject.FindObjectOfType<Player_Health>();
+            PlayerHealth.wait_Regen_t = 3;
+        }
+    }
+
     /*public class WhenNoVTEC : ChaosEffect
     {
         public int Duration = 30;
