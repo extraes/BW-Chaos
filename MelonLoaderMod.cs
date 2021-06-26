@@ -197,7 +197,7 @@ namespace BW_Chaos
             EffectList.Add(new Paralyze());
             EffectList.Add(new BootlegGravityCube());
             EffectList.Add(new Parkinsons());
-            //EffectList.Add(new PointToGo());
+            EffectList.Add(new NoRegen());
             #endregion
 
             #region Start node, hook websocket
