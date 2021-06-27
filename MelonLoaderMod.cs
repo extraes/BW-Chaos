@@ -27,8 +27,9 @@ namespace BW_Chaos
 
     public class BW_Chaos : MelonMod
     {
-        private string token = "YOUR_TOKEN_HERE";
-        private string channelPref = "CHANNEL_ID_HERE";
+        internal string token = "YOUR_TOKEN_HERE";
+        internal string channelPref = "CHANNEL_ID_HERE";
+
         public override void OnApplicationStart()
         {
             if (token == null)
@@ -45,18 +46,22 @@ namespace BW_Chaos
             }
 
             #region Get and set values from MelonPrefs
+
             MelonPreferences.CreateCategory("BW_Chaos", "BW_Chaos");
+
             MelonPreferences.CreateEntry("BW_Chaos", "token", token, "token", false);
             token = MelonPreferences.GetEntryValue<string>("BW_Chaos", "token");
+
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelPref, "channel", false);
             channelPref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
+
             MelonPreferences.Save(); // BECAUSE IF I DONT SAVE IT RN THEN THE FAT BASTARD WONT CHANGE IT UNTIL THE GAME CLOSES
+
             #endregion
 
             if (token != "YOUR_TOKEN_HERE" || channelPref != "CHANNEL_ID_HERE")
             {
                 MelonLogger.Msg("Token and channel fetched!");
-
                 MainAsync().GetAwaiter().GetResult();
             }
             else
@@ -67,17 +72,19 @@ namespace BW_Chaos
             }
         }
 
-        public int EffectNumberOffset = 0;
-        public List<ChaosEffect> EffectList = new List<ChaosEffect> { };
-        public List<ChaosEffect> CandidateEffects = new List<ChaosEffect> { };
-        public List<string> ActiveEffects = new List<string> { };
-        public ChaosEffect RandomEffect;
-        bool GUIEnabled = false;
-        float timeSinceEnabled = 0f;
+        public IChaosEffect randomEffect;
+        public int effectNumberOffset = 0;
+        public List<string> activeEffects = new List<string>();
+        public List<IChaosEffect> effectList = new List<IChaosEffect>();
+        public List<IChaosEffect> candidateEffects = new List<IChaosEffect>();
+
+        private bool guiEnabled = false;
+        private float timeSinceEnabled = 0f;
+
         public override async void OnGUI()
         {
             // Load chaos bars into onscreen UI
-            if (GUIEnabled)
+            if (guiEnabled)
             {
                 float TimeSinceReset = Time.realtimeSinceStartup - timeSinceEnabled;
                 if (TimeSinceReset > 30f)
@@ -93,13 +100,13 @@ namespace BW_Chaos
                 else
                 {
                     int EffectNumber = 0;
-                    foreach (ChaosEffect effect in CandidateEffects)
+                    foreach (IChaosEffect effect in candidateEffects)
                     {
-                        GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + EffectNumberOffset + 1}: {effect.Name}");
+                        GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + effectNumberOffset + 1}: {effect.Name}");
                         EffectNumber++;
                     }
-                    GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + EffectNumberOffset + 1}: Random effect");
-                    GUI.Box(new Rect(50, 250, 500, (ActiveEffects.Count + 1) * 20 + 10), "Active effects:\n" + String.Join("\n", ActiveEffects));
+                    GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + effectNumberOffset + 1}: Random effect");
+                    GUI.Box(new Rect(50, 250, 500, (activeEffects.Count + 1) * 20 + 10), "Active effects:\n" + String.Join("\n", activeEffects));
                     GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
                     GUI.Box(new Rect(Screen.width - 550, 75, 500 * Math.Min(TimeSinceReset % 30 / 30, 1f), 25), "");
                 }
@@ -116,7 +123,7 @@ namespace BW_Chaos
             await Task.Delay(0);
         }
 
-        WatsonWsClient client = new WatsonWsClient("localhost", 8999, false);
+        private readonly WatsonWsClient client = new WatsonWsClient("localhost", 8999, false);
         private async Task MainAsync()
         {
             #region Check for and install Node
@@ -180,25 +187,25 @@ namespace BW_Chaos
 
             #region Populate effect list
             if (token == null) MelonLogger.Msg("since youre looking, can you propose a better way to do this? cause this right here looks dumb as fuck.");
-            EffectList.Add(new ZeroGravity());
-            EffectList.Add(new Fling());
-            EffectList.Add(new Butterfingers());
-            EffectList.Add(new FuckYourMagazine());
-            EffectList.Add(new Lag());
-            EffectList.Add(new FlingPlayer());
-            EffectList.Add(new CreateDogAd());
-            EffectList.Add(new InvertGravity());
-            EffectList.Add(new PointToGo());
-            EffectList.Add(new PlayerPointToGo());
-            EffectList.Add(new Centrifuge());
-            EffectList.Add(new California());
-            EffectList.Add(new PlayerCentrifuge());
-            EffectList.Add(new SlowShooting());
-            EffectList.Add(new JetpackJoyride());
-            EffectList.Add(new Paralyze());
-            EffectList.Add(new BootlegGravityCube());
-            EffectList.Add(new Parkinsons());
-            EffectList.Add(new NoRegen());
+            effectList.Add(new ZeroGravity());
+            effectList.Add(new Fling());
+            effectList.Add(new Butterfingers());
+            effectList.Add(new FuckYourMagazine());
+            effectList.Add(new Lag());
+            effectList.Add(new FlingPlayer());
+            effectList.Add(new CreateDogAd());
+            effectList.Add(new InvertGravity());
+            effectList.Add(new PointToGo());
+            effectList.Add(new PlayerPointToGo());
+            effectList.Add(new Centrifuge());
+            effectList.Add(new California());
+            effectList.Add(new PlayerCentrifuge());
+            effectList.Add(new SlowShooting());
+            effectList.Add(new JetpackJoyride());
+            effectList.Add(new Paralyze());
+            effectList.Add(new BootlegGravityCube());
+            effectList.Add(new Parkinsons());
+            effectList.Add(new NoRegen());
             #endregion
 
             #region Start node, hook websocket
@@ -219,10 +226,10 @@ namespace BW_Chaos
             {
                 int[] votes = JsonConvert.DeserializeObject<int[]>(Message);
                 MelonLogger.Msg($"Recieved votes: A: {votes[0]}, B: {votes[1]}, C: {votes[2]}, D: {votes[3]}");
-                if (GUIEnabled)
+                if (guiEnabled)
                 {
-                    if (EffectNumberOffset == 0) EffectNumberOffset = 4;
-                    else EffectNumberOffset = 0;
+                    if (effectNumberOffset == 0) effectNumberOffset = 4;
+                    else effectNumberOffset = 0;
                     // GUIEnabled = false; // Stop drawing the GUI while the list of effects is being edited
                     // Apply effects
                     int MaxIndex = 0;
@@ -235,21 +242,21 @@ namespace BW_Chaos
                             MaxIndex = i;
                         }
                     };
-                    CandidateEffects.Add(RandomEffect);
+                    candidateEffects.Add(randomEffect);
                     if (MaxValue == 0) MelonLogger.Msg("There were no votes, skipping this round of effects.");
-                    else DoEffect(CandidateEffects[MaxIndex]);
+                    else DoEffect(candidateEffects[MaxIndex]);
 
                 }
                 // Generate new list of effects
-                MelonLogger.Msg("Generating new list of candidate effects from list of " + EffectList.Count + " effects");
-                CandidateEffects.Clear();
-                foreach (int number in NonconflictingRandom(EffectList.Count, 3))
+                MelonLogger.Msg("Generating new list of candidate effects from list of " + effectList.Count + " effects");
+                candidateEffects.Clear();
+                foreach (int number in NonconflictingRandom(effectList.Count, 3))
                 {
-                    CandidateEffects.Add(EffectList[number]);
+                    candidateEffects.Add(effectList[number]);
                 }
-                RandomEffect = EffectList[new System.Random().Next(EffectList.Count)];
+                randomEffect = effectList[new System.Random().Next(effectList.Count)];
                 timeSinceEnabled = Time.realtimeSinceStartup;
-                GUIEnabled = true;
+                guiEnabled = true;
             }
             else
             {
@@ -278,22 +285,22 @@ namespace BW_Chaos
             _ = client.SendAsync("It's me, your favorite client, just checking in to tell you I'm alive", System.Net.WebSockets.WebSocketMessageType.Text);
         }
 
-        private async void DoEffect(ChaosEffect effect)
+        private async void DoEffect(IChaosEffect effect)
         {
             try
             {
                 MelonLogger.Msg("Starting effect " + effect.Name);
                 effect.EffectStarts();
-                ActiveEffects.Add(effect.Name);
+                activeEffects.Add(effect.Name);
                 await Task.Delay(effect.Duration * 1000);
                 MelonLogger.Msg("Ending effect " + effect.Name);
                 effect.EffectEnds();
-                ActiveEffects.Remove(effect.Name);
+                activeEffects.Remove(effect.Name);
             } catch (Exception err)
             {
                 MelonLogger.Msg("Error running/ending effect " + effect.Name + ", removing it from list of effects");
                 MelonLogger.Error(err);
-                EffectList.Remove(effect);
+                effectList.Remove(effect);
             }
         }
 
