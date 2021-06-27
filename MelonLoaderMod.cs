@@ -66,6 +66,7 @@ namespace BW_Chaos
             }
         }
 
+        #region Effects declaration
         public int EffectNumberOffset = 0;
         public List<ChaosEffect> EffectList = new List<ChaosEffect> { };
         public List<ChaosEffect> CandidateEffects = new List<ChaosEffect> { };
@@ -73,6 +74,7 @@ namespace BW_Chaos
         public ChaosEffect RandomEffect;
         bool GUIEnabled = false;
         float timeSinceEnabled = 0f;
+        #endregion
         public override async void OnGUI()
         {
             // Load chaos bars into onscreen UI
@@ -114,6 +116,7 @@ namespace BW_Chaos
             }
             await Task.Delay(0);
         }
+
 
         WatsonWsClient client = new WatsonWsClient("localhost", 8999, false);
         private async Task MainAsync()
@@ -198,6 +201,10 @@ namespace BW_Chaos
             EffectList.Add(new BootlegGravityCube());
             EffectList.Add(new Parkinsons());
             EffectList.Add(new NoRegen());
+            EffectList.Add(new FuckYourItem());
+            EffectList.Add(new CrabletRain());
+            EffectList.Add(new SpeedUpTime());
+            EffectList.Add(new Immortality());
             #endregion
 
             #region Start node, hook websocket
@@ -361,4 +368,5 @@ namespace BW_Chaos
  * C# - If else statements 🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏
  * Stackoverflow - Generate list of random numbers without repeats (https://stackoverflow.com/questions/30014901/generating-random-numbers-without-repeating-c)
  * Forums - Change gravity direction
+ * ChaosModV - I yoinked the tick idea lol
  */
