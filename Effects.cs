@@ -14,7 +14,7 @@ using UnityEngine;
 
 namespace BW_Chaos_Effects
 {
-    public interface ChaosEffect
+    public interface IChaosEffect
     {
         int Duration { get; }
         string Name { get; set; }
@@ -24,13 +24,13 @@ namespace BW_Chaos_Effects
         void EffectEnds();
     }
     #region Effect definitions
-    public class Placeholder : ChaosEffect
+    public class Placeholder : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Placeholder effect name";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -42,13 +42,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class ZeroGravity : ChaosEffect
+    public class ZeroGravity : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Zero gravity";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -62,12 +62,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Fling : ChaosEffect
+    public class Fling : IChaosEffect
     {
         public int Duration = 1;
         public string Name = "Fling everything";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -82,12 +82,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Butterfingers : ChaosEffect
+    public class Butterfingers : IChaosEffect
     {
         public int Duration = 60;
         public string Name = "Butterfingers";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -119,13 +119,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class FuckYourMagazine : ChaosEffect
+    public class FuckYourMagazine : IChaosEffect
     {
         public int Duration = 90;
         public string Name = "Fuck your magazine";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -159,12 +159,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Lag : ChaosEffect
+    public class Lag : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Lag";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -189,12 +189,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class FlingPlayer : ChaosEffect
+    public class FlingPlayer : IChaosEffect
     {
         public int Duration = 2;
         public string Name = "Fling player";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -220,12 +220,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class CreateDogAd : ChaosEffect
+    public class CreateDogAd : IChaosEffect
     {
         public int Duration = 15;
         public string Name = "Create 2 dog ads";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -237,12 +237,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class InvertGravity : ChaosEffect
+    public class InvertGravity : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Invert gravity";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -254,13 +254,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class BootlegGravityCube : ChaosEffect
+    public class BootlegGravityCube : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Bootleg gravity cube";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         GameObject GObj;
         private bool EffectIsEnded = false;
@@ -304,12 +304,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class PointToGo : ChaosEffect
+    public class PointToGo : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Point to go";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -329,12 +329,12 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class PlayerPointToGo : ChaosEffect
+    public class PlayerPointToGo : IChaosEffect
     {
         public int Duration = 15;
         public string Name = "Point to go (Player)";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -361,13 +361,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Centrifuge : ChaosEffect
+    public class Centrifuge : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Centrifuge";
 
-        int ChaosEffect.Duration { get => 30; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => 30; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -390,13 +390,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class California : ChaosEffect
+    public class California : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "California";
 
-        int ChaosEffect.Duration { get => 30; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => 30; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -419,13 +419,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class PlayerCentrifuge : ChaosEffect
+    public class PlayerCentrifuge : IChaosEffect
     {
         public int Duration = 60;
         public string Name = "Player Centrifuge";
 
-        int ChaosEffect.Duration { get => 30; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => 30; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private int lastFrame = 0;
         private bool EffectIsEnded = false;
@@ -457,13 +457,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class SlowShooting : ChaosEffect
+    public class SlowShooting : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "SUPER SHOT";
 
-        int ChaosEffect.Duration { get => 30; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => 30; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private bool EffectIsEnded = false;
         public void EffectStarts()
@@ -490,13 +490,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class JetpackJoyride : ChaosEffect
+    public class JetpackJoyride : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Barry Steakfries";
 
-        int ChaosEffect.Duration { get => 30; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => 30; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -521,13 +521,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Parkinsons : ChaosEffect
+    public class Parkinsons : IChaosEffect
     {
         public int Duration = 90;
         public string Name = "Parkinsons";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private bool EffectIsEnded = false;
         public async void EffectStarts()
@@ -560,13 +560,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Paralyze : ChaosEffect
+    public class Paralyze : IChaosEffect
     {
         public int Duration = 15;
         public string Name = "Paralyze";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private Vector3 playerpos;
         private Quaternion playerrot;
@@ -610,13 +610,13 @@ namespace BW_Chaos_Effects
     }
 
     // VV NOT DONE VV
-    public class VibeCheck : ChaosEffect
+    public class VibeCheck : IChaosEffect
     {
         public int Duration = 15;
         public string Name = "Vibe check";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private Vector3 playerpos;
         private Quaternion playerrot;
@@ -652,13 +652,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class NoRegen : ChaosEffect
+    public class NoRegen : IChaosEffect
     {
         public int Duration = 300;
         public string Name = "No regen";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -672,13 +672,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class FuckYourItem : ChaosEffect
+    public class FuckYourItem : IChaosEffect
     {
         public int Duration = 1;
         public string Name = "Delete held item";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -708,13 +708,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class CrabletRain : ChaosEffect
+    public class CrabletRain : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Crablet rain";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private List<GameObject> Crablets = new List<GameObject> { };
         private bool EffectIsEnded = false;
@@ -748,13 +748,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Accelerate : ChaosEffect
+    public class Accelerate : IChaosEffect
     {
         public int Duration = 30;
         public string Name = "Instant acceleration";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
@@ -768,13 +768,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class RandomRigShit : ChaosEffect
+    public class RandomRigShit : IChaosEffect
     {
         public int Duration = 3;
         public string Name = "Messing with random shit in the rig";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public async void EffectStarts()
         {
@@ -795,13 +795,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class SpeedUpTime : ChaosEffect
+    public class SpeedUpTime : IChaosEffect
     {
         public int Duration = 60;
         public string Name = "4x time (overrides)";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
 
         private bool EffectIsEnded = false;
@@ -821,13 +821,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class Immortality : ChaosEffect
+    public class Immortality : IChaosEffect
     {
         public int Duration = 60;
         public string Name = "Immortality";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
 
         public void EffectStarts()
@@ -840,13 +840,13 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class JumpThePlayer : ChaosEffect
+    public class JumpThePlayer : IChaosEffect
     {
         public int Duration = 90;
         public string Name = "Jump the player";
 
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
 
         private List<GameObject> Nulls = new List<GameObject> { };
         public async void EffectStarts()

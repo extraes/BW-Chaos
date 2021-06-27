@@ -68,10 +68,10 @@ namespace BW_Chaos
 
         #region Effects declaration
         public int EffectNumberOffset = 0;
-        public List<ChaosEffect> EffectList = new List<ChaosEffect> { };
-        public List<ChaosEffect> CandidateEffects = new List<ChaosEffect> { };
+        public List<IChaosEffect> EffectList = new List<IChaosEffect> { };
+        public List<IChaosEffect> CandidateEffects = new List<IChaosEffect> { };
         public List<string> ActiveEffects = new List<string> { };
-        public ChaosEffect RandomEffect;
+        public IChaosEffect RandomEffect;
         bool GUIEnabled = false;
         float timeSinceEnabled = 0f;
         #endregion
@@ -94,7 +94,7 @@ namespace BW_Chaos
                 else
                 {
                     int EffectNumber = 0;
-                    foreach (ChaosEffect effect in CandidateEffects)
+                    foreach (IChaosEffect effect in CandidateEffects)
                     {
                         GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + EffectNumberOffset + 1}: {effect.Name}");
                         EffectNumber++;
@@ -287,7 +287,7 @@ namespace BW_Chaos
             _ = client.SendAsync("It's me, your favorite client, just checking in to tell you I'm alive", System.Net.WebSockets.WebSocketMessageType.Text);
         }
 
-        private async void DoEffect(ChaosEffect effect)
+        private async void DoEffect(IChaosEffect effect)
         {
             try
             {
