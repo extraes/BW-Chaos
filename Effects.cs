@@ -2,15 +2,15 @@
 using ModThatIsNotMod;
 using StressLevelZero.Data;
 using StressLevelZero.Interaction;
+using StressLevelZero.Pool;
 using StressLevelZero.Props.Weapons;
+using StressLevelZero.Rig;
 using StressLevelZero.VRMK;
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 using UnityEngine;
-using StressLevelZero.Rig;
-using System.Collections.Generic;
-using StressLevelZero.Pool;
-using System.Collections;
 
 namespace BW_Chaos_Effects
 {
@@ -716,16 +716,18 @@ namespace BW_Chaos_Effects
         int ChaosEffect.Duration { get => Duration; }
         string ChaosEffect.Name { get => Name; set => Name = value; }
 
-        private List<GameObject> Crablets;
+        private List<GameObject> Crablets = new List<GameObject> { };
         private bool EffectIsEnded = false;
         public async void EffectStarts()
         {
             var rand = new System.Random();
             EffectIsEnded = false;
-            while (!EffectIsEnded) {
+            while (!EffectIsEnded)
+            {
                 var pos = Player.GetPlayerHead().transform.position + new Vector3(((float)rand.NextDouble() - 0.5f) * 5, 10, ((float)rand.NextDouble() - 0.5f) * 5);
+
                 Crablets.Add(GameObject.Instantiate(PoolManager.GetPool("Crablet").Prefab, pos, Quaternion.identity));
-                await Task.Delay(1000); 
+                await Task.Delay(1000);
             }
         }
         public void EffectEnds()
@@ -734,25 +736,26 @@ namespace BW_Chaos_Effects
             MelonCoroutines.Start(RemoveCrablets());
         }
 
-        private IEnumerator RemoveCrablets ()
+        private IEnumerator RemoveCrablets()
         {
             yield return new WaitForSeconds(1);
-            GameObject.Destroy(Crablets[0]);
-            Crablets.RemoveAt(0);
-            MelonCoroutines.Start(RemoveCrablets());
+            if (Crablets.Count != 0)
+            {
+                GameObject.Destroy(Crablets[0]);
+                Crablets.RemoveAt(0);
+                MelonCoroutines.Start(RemoveCrablets());
+            }
         }
     }
 
-    public class Speed : ChaosEffect
+    public class Accelerate : ChaosEffect
     {
         public int Duration = 30;
-        public string Name = "Sanic";
+        public string Name = "Instant acceleration";
 
         int ChaosEffect.Duration { get => Duration; }
         string ChaosEffect.Name { get => Name; set => Name = value; }
 
-        private List<GameObject> Crablets;
-        private bool EffectIsEnded = false;
         public void EffectStarts()
         {
             RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
@@ -760,7 +763,35 @@ namespace BW_Chaos_Effects
         }
         public void EffectEnds()
         {
-            EffectIsEnded = true;
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+            PlayerRig.ControllerRig.maxAcceleration = PlayerRig.ControllerRig.maxAcceleration / 25;
+        }
+    }
+
+    public class RandomRigShit : ChaosEffect
+    {
+        public int Duration = 3;
+        public string Name = "Messing with random shit in the rig";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        public async void EffectStarts()
+        {
+            var rand = new System.Random();
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+            PlayerRig.ControllerRig.maxAcceleration = PlayerRig.ControllerRig.maxAcceleration * 25;
+            PlayerRig.ControllerRig.slowMoEnabled = false;
+            PlayerRig.ControllerRig.snapDegreesPerFrame = 83; // odd prime because fuck you
+            PlayerRig.ControllerRig.Teleport(new Vector3((float)rand.NextDouble() * 2, (float)rand.NextDouble() * 2, (float)rand.NextDouble() * 2));
+            await Task.Delay(1000);
+            PlayerRig.ControllerRig.Jump();
+        }
+        public void EffectEnds()
+        {
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+            PlayerRig.ControllerRig.maxAcceleration = PlayerRig.ControllerRig.maxAcceleration / 25;
+
         }
     }
 
@@ -774,21 +805,21 @@ namespace BW_Chaos_Effects
 
 
         private bool EffectIsEnded = false;
-        public async void EffectStarts()
+        public void EffectStarts()
         {
-            while (!EffectIsEnded)
-            {
-                Time.timeScale = 4;
-                await Task.Delay(250); // Set repeatedly so the slowmo buttons dont work lol
-            }
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+            PlayerRig.ControllerRig.slowMoEnabled = false;
+            Time.timeScale = 4;
 
         }
         public void EffectEnds()
         {
             EffectIsEnded = true;
             Time.timeScale = 1;
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+            PlayerRig.ControllerRig.slowMoEnabled = true;
         }
-    } 
+    }
 
     public class Immortality : ChaosEffect
     {
@@ -806,6 +837,49 @@ namespace BW_Chaos_Effects
         public void EffectEnds()
         {
             GameObject.FindObjectOfType<Player_Health>().healthMode = Player_Health.HealthMode.Mortal;
+        }
+    }
+
+    public class JumpThePlayer : ChaosEffect
+    {
+        public int Duration = 90;
+        public string Name = "Jump the player";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        private List<GameObject> Nulls = new List<GameObject> { };
+        public async void EffectStarts()
+        {
+            var playerPos = GameObject.FindObjectOfType<PhysBody>().feet.transform.position;
+            int i = 0;
+            while (i < 7)
+            {
+                float theta = Time.realtimeSinceStartup % 1 * 360;
+                float x = (float)(Math.Cos(theta * Math.PI / 180));
+                float y = (float)(Math.Sin(theta * Math.PI / 180));
+
+                var pos = playerPos + new Vector3(x, 0.1f, y);
+                Nulls.Add(GameObject.Instantiate(PoolManager.GetPool("Nullbody").Prefab, pos, Quaternion.identity));
+
+                await Task.Delay(1000 / 7);
+                i++;
+            }
+        }
+        public void EffectEnds()
+        {
+            MelonCoroutines.Start(RemoveNulls());
+        }
+
+        private IEnumerator RemoveNulls()
+        {
+            yield return new WaitForSeconds(5);
+            if (Nulls.Count != 0)
+            {
+                GameObject.Destroy(Nulls[0]);
+                Nulls.RemoveAt(0);
+                MelonCoroutines.Start(RemoveNulls());
+            }
         }
     }
     /*public class WhenNoVTEC : ChaosEffect

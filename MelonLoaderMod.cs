@@ -205,6 +205,9 @@ namespace BW_Chaos
             EffectList.Add(new CrabletRain());
             EffectList.Add(new SpeedUpTime());
             EffectList.Add(new Immortality());
+            EffectList.Add(new Accelerate());
+            EffectList.Add(new RandomRigShit());
+            EffectList.Add(new JumpThePlayer());
             #endregion
 
             #region Start node, hook websocket
