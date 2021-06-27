@@ -7,6 +7,10 @@ using StressLevelZero.VRMK;
 using System;
 using System.Threading.Tasks;
 using UnityEngine;
+using StressLevelZero.Rig;
+using System.Collections.Generic;
+using StressLevelZero.Pool;
+using System.Collections;
 
 namespace BW_Chaos_Effects
 {
@@ -265,7 +269,7 @@ namespace BW_Chaos_Effects
             if (CustomItems.customItemsExist)
             {
                 Vector3 spawnposition = Player.controllersExist ? Player.rightController.transform.position + Player.rightController.transform.forward : new Vector3(0, 5, 0); // P.cE ? ...  : ... is for testing
-                
+
                 #region Spawn item
                 SpawnableObject spawnable = null;
                 while (spawnable == null || spawnable.title.Contains(".bcm") || spawnable.title.Contains("grenade") || spawnable.prefab.GetComponent<Magazine>() != null)
@@ -356,31 +360,6 @@ namespace BW_Chaos_Effects
             Physics.gravity = new Vector3(0, -9.8f, 0);
         }
     }
-
-    /*public class ForMyNextTrick : ChaosEffect
-    {
-        public int Duration = 2;
-        public string Name = "For my next trick, float.MaxValue!";
-        int ChaosEffect.Duration { get => Duration; }
-        string ChaosEffect.Name { get => Name; set => Name = value; }
-
-        private int NumberOfTimesRan = 0;
-        public void EffectEnds()
-        {
-            NumberOfTimesRan++;
-            if (NumberOfTimesRan > 5)
-            {
-                MelonLogger.Error("Here's a premature error. Physics.gravity was set to a vector3 with one float.MaxValue aka " + float.MaxValue);
-                Physics.gravity = new Vector3(0, float.MaxValue, 0);
-            }
-        }
-
-        public void EffectStarts()
-        {
-            MelonLogger.Msg("... The game didn't crash? Whatever, take your gravity and go.");
-            Physics.gravity = new Vector3(0, -9.8f, 0);
-        }
-    }*/
 
     public class Centrifuge : ChaosEffect
     {
@@ -592,11 +571,18 @@ namespace BW_Chaos_Effects
         private Vector3 playerpos;
         private Quaternion playerrot;
         private bool EffectIsEnded = false;
+        float accel;
         public async void EffectStarts()
         {
             EffectIsEnded = false;
             try
             {
+                // Change acceleration to epsilon because last time i changed something to 0, it did not end well
+                RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+                accel = PlayerRig.ControllerRig.maxAcceleration;
+                PlayerRig.ControllerRig.maxAcceleration = float.Epsilon;
+
+
                 PhysBody PlayerPhysBody = GameObject.FindObjectOfType<PhysBody>();
                 if (PlayerPhysBody != null)
                 {
@@ -617,10 +603,13 @@ namespace BW_Chaos_Effects
         }
         public void EffectEnds()
         {
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
             EffectIsEnded = true;
+            PlayerRig.ControllerRig.maxAcceleration = accel;
         }
     }
 
+    // VV NOT DONE VV
     public class VibeCheck : ChaosEffect
     {
         public int Duration = 15;
@@ -683,6 +672,142 @@ namespace BW_Chaos_Effects
         }
     }
 
+    public class FuckYourItem : ChaosEffect
+    {
+        public int Duration = 1;
+        public string Name = "Delete held item";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        public void EffectStarts()
+        {
+            var rand = new System.Random();
+            Interactable HandInteractable = Player.leftHand.attachedInteractable;
+
+
+            if (rand.Next(0, 2) == 1)
+            {
+                HandInteractable = Player.rightHand.attachedInteractable;
+            }
+            if (HandInteractable != null)
+            {
+                InteractableHost CompParent = HandInteractable.GetComponentInParent<InteractableHost>();
+                if (CompParent != null)
+                {
+                    CompParent.Drop();
+                    if (CompParent.gameObject != null) CompParent.gameObject.SetActive(false);
+                    // Yes, this will almost certainly break doors and other related items. Cry about it.
+                }
+            }
+
+        }
+        public void EffectEnds()
+        {
+            if (Duration == 2) MelonLogger.Msg("Deez.");
+        }
+    }
+
+    public class CrabletRain : ChaosEffect
+    {
+        public int Duration = 30;
+        public string Name = "Crablet rain";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        private List<GameObject> Crablets;
+        private bool EffectIsEnded = false;
+        public async void EffectStarts()
+        {
+            var rand = new System.Random();
+            EffectIsEnded = false;
+            while (!EffectIsEnded) {
+                var pos = Player.GetPlayerHead().transform.position + new Vector3(((float)rand.NextDouble() - 0.5f) * 5, 10, ((float)rand.NextDouble() - 0.5f) * 5);
+                Crablets.Add(GameObject.Instantiate(PoolManager.GetPool("Crablet").Prefab, pos, Quaternion.identity));
+                await Task.Delay(1000); 
+            }
+        }
+        public void EffectEnds()
+        {
+            EffectIsEnded = true;
+            MelonCoroutines.Start(RemoveCrablets());
+        }
+
+        private IEnumerator RemoveCrablets ()
+        {
+            yield return new WaitForSeconds(1);
+            GameObject.Destroy(Crablets[0]);
+            Crablets.RemoveAt(0);
+            MelonCoroutines.Start(RemoveCrablets());
+        }
+    }
+
+    public class Speed : ChaosEffect
+    {
+        public int Duration = 30;
+        public string Name = "Sanic";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+        private List<GameObject> Crablets;
+        private bool EffectIsEnded = false;
+        public void EffectStarts()
+        {
+            RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
+            PlayerRig.ControllerRig.maxAcceleration = PlayerRig.ControllerRig.maxAcceleration * 25;
+        }
+        public void EffectEnds()
+        {
+            EffectIsEnded = true;
+        }
+    }
+
+    public class SpeedUpTime : ChaosEffect
+    {
+        public int Duration = 60;
+        public string Name = "4x time (overrides)";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+
+        private bool EffectIsEnded = false;
+        public async void EffectStarts()
+        {
+            while (!EffectIsEnded)
+            {
+                Time.timeScale = 4;
+                await Task.Delay(250); // Set repeatedly so the slowmo buttons dont work lol
+            }
+
+        }
+        public void EffectEnds()
+        {
+            EffectIsEnded = true;
+            Time.timeScale = 1;
+        }
+    } 
+
+    public class Immortality : ChaosEffect
+    {
+        public int Duration = 60;
+        public string Name = "Immortality";
+
+        int ChaosEffect.Duration { get => Duration; }
+        string ChaosEffect.Name { get => Name; set => Name = value; }
+
+
+        public void EffectStarts()
+        {
+            GameObject.FindObjectOfType<Player_Health>().healthMode = Player_Health.HealthMode.Invincible;
+        }
+        public void EffectEnds()
+        {
+            GameObject.FindObjectOfType<Player_Health>().healthMode = Player_Health.HealthMode.Mortal;
+        }
+    }
     /*public class WhenNoVTEC : ChaosEffect
     {
         public int Duration = 30;
@@ -760,6 +885,8 @@ namespace BW_Chaos_Effects
  * Make gravity switch to wall/ceiling at intervals: Physics.gravity = new Vector3(0, 0.5f, 0);
  * An effect that, if it gets picked 5 times exits the game (or crashes pc based on melonprefs entry) <----- FUCK no!
  * Increases recoil or at least when guns are pointed downwards when fired, you get jetpack joyrided
+ * Crablet/npc rain
+ * Get every NPC loaded and make it invincible/target player
  */
 /* KNOWN ISSUES
  * Effects that modify the same values will fuck each other up upon ending (assuming they're longer than 30 seconds and overlap)
