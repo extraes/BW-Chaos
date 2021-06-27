@@ -24,21 +24,21 @@ namespace BW_Chaos_Effects
         void EffectEnds();
     }
     #region Effect definitions
-    public class Placeholder : IChaosEffect
+    public class Template : IChaosEffect
     {
         public int Duration = 30;
-        public string Name = "Placeholder effect name";
+        public string Name = "Template effect";
 
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
 
         public void EffectStarts()
         {
-            MelonLogger.Error("Placeholder effect invoked");
+            MelonLogger.Error("The template effect should not be added to the list!");
         }
         public void EffectEnds()
         {
-            MelonLogger.Error("Placeholder effect ended");
+            MelonLogger.Error("Template effect \"ended\"");
         }
     }
 
