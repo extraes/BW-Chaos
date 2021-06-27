@@ -26,8 +26,8 @@ namespace BW_Chaos
 
     public class BW_Chaos : MelonMod
     {
-        private string token = "YOUR_TOKEN_HERE";
-        private string channelPref = "CHANNEL_ID_HERE";
+        internal string token = "YOUR_TOKEN_HERE";
+        internal string channelPref = "CHANNEL_ID_HERE";
         public override void OnApplicationStart()
         {
             if (token == null)
