@@ -81,7 +81,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Effects\EffectBase.cs" />
-    <Compile Include="Effects\Misc\Placeholder.cs" />
+    <Compile Include="Effects\Misc\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourMag.cs" />
     <Compile Include="Effects\World\Fling.cs" />

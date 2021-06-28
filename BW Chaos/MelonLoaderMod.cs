@@ -37,7 +37,7 @@ namespace BW_Chaos
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelId, "channel");
             channelId = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
 
-            // todo: :dviperHmm:
+            // todo: dviperHmm
             MelonPreferences.Save(); // BECAUSE IF I DONT SAVE IT RN THEN THE FAT BASTARD WONT CHANGE IT UNTIL THE GAME CLOSES
 
             #endregion
@@ -80,6 +80,12 @@ namespace BW_Chaos
         {
             GlobalVariables.Player_BodyVitals =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.BodyVitals>();
+            GlobalVariables.Player_RigManager =
+                GameObject.FindObjectOfType<StressLevelZero.Rig.RigManager>();
+            GlobalVariables.Player_Health =
+                GameObject.FindObjectOfType<Player_Health>();
+            GlobalVariables.Player_PhysBody =
+                GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
         }
 
         #region Websocket Methods

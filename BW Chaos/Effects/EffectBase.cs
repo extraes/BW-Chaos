@@ -6,6 +6,8 @@
         public string Name;
         public int Duration;
 
+        public bool active;
+
         public EffectBase(string eName, int eDuration)
         {
             Name = eName;
