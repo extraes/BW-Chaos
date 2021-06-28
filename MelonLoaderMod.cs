@@ -51,7 +51,7 @@ namespace BW_Chaos
             token = MelonPreferences.GetEntryValue<string>("BW_Chaos", "token");
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelPref, "channel", false);
             channelPref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
-            MelonPreferences.CreateEntry("BW_Chaos", "node_path", channelPref, "node_path", false);
+            MelonPreferences.CreateEntry("BW_Chaos", "node_path", nodePref, "node_path", false);
             nodePref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "node_path");
             MelonPreferences.Save(); // BECAUSE IF I DONT SAVE IT RN THEN THE FAT BASTARD WONT CHANGE IT UNTIL THE GAME CLOSES
             #endregion
@@ -66,7 +66,7 @@ namespace BW_Chaos
             {
                 MelonLogger.Msg("Welcome to BW Chaos!");
                 MelonLogger.Msg("This mod will remain inactive until you place a Discord BOT token and channel ID into melonprefs.");
-                MelonLogger.Msg("If you have Node.js installed and at a different location than" + @"C:\Program Files\nodejs\node.exe" + ", edit the entry in modprefs with the location of node.exe.");
+                MelonLogger.Msg("If you have Node.js installed and at a different location than" + @"C:\Program Files\nodejs\node.exe" + ", edit the entry in MelonPrefs with the location of node.exe.");
             }
         }
 
@@ -90,9 +90,12 @@ namespace BW_Chaos
                     GUI.Box(new Rect(Screen.width * (TimeSinceReset % 2) * 0.5f, 25, 50, 25), "");
                     if (TimeSinceReset > 40f)
                     {
-                        GUI.Box(new Rect(Screen.width - 550, 100, 500, 25), "It looks like the mod is spinning idly. This is likely a result of the bot crashing.");
-                        GUI.Box(new Rect(Screen.width - 550, 125, 500, 25), "Restart BONEWORKS and ping '<@261631460727980033>' (extraes) in the BW server.");
-                        if (TimeSinceReset < 40.5f) MelonLogger.Error("Mod is spinning, ping extraes in the bw server '<@261631460727980033>'");
+                        if (token != "YOUR_TOKEN_HERE" && channelPref != "CHANNEL_ID_HERE") {
+                            GUI.Box(new Rect(Screen.width - 550, 100, 500, 25), "It looks like the mod is spinning idly. This is likely a result of the bot crashing.");
+                            GUI.Box(new Rect(Screen.width - 550, 125, 500, 25), "Restart BONEWORKS and ping '<@261631460727980033>' (extraes) in the BW server.");
+                            if (TimeSinceReset < 40.5f) MelonLogger.Error("Mod is spinning, ping extraes in the bw server '<@261631460727980033>'");
+                        }
+                        else GUI.Box(new Rect(Screen.width - 550, 125, 500, 25), "Fill out the token and channel ID in MelonPrefs!");
                     }
                 }
                 else
@@ -120,7 +123,6 @@ namespace BW_Chaos
             }
             await Task.Delay(0);
         }
-
 
         WatsonWsClient client = new WatsonWsClient("localhost", 8999, false);
         private async Task MainAsync()
@@ -164,7 +166,7 @@ namespace BW_Chaos
                     MelonLogger.Msg("Downloaded the Node v16.3.0 installer to temporary path " + InstallerPath);
 
                     // Run the installer
-                    Process.Start(InstallerPath, " /passive /qb").WaitForExit();
+                    Process.Start(InstallerPath, " /passive /qb ").WaitForExit();
                     MelonLogger.Msg("Node is now installed, let's extract and run the bot!");
 
                 }
@@ -227,13 +229,14 @@ namespace BW_Chaos
             #endregion
 
             #region Start node, hook websocket
-            Process.Start(nodePref, $" {JSPath} {token} {channelPref}");
+            MelonLogger.Msg(nodePref);
+            try { Process.Start(nodePref, $" {JSPath} {token} {channelPref}"); }
+            catch (Exception err) { MelonLogger.Warning("Node wasn't found! Did you install it to another folder and not update the path in MelonPreferences.cfg?"); throw err; }
             await Task.Delay(2000);
             client.MessageReceived += MessageRecieved;
             client.ServerConnected += Connected;
             client.ServerDisconnected += Disconnected;
             client.Start();
-
             #endregion
         }
 
