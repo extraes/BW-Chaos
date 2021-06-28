@@ -382,6 +382,9 @@ namespace BW_Chaos
  * TrevTV - Packaging nodejs and file into an executable
  * TrevTV - Embedding executable into dll and read it (I didnt end up needing to embed an executable, but I embedded)
  * TrevTV - Pointing me towards the Unity Scripting Reference and websockets and WatsonWebsocket
+ * TrevTV - Rewriting the discord bot in C# (testing builds still use cbot.zip though lol)
+ * WNP - Told me to use sqrMagnitude instead of calculating the distance becaust sqrt is slower
+ * * Iterating through a long ass list of gameobjects needs to be as fast as possible, so this was important to PlayerGravity
  * YOWChap & WNP - Helping me with stupid problems I should have noticed
  * YOWChap - BMTK/MTINM
  * * Like seriously, there's no SHOT this mod could be done without MTINM, it's basically a mod of "idk how to do this shit, but mtinm probably has a function for it"
@@ -390,9 +393,9 @@ namespace BW_Chaos
  * Adamdev - Helping me with FuckYourMagazine and Butterfingers
  * Lakatrazz - Telling me about PhysBody
  * Microsoft - C# documentation (duh)
- * FatWrinkleZ - SusArrow, I dnspy'd it to get the code for bootleg gravity cube.
+ * FatWrinkleZ - SusArrow, I dnspy'd it to get the code for bootleg gravity cube & pointtogo.
  * C# - If else statements 🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏
  * Stackoverflow - Generate list of random numbers without repeats (https://stackoverflow.com/questions/30014901/generating-random-numbers-without-repeating-c)
- * Forums - Change gravity direction
- * ChaosModV - I yoinked the tick idea lol
+ * Forums - Change gravity direction, get list of all gameobjects
+ * ChaosModV - "Inspiration" for some effects
  */
