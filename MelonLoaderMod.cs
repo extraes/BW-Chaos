@@ -28,6 +28,8 @@ namespace BW_Chaos
     {
         internal string token = "YOUR_TOKEN_HERE";
         internal string channelPref = "CHANNEL_ID_HERE";
+        internal string nodePref = @"C:\Program Files\nodejs\node.exe";
+
         public override void OnApplicationStart()
         {
             if (token == null)
@@ -49,6 +51,8 @@ namespace BW_Chaos
             token = MelonPreferences.GetEntryValue<string>("BW_Chaos", "token");
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelPref, "channel", false);
             channelPref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
+            MelonPreferences.CreateEntry("BW_Chaos", "node_path", channelPref, "node_path", false);
+            nodePref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "node_path");
             MelonPreferences.Save(); // BECAUSE IF I DONT SAVE IT RN THEN THE FAT BASTARD WONT CHANGE IT UNTIL THE GAME CLOSES
             #endregion
 
@@ -62,7 +66,7 @@ namespace BW_Chaos
             {
                 MelonLogger.Msg("Welcome to BW Chaos!");
                 MelonLogger.Msg("This mod will remain inactive until you place a Discord BOT token and channel ID into melonprefs.");
-                MelonLogger.Msg("User tokens are against TOS and thus unsupported.");
+                MelonLogger.Msg("If you have Node.js installed and at a different location than" + @"C:\Program Files\nodejs\node.exe" + ", edit the entry in modprefs with the location of node.exe.");
             }
         }
 
@@ -129,11 +133,22 @@ namespace BW_Chaos
                 bool HasNode = false;
                 try
                 {
-                    Process.Start(@"C:\Program Files\nodejs\node.exe").Kill();
+                    Process.Start(nodePref).Kill();
                     HasNode = true;
                 }
                 catch
                 { }
+                if (!HasNode)
+                {
+                    try
+                    {
+                        Process.Start("node").Kill();
+                        HasNode = true;
+                        nodePref = "node";
+                    }
+                    catch
+                    { }
+                }
 
                 if (HasNode) MelonLogger.Msg("Node.js is installed, reading and unzipping the bot!");
                 else
@@ -212,7 +227,7 @@ namespace BW_Chaos
             #endregion
 
             #region Start node, hook websocket
-            Process.Start(@"C:\Program Files\nodejs\node.exe", $" {JSPath} {token} {channelPref}");
+            Process.Start(nodePref, $" {JSPath} {token} {channelPref}");
             await Task.Delay(2000);
             client.MessageReceived += MessageRecieved;
             client.ServerConnected += Connected;
