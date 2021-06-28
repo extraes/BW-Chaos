@@ -490,37 +490,6 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class JetpackJoyride : IChaosEffect
-    {
-        public int Duration = 30;
-        public string Name = "Barry Steakfries";
-
-        int IChaosEffect.Duration { get => 30; }
-        string IChaosEffect.Name { get => Name; set => Name = value; }
-
-        public void EffectStarts()
-        {
-            Hooking.OnPreFireGun += JetpackGun;
-            Hooking.OnPostFireGun += JetpackGunPost;
-
-        }
-        public void EffectEnds()
-        {
-            Hooking.OnPreFireGun -= JetpackGun;
-            Hooking.OnPostFireGun -= JetpackGunPost;
-        }
-
-
-        private void JetpackGun(Gun gun)
-        {
-            gun.kickForce = gun.kickForce * 100;
-        }
-        private void JetpackGunPost(Gun gun)
-        {
-            gun.kickForce = gun.kickForce / 100;
-        }
-    }
-
     public class Parkinsons : IChaosEffect
     {
         public int Duration = 90;
@@ -1186,7 +1155,7 @@ namespace BW_Chaos_Effects
     public class MassiveKnockback : IChaosEffect
     {
         public int Duration = 30;
-        public string Name = "High recoil";
+        public string Name = "Barry Steakfries";
 
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
@@ -1223,6 +1192,7 @@ namespace BW_Chaos_Effects
                     leftGun = gun;
                 }
                 gun.kickForce *= 20;
+                gun.magazineSocket.isInfiniteAmmo = true;
             }
         }
         private void OnDrop(Grip grip, Hand hand)
@@ -1232,6 +1202,7 @@ namespace BW_Chaos_Effects
                 if (rightGun != null)
                 {
                     rightGun.kickForce *= 20;
+                    rightGun.magazineSocket.isInfiniteAmmo = false;
                     rightGun = null;
                 }
             }
@@ -1240,6 +1211,7 @@ namespace BW_Chaos_Effects
                 if (leftGun != null)
                 {
                     leftGun.kickForce *= 20;
+                    leftGun.magazineSocket.isInfiniteAmmo = false;
                     leftGun = null;
                 }
             }

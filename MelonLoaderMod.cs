@@ -229,10 +229,9 @@ namespace BW_Chaos
             EffectList.Add(new PlayerInverseGravity());
             EffectList.Add(new WhenNoVTEC());
             EffectList.Add(new WhenVTEC());
-            EffectList.Add(new MassiveKnockback());
             EffectList.Add(new VibeCheck());
             #endregion
-
+            
             #region Start node, hook websocket
             MelonLogger.Msg(nodePref);
             try { Process.Start(nodePref, $" {JSPath} {token} {channelPref}"); }
