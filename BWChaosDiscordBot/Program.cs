@@ -20,7 +20,7 @@ namespace BWChaosDiscordBot
         private static string discordBotToken;
         private static string discordChannelId;
 
-        private static int[] accumulatedVotes = new int[4] { 0, 0, 0, 0 };
+        private static int[] accumulatedVotes = new int[5] { 0, 0, 0, 0, 0 };
 
         private static void Main()
         {
@@ -67,7 +67,7 @@ namespace BWChaosDiscordBot
 
             if (int.TryParse(e.Message.Content, out int messageInt))
             {
-                if (messageInt >= 1 && messageInt <= 4)
+                if (messageInt >= 1 && messageInt <= 5)
                     accumulatedVotes[messageInt - 1]++;
             }
 
@@ -111,6 +111,11 @@ namespace BWChaosDiscordBot
                 case "sendvotes":
                     watsonServer.SendAsync(currentClientIpPort, "receivevotes:" +
                         JsonConvert.SerializeObject(accumulatedVotes, Formatting.None));
+                    accumulatedVotes[0] = 0;
+                    accumulatedVotes[1] = 0;
+                    accumulatedVotes[2] = 0;
+                    accumulatedVotes[3] = 0;
+                    accumulatedVotes[4] = 0;
                     break;
                 default:
                     Console.WriteLine("UNKNOWN MESSAGE TYPE: " + messageType);

@@ -7,6 +7,7 @@ using UnityEngine;
 using MelonLoader;
 using WatsonWebsocket;
 using BW_Chaos.Effects;
+using System.Threading.Tasks;
 
 namespace BW_Chaos
 {
@@ -29,7 +30,6 @@ namespace BW_Chaos
 
         private List<EffectBase> effectList = new List<EffectBase>();
         private List<EffectBase> candidateEffects = new List<EffectBase>();
-        private List<EffectBase> activeEffects = new List<EffectBase>();
         private float timeSinceEnabled = 0f;
         private int whenTimerReset = 0;
         private bool showGUI = false;
@@ -98,6 +98,12 @@ namespace BW_Chaos
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
         }
 
+        public override void OnUpdate()
+        {
+            foreach (EffectBase effect in GlobalVariables.ActiveEffects)
+                effect.OnEffectUpdate();
+        }
+
         public override void OnGUI()
         {
             if (showGUI)
@@ -117,18 +123,43 @@ namespace BW_Chaos
                     effectNumber++;
                 }
                 GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: Random Effect");
-                GUI.Box(new Rect(50, 250, 500, (activeEffects.Count + 1) * 20 + 10), "Active effects:\n" + string.Join("\n", activeEffects));
+                GUI.Box(new Rect(50, 250, 500, (GlobalVariables.ActiveEffects.Count + 1) * 20 + 10), "Active effects:\n" + string.Join("\n", GlobalVariables.ActiveEffects));
                 GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
                 GUI.Box(new Rect(Screen.width - 550, 75, 500 * System.Math.Min(timeSinceReset % 30 / 30, 1f), 25), "");
 
                 if ((timeSinceReset / 30) >= whenTimerReset)
                 {
                     whenTimerReset++;
+                    RunVotedEffect();
+                    ResetEffectCandidates();
                 }
             }
         }
 
+        private async void RunVotedEffect()
+        {
+            await watsonClient.SendAsync("sendvotes:");
+            while (accumulatedVotes == null) await Task.Delay(250);
+            (int, int) topVoted = (0, 0); // format is (arrIndex, value)
+            for (int i = 0; i < accumulatedVotes.Length; i++)
+            {
+                if (accumulatedVotes[i] > topVoted.Item2)
+                    topVoted = (i, accumulatedVotes[i]);
+            }
+            if (topVoted.Item1 == 4) effectList[UnityEngine.Random.Range(0, effectList.Count)].Run();
+            else candidateEffects[topVoted.Item1].Run();
+        }
+
+        private void ResetEffectCandidates()
+        {
+            candidateEffects.Clear();
+            for (int i = 0; i < 4; i++)
+                candidateEffects.Add(effectList[UnityEngine.Random.Range(0, effectList.Count)]);
+        }
+
         #region Websocket Methods
+
+        private int[] accumulatedVotes = null;
 
         private async void ClientConnectedToServer(object sender, EventArgs e)
         {
@@ -157,8 +188,7 @@ namespace BW_Chaos
                     MelonLogger.Msg(messageData);
                     break;
                 case "receivevotes":
-                    // todo:
-                    MelonLogger.Msg(messageData);
+                    accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
                     break;
                 default:
                     MelonLogger.Error("UNKNOWN MESSAGE TYPE: " + messageType);
