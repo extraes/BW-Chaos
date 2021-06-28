@@ -590,7 +590,7 @@ namespace BW_Chaos_Effects
                     playerrot = PlayerPhysBody.gameObject.transform.rotation;
                     while (!EffectIsEnded)
                     {
-                        PlayerPhysBody.gameObject.transform.SetPositionAndRotation(playerpos, playerrot);
+                        PlayerPhysBody.gameObject.transform.SetPositionAndRotation(playerpos, playerrot); // wow is this one of those lines i wrote at 2am? how the fuck did i find out this method existed?
                         await Task.Delay(250);
                     }
                 }
@@ -876,8 +876,6 @@ namespace BW_Chaos_Effects
 
                 await Task.Delay(1000); // Update the list every second
             }
-
-            // Start the routine
         }
         public void EffectEnds()
         {
@@ -955,8 +953,6 @@ namespace BW_Chaos_Effects
 
                 await Task.Delay(1000); // Update the list every second
             }
-
-            // Start the routine
         }
         public void EffectEnds()
         {
@@ -997,7 +993,7 @@ namespace BW_Chaos_Effects
 
     public class VibeCheck : IChaosEffect
     {
-        public int Duration = 90;
+        public int Duration = 1;
         public string Name = "Vibe check";
 
         int IChaosEffect.Duration { get => Duration; }
@@ -1005,7 +1001,7 @@ namespace BW_Chaos_Effects
 
         private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
         private bool EffectIsEnded = false;
-        public async void EffectStarts()
+        public void EffectStarts()
         {
             Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
             EffectIsEnded = false;
@@ -1026,10 +1022,6 @@ namespace BW_Chaos_Effects
             Array.Clear(allObjects, 0, allObjects.Length); // This is what the kids call "memory management" right?
 
             MelonCoroutines.Start(ApplyForce());
-            await Task.Delay(1000); // Update the list every second
-
-
-            // Start the routine
         }
         public void EffectEnds()
         {
@@ -1056,7 +1048,7 @@ namespace BW_Chaos_Effects
                     }
 
                     var rb = rigidbodies[i + continueFrom];
-                    rb.AddForce(-(playerPos - rb.position) / 5, ForceMode.VelocityChange);
+                    rb.AddForce(-(playerPos - rb.position) + new Vector3(0, 0.5f, 0), ForceMode.VelocityChange);
                     continueFrom += 15;
                 }
                 MelonCoroutines.Start(ApplyForce());
@@ -1064,7 +1056,6 @@ namespace BW_Chaos_Effects
             else yield break;
         }
     }
-
 
     public class WhenNoVTEC : IChaosEffect
     {
