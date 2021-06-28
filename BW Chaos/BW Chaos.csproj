@@ -59,6 +59,10 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="Microsoft.CSharp" />
+    <Reference Include="TextMeshPro-1.0.55.2017.2.0b12, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\TextMeshPro-1.0.55.2017.2.0b12.dll</HintPath>
+    </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
     </Reference>
@@ -69,11 +73,22 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ImageConversionModule">
+      <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnityEngine.ImageConversionModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.TextRenderingModule, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.UI, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="WatsonWebsocket">
       <HintPath>..\..\..\..\Desktop\BONEWORKS Refs\MelonLoader\Managed\WatsonWebsocket.dll</HintPath>
@@ -81,11 +96,32 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Effects\EffectBase.cs" />
+    <Compile Include="Effects\Guns\LowRPM.cs" />
+    <Compile Include="Effects\Guns\HighRPM.cs" />
+    <Compile Include="Effects\Guns\MassiveKnockback.cs" />
+    <Compile Include="Effects\Misc\SpawnDogAd.cs" />
+    <Compile Include="Effects\Misc\4xSpeed.cs" />
     <Compile Include="Effects\Misc\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
-    <Compile Include="Effects\Player\FuckYourMag.cs" />
+    <Compile Include="Effects\Player\FuckYourItem.cs" />
+    <Compile Include="Effects\Player\Accelerate.cs" />
+    <Compile Include="Effects\Player\Paralyze.cs" />
+    <Compile Include="Effects\Player\PointPush.cs" />
+    <Compile Include="Effects\Guns\FuckYourMag.cs" />
+    <Compile Include="Effects\Player\FlingPlayer.cs" />
+    <Compile Include="Effects\Player\Centrifuge.cs" />
+    <Compile Include="Effects\Player\Parkinsons.cs" />
+    <Compile Include="Effects\Player\NoRegen.cs" />
+    <Compile Include="Effects\Player\Immortality.cs" />
+    <Compile Include="Effects\Player\GetJumped.cs" />
     <Compile Include="Effects\World\Fling.cs" />
+    <Compile Include="Effects\World\BootlegGravityCube.cs" />
     <Compile Include="Effects\World\Lag.cs" />
+    <Compile Include="Effects\World\InvertGravity.cs" />
+    <Compile Include="Effects\World\PointGravity.cs" />
+    <Compile Include="Effects\World\California.cs" />
+    <Compile Include="Effects\World\SlowShooting.cs" />
+    <Compile Include="Effects\World\CrabletRain.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
