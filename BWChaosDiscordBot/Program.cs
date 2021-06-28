@@ -24,6 +24,15 @@ namespace BWChaosDiscordBot
 
         private static void Main()
         {
+            /*
+             * I have no clue if you will ever see this but to
+             * compile this into a single EXE you need to do it a bit differently.
+             * 1. Right click the project in Solution Explorer and select "Publish"
+             * 2. There should already be a profile for a single-exe local publish,
+             *  so just press the big Publish button and wait a few and it'll compile
+             *  to `BWChaosDiscordBot\bin\Release\netcoreapp3.1\publish\`
+            */
+
             watsonServer = new WatsonWsServer("127.0.0.1", 8827, false);
             watsonServer.ClientConnected += ClientConnected;
             watsonServer.ClientDisconnected += ClientDisconnected;

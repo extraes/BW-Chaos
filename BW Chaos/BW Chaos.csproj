@@ -127,6 +127,9 @@
     <Compile Include="MelonLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="BWChaosDiscordBot.exe" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>COPY "$(TargetPath)" "C:\Users\trevo\Desktop\TestMLBuild\Mods"</PostBuildEvent>

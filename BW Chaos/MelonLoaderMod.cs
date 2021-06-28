@@ -1,4 +1,6 @@
 ﻿using System;
+using System.IO;
+using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Collections.Generic;
@@ -62,14 +64,36 @@ namespace BW_Chaos
 
             #endregion
 
-            // todo: move to embedded resource, this is for debugging
+            #region Extract Bot
+
+            string saveFolder = Path.Combine(Path.GetTempPath(), "BW-Chaos");
+            string exePath = Path.Combine(saveFolder, "BWChaosDiscordBot.exe");
+
+            if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
+            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.BWChaosDiscordBot.exe"))
+            {
+                byte[] data;
+                using (var ms = new MemoryStream())
+                {
+                    stream.CopyTo(ms);
+                    data = ms.ToArray();
+                }
+                if (File.Exists(exePath)) File.Delete(exePath);
+                File.WriteAllBytes(exePath, data);
+            }
+
+            #endregion
+
+            // todo: test this
+            effectList = (from t in Assembly.GetTypes()
+             where t.GetInterfaces().Contains(typeof(EffectBase)) && t.GetConstructor(Type.EmptyTypes) != null
+             select (EffectBase)Activator.CreateInstance(t)).ToList();
+
             botProcess = new Process();
-            botProcess.StartInfo.FileName =
-                @"C:\Users\trevo\Documents\GitHub\BW-Chaos-new\BWChaosDiscordBot\bin\Debug\netcoreapp3.1\BWChaosDiscordBot.exe";
-            botProcess.StartInfo.WorkingDirectory =
-                @"C:\Users\trevo\Documents\GitHub\BW-Chaos-new\BWChaosDiscordBot\bin\Debug\netcoreapp3.1\";
+            botProcess.StartInfo.FileName = exePath;
+            botProcess.StartInfo.WorkingDirectory = saveFolder;
             botProcess.StartInfo.UseShellExecute = true;
-            // botProcess.StartInfo.CreateNoWindow = false;
+            botProcess.StartInfo.CreateNoWindow = false; // todo: check if this actually works
             botProcess.Start();
 
             watsonClient = new WatsonWsClient("127.0.0.1", 8827, false);
