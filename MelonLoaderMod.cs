@@ -229,6 +229,7 @@ namespace BW_Chaos
             EffectList.Add(new PlayerInverseGravity());
             EffectList.Add(new WhenNoVTEC());
             EffectList.Add(new WhenVTEC());
+            EffectList.Add(new MassiveKnockback());
             #endregion
 
             #region Start node, hook websocket

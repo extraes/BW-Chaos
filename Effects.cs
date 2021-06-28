@@ -812,7 +812,6 @@ namespace BW_Chaos_Effects
         }
         public void EffectEnds()
         {
-            EffectIsEnded = true;
             Time.timeScale = 1;
             RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
             PlayerRig.ControllerRig.slowMoEnabled = true;
@@ -1165,10 +1164,10 @@ namespace BW_Chaos_Effects
         }
     }
 
-    public class WhenVTEC : IChaosEffect
+    public class MassiveKnockback : IChaosEffect
     {
         public int Duration = 30;
-        public string Name = "High RPM gun";
+        public string Name = "High recoil";
 
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
@@ -1204,7 +1203,7 @@ namespace BW_Chaos_Effects
                     gun = Player.GetGunInHand(hand);
                     leftGun = gun;
                 }
-                gun.SetRpm(gun.roundsPerMinute * 10);
+                gun.kickForce *= 20;
             }
         }
         private void OnDrop(Grip grip, Hand hand)
@@ -1213,7 +1212,7 @@ namespace BW_Chaos_Effects
             {
                 if (rightGun != null)
                 {
-                    rightGun.SetRpm(rightGun.roundsPerMinute / 10);
+                    rightGun.kickForce *= 20;
                     rightGun = null;
                 }
             }
@@ -1221,7 +1220,7 @@ namespace BW_Chaos_Effects
             {
                 if (leftGun != null)
                 {
-                    leftGun.SetRpm(leftGun.roundsPerMinute / 10);
+                    leftGun.kickForce *= 20;
                     leftGun = null;
                 }
             }
