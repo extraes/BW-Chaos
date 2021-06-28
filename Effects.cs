@@ -177,7 +177,7 @@ namespace BW_Chaos_Effects
                 {
                     Time.timeScale = 1;
                 }
-                else Time.timeScale = 0;
+                else Time.timeScale = float.Epsilon;
                 await Task.Delay(rand.Next(1, 4) * 250);
             }
         }
