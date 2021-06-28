@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Text;
 using System.Diagnostics;
+using System.Collections.Generic;
 
 using UnityEngine;
 using MelonLoader;
 using WatsonWebsocket;
+using BW_Chaos.Effects;
 
 namespace BW_Chaos
 {
@@ -24,6 +26,13 @@ namespace BW_Chaos
 
         internal WatsonWsClient watsonClient;
         internal Process botProcess;
+
+        private List<EffectBase> effectList = new List<EffectBase>();
+        private List<EffectBase> candidateEffects = new List<EffectBase>();
+        private List<EffectBase> activeEffects = new List<EffectBase>();
+        private float timeSinceEnabled = 0f;
+        private int whenTimerReset = 0;
+        private bool showGUI = false;
 
         public override void OnApplicationStart()
         {
@@ -53,6 +62,7 @@ namespace BW_Chaos
 
             #endregion
 
+            // todo: move to embedded resource, this is for debugging
             botProcess = new Process();
             botProcess.StartInfo.FileName =
                 @"C:\Users\trevo\Documents\GitHub\BW-Chaos-new\BWChaosDiscordBot\bin\Debug\netcoreapp3.1\BWChaosDiscordBot.exe";
@@ -86,6 +96,36 @@ namespace BW_Chaos
                 GameObject.FindObjectOfType<Player_Health>();
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
+        }
+
+        public override void OnGUI()
+        {
+            if (showGUI)
+            {
+                float timeSinceReset = Time.timeSinceLevelLoad - timeSinceEnabled;
+                if (!(timeSinceReset >= 30))
+                {
+                    GUI.Box(new Rect(50, 25, 350, 25),
+                        "BW Chaos: Waiting " + (30 - System.Math.Floor(timeSinceReset)) + " seconds before starting");
+                    GUI.Box(new Rect(50, 50, 350, 25), "Made by extraes");
+                    return;
+                }
+                int effectNumber = 0;
+                foreach (EffectBase effect in candidateEffects)
+                {
+                    GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: {effect.Name}");
+                    effectNumber++;
+                }
+                GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: Random Effect");
+                GUI.Box(new Rect(50, 250, 500, (activeEffects.Count + 1) * 20 + 10), "Active effects:\n" + string.Join("\n", activeEffects));
+                GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
+                GUI.Box(new Rect(Screen.width - 550, 75, 500 * System.Math.Min(timeSinceReset % 30 / 30, 1f), 25), "");
+
+                if ((timeSinceReset / 30) >= whenTimerReset)
+                {
+                    whenTimerReset++;
+                }
+            }
         }
 
         #region Websocket Methods
