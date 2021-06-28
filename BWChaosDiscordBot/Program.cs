@@ -37,6 +37,7 @@ namespace BWChaosDiscordBot
 
         private static async Task MainAsync()
         {
+            // wait until we have token and channel id
             while (string.IsNullOrEmpty(discordChannelId)) await Task.Delay(250);
 
             try
@@ -66,8 +67,8 @@ namespace BWChaosDiscordBot
 
             if (int.TryParse(e.Message.Content, out int messageInt))
             {
-                int choice = Math.Clamp(messageInt, 1, 4);
-                accumulatedVotes[choice - 1]++;
+                if (messageInt >= 1 && messageInt <= 4)
+                    accumulatedVotes[messageInt - 1]++;
             }
 
             return Task.CompletedTask;

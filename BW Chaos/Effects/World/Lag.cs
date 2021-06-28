@@ -12,6 +12,7 @@ namespace BW_Chaos.Effects
 
         public override void OnEffectUpdate()
         {
+            // todo: cant use extraes' method because i dont think setting timeScale to 0 is a good idea
             MelonLogger.Msg("Placeholder update");
         }
 
