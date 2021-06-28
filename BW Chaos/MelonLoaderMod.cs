@@ -178,7 +178,12 @@ namespace BW_Chaos
         {
             candidateEffects.Clear();
             for (int i = 0; i < 4; i++)
-                candidateEffects.Add(effectList[UnityEngine.Random.Range(0, effectList.Count)]);
+            {
+                EffectBase effect = effectList[UnityEngine.Random.Range(0, effectList.Count)];
+                while (candidateEffects.Contains(effect))
+                    effect = effectList[UnityEngine.Random.Range(0, effectList.Count)];
+                candidateEffects.Add(effect);
+            }
         }
 
         #region Websocket Methods
