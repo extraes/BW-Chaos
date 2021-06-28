@@ -8,10 +8,10 @@ namespace BW_Chaos.Effects
     // todo: maybe add a "conflicting effects" list variable in case of something such as 2 effects modifying gravity
     internal class EffectBase
     {
-        public string Name;
-        public int Duration;
+        public string Name { get; }
+        public int Duration { get; }
 
-        public bool active;
+        public bool Active { get; private set; }
 
         public EffectBase(string eName, int eDuration)
         {
@@ -38,7 +38,7 @@ namespace BW_Chaos.Effects
         private IEnumerator CoRun()
         {
             // todo: does this actually work, cause i heavily doubt it
-            active = true;
+            Active = true;
             GlobalVariables.ActiveEffects.Add(this);
 
             OnEffectStart();
@@ -46,7 +46,7 @@ namespace BW_Chaos.Effects
             yield return new WaitForSecondsRealtime(Duration);
 
             GlobalVariables.ActiveEffects.Remove(this);
-            active = false;
+            Active = false;
 
             OnEffectEnd();
         }

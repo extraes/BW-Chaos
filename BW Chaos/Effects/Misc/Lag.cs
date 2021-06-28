@@ -19,7 +19,7 @@ namespace BW_Chaos.Effects
         private IEnumerator DoLag()
         {
             // todo: using Epsilon instead of 0 might work better
-            while (active)
+            while (Active)
             {
                 yield return new WaitForSeconds(3 / UnityEngine.Random.value);
                 Time.timeScale = Time.timeScale == 1 ? 0 : 1;

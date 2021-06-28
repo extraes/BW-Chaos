@@ -29,7 +29,7 @@ namespace BW_Chaos.Effects
         {
             // todo: wait might want to be changed
             Time.timeScale = 0.05f;
-            while (Time.timeScale < 1f && active)
+            while (Time.timeScale < 1f && Active)
             {
                 Time.timeScale += 0.05f;
                 yield return new WaitForSeconds(0.1f);

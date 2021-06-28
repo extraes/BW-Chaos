@@ -24,7 +24,7 @@ namespace BW_Chaos.Effects
 
         private IEnumerator SpawnCrablets()
         {
-            while (active)
+            while (Active)
             {
                 yield return new WaitForSeconds(10 * UnityEngine.Random.value);
                 var spawnPos =
