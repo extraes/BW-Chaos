@@ -213,7 +213,6 @@ namespace BW_Chaos
             EffectList.Add(new California());
             EffectList.Add(new PlayerCentrifuge());
             EffectList.Add(new SlowShooting());
-            EffectList.Add(new JetpackJoyride());
             EffectList.Add(new Paralyze());
             EffectList.Add(new BootlegGravityCube());
             EffectList.Add(new Parkinsons());
@@ -230,6 +229,7 @@ namespace BW_Chaos
             EffectList.Add(new WhenNoVTEC());
             EffectList.Add(new WhenVTEC());
             EffectList.Add(new VibeCheck());
+            EffectList.Add(new MassiveKnockback());
             #endregion
             
             #region Start node, hook websocket
