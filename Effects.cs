@@ -911,7 +911,7 @@ namespace BW_Chaos_Effects
                     Rigidbody rb = go.GetComponent<Rigidbody>();
                     if (rb != null)
                     {
-                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 20 * 20) 
+                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 15 * 15) 
                             if (go.GetComponentInParent<PhysicsRig>() != null)
                                 rigidbodies.Add(rb);
                         
@@ -942,7 +942,7 @@ namespace BW_Chaos_Effects
 
                 if (!modifyingRbs)
                 {
-                    for (int i = 0; i < 25; i++)
+                    for (int i = 0; i < 15; i++)
                     {
                         // Make sure we don't get an outofrange exception
                         if (i == rigidbodies.Count)
@@ -953,7 +953,7 @@ namespace BW_Chaos_Effects
 
                         var rb = rigidbodies[i + continueFrom];
                         rb.AddForce((playerPos - rb.position) / 5, ForceMode.VelocityChange);
-                        continueFrom += 25;
+                        continueFrom += 15;
                     }
                 }
                 MelonCoroutines.Start(ApplyForce());
@@ -990,7 +990,7 @@ namespace BW_Chaos_Effects
                     Rigidbody rb = go.GetComponent<Rigidbody>();
                     if (rb != null)
                     {
-                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 20 * 20)
+                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 15 * 15)
                             if (go.GetComponentInParent<PhysicsRig>() != null)
                                 rigidbodies.Add(rb);
 
@@ -1021,7 +1021,7 @@ namespace BW_Chaos_Effects
 
                 if (!modifyingRbs)
                 {
-                    for (int i = 0; i < 25; i++)
+                    for (int i = 0; i < 15; i++)
                     {
                         // Make sure we don't get an outofrange exception
                         if (i == rigidbodies.Count)
@@ -1032,7 +1032,7 @@ namespace BW_Chaos_Effects
 
                         var rb = rigidbodies[i + continueFrom];
                         rb.AddForce(-(playerPos - rb.position) / 5, ForceMode.VelocityChange);
-                        continueFrom += 25;
+                        continueFrom += 15;
                     }
                 }
                 MelonCoroutines.Start(ApplyForce());
