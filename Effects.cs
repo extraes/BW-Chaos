@@ -609,49 +609,6 @@ namespace BW_Chaos_Effects
         }
     }
 
-    // VV NOT DONE VV
-    public class VibeCheck : IChaosEffect
-    {
-        public int Duration = 15;
-        public string Name = "Vibe check";
-
-        int IChaosEffect.Duration { get => Duration; }
-        string IChaosEffect.Name { get => Name; set => Name = value; }
-
-        private Vector3 playerpos;
-        private Quaternion playerrot;
-        private bool EffectIsEnded = false;
-        public async void EffectStarts()
-        {
-            EffectIsEnded = false;
-            try
-            {
-                //var ande = new WNP78.Grenades.Grenade().explosion.Explode();
-                //Poolee[] pooled = PoolManager.GetPool("Grenade")._pooledObjects.ToArray();
-                PhysBody PlayerPhysBody = GameObject.FindObjectOfType<PhysBody>();
-                if (PlayerPhysBody != null)
-                {
-                    playerpos = PlayerPhysBody.gameObject.transform.position;
-                    playerrot = PlayerPhysBody.gameObject.transform.rotation;
-                    while (!EffectIsEnded)
-                    {
-                        PlayerPhysBody.gameObject.transform.SetPositionAndRotation(playerpos, playerrot);
-                        await Task.Delay(250);
-                    }
-                }
-            }
-            catch (Exception err)
-            {
-                MelonLogger.Error("Error paralyzing player");
-                MelonLogger.Error(err);
-            }
-        }
-        public void EffectEnds()
-        {
-            EffectIsEnded = true;
-        }
-    }
-
     public class NoRegen : IChaosEffect
     {
         public int Duration = 300;
@@ -908,10 +865,10 @@ namespace BW_Chaos_Effects
                     Rigidbody rb = go.GetComponent<Rigidbody>();
                     if (rb != null)
                     {
-                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 15 * 15) 
+                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 15 * 15)
                             if (go.GetComponentInParent<PhysicsRig>() != null)
                                 rigidbodies.Add(rb);
-                        
+
                     }
                 }
                 Array.Clear(allObjects, 0, allObjects.Length); // This is what the kids call "memory management" right?
@@ -1037,6 +994,77 @@ namespace BW_Chaos_Effects
             else yield break;
         }
     }
+
+    public class VibeCheck : IChaosEffect
+    {
+        public int Duration = 90;
+        public string Name = "Vibe check";
+
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
+
+        private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
+        private bool EffectIsEnded = false;
+        public async void EffectStarts()
+        {
+            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+            EffectIsEnded = false;
+            // Probably best to do this in an ienumerator
+            // Get list of active gameobjects with rigidbodies and filter out the rigidbodies that are too far away
+            GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+            foreach (GameObject go in allObjects)
+            {
+                Rigidbody rb = go.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 15 * 15)
+                        if (go.GetComponentInParent<PhysicsRig>() != null)
+                            rigidbodies.Add(rb);
+
+                }
+            }
+            Array.Clear(allObjects, 0, allObjects.Length); // This is what the kids call "memory management" right?
+
+            MelonCoroutines.Start(ApplyForce());
+            await Task.Delay(1000); // Update the list every second
+
+
+            // Start the routine
+        }
+        public void EffectEnds()
+        {
+            EffectIsEnded = true;
+        }
+
+        private int continueFrom = 0;
+        private IEnumerator ApplyForce()
+        {
+            yield return new WaitForFixedUpdate();
+            if (EffectIsEnded) yield break;
+
+            if (rigidbodies.Count != 0)
+            {
+                Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+
+                for (int i = 0; i < 15; i++)
+                {
+                    // Make sure we don't get an outofrange exception
+                    if (i == rigidbodies.Count)
+                    {
+                        continueFrom = 0;
+                        yield break;
+                    }
+
+                    var rb = rigidbodies[i + continueFrom];
+                    rb.AddForce(-(playerPos - rb.position) / 5, ForceMode.VelocityChange);
+                    continueFrom += 15;
+                }
+                MelonCoroutines.Start(ApplyForce());
+            }
+            else yield break;
+        }
+    }
+
 
     public class WhenNoVTEC : IChaosEffect
     {
