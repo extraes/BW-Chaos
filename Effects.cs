@@ -803,8 +803,6 @@ namespace BW_Chaos_Effects
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
 
-
-        private bool EffectIsEnded = false;
         public void EffectStarts()
         {
             RigManager PlayerRig = GameObject.FindObjectOfType<RigManager>();
@@ -1166,6 +1164,70 @@ namespace BW_Chaos_Effects
             }
         }
     }
+
+    public class WhenVTEC : IChaosEffect
+    {
+        public int Duration = 30;
+        public string Name = "High RPM gun";
+
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
+
+        public void EffectStarts()
+        {
+            Hooking.OnGripAttached += OnGrab;
+            Hooking.OnGripDetached += OnDrop;
+            // If the player has a gun in their hand when the effect activates
+            OnGrab(null, Player.rightHand);
+            OnGrab(null, Player.leftHand);
+        }
+        public void EffectEnds()
+        {
+            Hooking.OnGripAttached += OnGrab;
+            Hooking.OnGripDetached += OnDrop;
+        }
+
+        Gun rightGun;
+        Gun leftGun;
+        private void OnGrab(Grip grip, Hand hand)
+        {
+            if (hand.attachedInteractable.GetComponentInParent<MagazineSocket>() != null)
+            {
+                Gun gun;
+                if (hand == Player.rightHand)
+                {
+                    gun = Player.GetGunInHand(hand);
+                    rightGun = gun;
+                }
+                else
+                {
+                    gun = Player.GetGunInHand(hand);
+                    leftGun = gun;
+                }
+                gun.SetRpm(gun.roundsPerMinute * 10);
+            }
+        }
+        private void OnDrop(Grip grip, Hand hand)
+        {
+            if (hand == Player.rightHand)
+            {
+                if (rightGun != null)
+                {
+                    rightGun.SetRpm(rightGun.roundsPerMinute / 10);
+                    rightGun = null;
+                }
+            }
+            else
+            {
+                if (leftGun != null)
+                {
+                    leftGun.SetRpm(leftGun.roundsPerMinute / 10);
+                    leftGun = null;
+                }
+            }
+        }
+    }
+
     #endregion
 }
 
