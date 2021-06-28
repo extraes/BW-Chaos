@@ -882,6 +882,86 @@ namespace BW_Chaos_Effects
             }
         }
     }
+
+    public class PlayerGravity : IChaosEffect
+    {
+        public int Duration = 90;
+        public string Name = "Magnetic player";
+
+        int IChaosEffect.Duration { get => Duration; }
+        string IChaosEffect.Name { get => Name; set => Name = value; }
+
+        private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
+        private bool EffectIsEnded = false;
+        private bool modifyingRbs = true;
+        public async void EffectStarts()
+        {
+            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+            EffectIsEnded = false;
+            modifyingRbs = true;
+            // Probably best to do this in an ienumerator
+            // Get list of active gameobjects with rigidbodies and filter out the rigidbodies that are too far away
+            MelonCoroutines.Start(ApplyForce());
+            while (!EffectIsEnded)
+            {
+                modifyingRbs = true;
+                GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
+                foreach (GameObject go in allObjects)
+                {
+                    Rigidbody rb = go.GetComponent<Rigidbody>();
+                    if (rb != null)
+                    {
+                        if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 20 * 20) 
+                            if (go.GetComponentInParent<PhysicsRig>() != null)
+                                rigidbodies.Add(rb);
+                        
+                    }
+                }
+                Array.Clear(allObjects, 0, allObjects.Length); // This is what the kids call "memory management" right?
+                modifyingRbs = false;
+
+                await Task.Delay(1000); // Update the list every second
+            }
+
+            // Start the routine
+        }
+        public void EffectEnds()
+        {
+            EffectIsEnded = true;
+        }
+
+        private int continueFrom = 0;
+        private IEnumerator ApplyForce()
+        {
+            yield return new WaitForFixedUpdate();
+            if (EffectIsEnded) yield break;
+
+            if (rigidbodies.Count != 0)
+            {
+                Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+
+                if (!modifyingRbs)
+                {
+                    for (int i = 0; i < 25; i++)
+                    {
+                        // Make sure we don't get an outofrange exception
+                        if (i == rigidbodies.Count)
+                        {
+                            continueFrom = 0;
+                            break;
+                        }
+
+                        var rb = rigidbodies[i + continueFrom];
+                        rb.AddForce(playerPos - rb.position, ForceMode.VelocityChange);
+                        continueFrom += 25;
+                    }
+                }
+                MelonCoroutines.Start(ApplyForce());
+            }
+            else yield break;
+        }
+    }
+
     /*public class WhenNoVTEC : ChaosEffect
     {
         public int Duration = 30;

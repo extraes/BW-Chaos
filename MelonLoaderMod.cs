@@ -208,6 +208,7 @@ namespace BW_Chaos
             EffectList.Add(new Accelerate());
             EffectList.Add(new RandomRigShit());
             EffectList.Add(new JumpThePlayer());
+            EffectList.Add(new PlayerGravity());
             #endregion
 
             #region Start node, hook websocket
@@ -232,7 +233,6 @@ namespace BW_Chaos
                 {
                     if (EffectNumberOffset == 0) EffectNumberOffset = 4;
                     else EffectNumberOffset = 0;
-                    // GUIEnabled = false; // Stop drawing the GUI while the list of effects is being edited
                     // Apply effects
                     int MaxIndex = 0;
                     int MaxValue = votes[0];
