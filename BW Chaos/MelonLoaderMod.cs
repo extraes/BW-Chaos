@@ -69,17 +69,20 @@ namespace BW_Chaos
             string saveFolder = Path.Combine(Path.GetTempPath(), "BW-Chaos");
             string exePath = Path.Combine(saveFolder, "BWChaosDiscordBot.exe");
 
-            if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
-            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.BWChaosDiscordBot.exe"))
+            if (!File.Exists(exePath))
             {
-                byte[] data;
-                using (var ms = new MemoryStream())
+                if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
+                using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.BWChaosDiscordBot.exe"))
                 {
-                    stream.CopyTo(ms);
-                    data = ms.ToArray();
+                    byte[] data;
+                    using (var ms = new MemoryStream())
+                    {
+                        stream.CopyTo(ms);
+                        data = ms.ToArray();
+                    }
+                    if (File.Exists(exePath)) File.Delete(exePath);
+                    File.WriteAllBytes(exePath, data);
                 }
-                if (File.Exists(exePath)) File.Delete(exePath);
-                File.WriteAllBytes(exePath, data);
             }
 
             #endregion
