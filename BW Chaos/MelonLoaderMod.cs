@@ -138,7 +138,7 @@ namespace BW_Chaos
                 if (!(timeSinceReset >= 30))
                 {
                     GUI.Box(new Rect(50, 25, 350, 25),
-                        "BW Chaos: Waiting " + (30 - System.Math.Floor(timeSinceReset)) + " seconds before starting");
+                        "BW Chaos: Waiting " + (30 - Math.Floor(timeSinceReset)) + " seconds before starting");
                     GUI.Box(new Rect(50, 50, 350, 25), "Made by extraes");
                     return;
                 }
@@ -151,7 +151,7 @@ namespace BW_Chaos
                 GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: Random Effect");
                 GUI.Box(new Rect(50, 250, 500, (GlobalVariables.ActiveEffects.Count + 1) * 20 + 10), "Active effects:\n" + string.Join("\n", GlobalVariables.ActiveEffects));
                 GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
-                GUI.Box(new Rect(Screen.width - 550, 75, 500 * System.Math.Min(timeSinceReset % 30 / 30, 1f), 25), "");
+                GUI.Box(new Rect(Screen.width - 550, 75, 500 * Math.Min(timeSinceReset % 30 / 30, 1f), 25), "");
 
                 if ((timeSinceReset / 30) >= whenTimerReset)
                 {
