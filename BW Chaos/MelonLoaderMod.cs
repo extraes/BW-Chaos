@@ -86,7 +86,9 @@ namespace BW_Chaos
 
             // todo: test this
             effectList = (from t in Assembly.GetTypes()
-             where t.GetInterfaces().Contains(typeof(EffectBase)) && t.GetConstructor(Type.EmptyTypes) != null
+             where t.GetInterfaces().Contains(typeof(EffectBase))
+                && t.GetConstructor(Type.EmptyTypes) != null
+                && t != typeof(Template)
              select (EffectBase)Activator.CreateInstance(t)).ToList();
 
             botProcess = new Process();
