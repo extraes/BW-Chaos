@@ -80,7 +80,6 @@ namespace BW_Chaos
                         stream.CopyTo(ms);
                         data = ms.ToArray();
                     }
-                    if (File.Exists(exePath)) File.Delete(exePath);
                     File.WriteAllBytes(exePath, data);
                 }
             }
