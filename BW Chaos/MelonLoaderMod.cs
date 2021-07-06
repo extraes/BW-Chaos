@@ -89,9 +89,7 @@ namespace BW_Chaos
 
             // todo: test this
             effectList = (from t in Assembly.GetTypes()
-             where t.GetInterfaces().Contains(typeof(EffectBase))
-                && t.GetConstructor(Type.EmptyTypes) != null
-                && t != typeof(Template)
+             where t.BaseType == typeof(EffectBase) && t != typeof(Template)
              select (EffectBase)Activator.CreateInstance(t)).ToList();
 
             #region BoneMenu for Debugging
@@ -106,7 +104,7 @@ namespace BW_Chaos
             botProcess.StartInfo.FileName = exePath;
             botProcess.StartInfo.WorkingDirectory = saveFolder;
             botProcess.StartInfo.UseShellExecute = true;
-            botProcess.StartInfo.CreateNoWindow = false; // todo: check if this actually works
+            botProcess.StartInfo.CreateNoWindow = false;
             botProcess.Start();
 
             watsonClient = new WatsonWsClient("127.0.0.1", 8827, false);
