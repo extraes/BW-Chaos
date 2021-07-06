@@ -10,6 +10,7 @@ using MelonLoader;
 using WatsonWebsocket;
 using BW_Chaos.Effects;
 using System.Threading.Tasks;
+using ModThatIsNotMod.BoneMenu;
 
 namespace BW_Chaos
 {
@@ -92,6 +93,14 @@ namespace BW_Chaos
                 && t.GetConstructor(Type.EmptyTypes) != null
                 && t != typeof(Template)
              select (EffectBase)Activator.CreateInstance(t)).ToList();
+
+            #region BoneMenu for Debugging
+
+            MenuCategory menu = MenuManager.CreateCategory("Chaos", Color.white);
+            foreach (EffectBase effect in effectList)
+                menu.CreateFunctionElement(effect.Name, Color.white, () => effect.Run());
+
+            #endregion
 
             botProcess = new Process();
             botProcess.StartInfo.FileName = exePath;
