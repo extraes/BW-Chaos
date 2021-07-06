@@ -70,19 +70,16 @@ namespace BW_Chaos
             string saveFolder = Path.Combine(Path.GetTempPath(), "BW-Chaos");
             string exePath = Path.Combine(saveFolder, "BWChaosDiscordBot.exe");
 
-            if (!File.Exists(exePath))
+            if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
+            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.BWChaosDiscordBot.exe"))
             {
-                if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
-                using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.BWChaosDiscordBot.exe"))
+                byte[] data;
+                using (var ms = new MemoryStream())
                 {
-                    byte[] data;
-                    using (var ms = new MemoryStream())
-                    {
-                        stream.CopyTo(ms);
-                        data = ms.ToArray();
-                    }
-                    File.WriteAllBytes(exePath, data);
+                    stream.CopyTo(ms);
+                    data = ms.ToArray();
                 }
+                File.WriteAllBytes(exePath, data);
             }
 
             #endregion
@@ -180,8 +177,19 @@ namespace BW_Chaos
                 if (accumulatedVotes[i] > topVoted.Item2)
                     topVoted = (i, accumulatedVotes[i]);
             }
-            if (topVoted.Item1 == 4) effectList[UnityEngine.Random.Range(0, effectList.Count)].Run();
-            else candidateEffects[topVoted.Item1].Run();
+
+            if (topVoted.Item1 == 4)
+            {
+                EffectBase e = effectList[UnityEngine.Random.Range(0, effectList.Count)];
+                MelonLogger.Msg(e.Name + " (random) was chosen");
+                e.Run();
+            }
+            else
+            {
+                EffectBase e = candidateEffects[topVoted.Item1];
+                MelonLogger.Msg(e.Name + " was chosen");
+                e.Run();
+            }
         }
 
         private void ResetEffectCandidates()
