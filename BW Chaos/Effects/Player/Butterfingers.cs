@@ -11,7 +11,6 @@ namespace BW_Chaos.Effects
 
         public override void OnEffectUpdate()
         {
-            // todo: might want a wait in between drops
             Interactable interactable = UnityEngine.Random.Range(0, 2) == 1
                 ? Player.leftHand.attachedInteractable
                 : Player.rightHand.attachedInteractable;

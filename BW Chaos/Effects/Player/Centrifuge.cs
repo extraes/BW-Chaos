@@ -10,7 +10,6 @@ namespace BW_Chaos.Effects
 
         public override void OnEffectUpdate()
         {
-            // todo: i feel like this could just be done by constantly adding to the player rotation
             float r = 1;
             float theta = Time.realtimeSinceStartup % 5 * 360;
             float x = r * (float)Math.Cos(theta * Math.PI / 180);

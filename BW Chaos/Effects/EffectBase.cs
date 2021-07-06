@@ -37,7 +37,6 @@ namespace BW_Chaos.Effects
 
         private IEnumerator CoRun()
         {
-            // todo: does this actually work, cause i heavily doubt it
             OnEffectStart();
 
             Active = true;

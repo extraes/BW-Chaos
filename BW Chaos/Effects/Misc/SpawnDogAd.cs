@@ -14,7 +14,7 @@ namespace BW_Chaos.Effects
 
         public override void OnEffectStart()
         {
-			// todo: i have zero fucking clue if this works
+			// todo: this does not seem to work
 			byte[] dogBytes = null;
 			AdManager.GetDogBytes((b) =>{ dogBytes = b; });
 			// taken from mtinm, CreateDogAd doesnt make the actual ad it seems and this stuff is in a coroutine

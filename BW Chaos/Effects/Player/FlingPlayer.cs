@@ -9,7 +9,6 @@ namespace BW_Chaos.Effects
 
         public override void OnEffectStart()
         {
-            // todo: i dislike this method of an array
             int[] arr = new int[] { -1, 1 };
             GlobalVariables.Player_PhysBody.AddVelocityChange(
                 new Vector3(9.8f * 3 * arr[Random.Range(0, 2)], 9.8f * 6, 9.8f * 3 * arr[Random.Range(0, 2)]));
