@@ -34,8 +34,8 @@ namespace BW_Chaos
         private List<EffectBase> effectList = new List<EffectBase>();
         private List<EffectBase> candidateEffects = new List<EffectBase>();
         private float timeSinceEnabled = 0f;
-        private int whenTimerReset = 0;
-        private bool showGUI = false;
+        private int whenTimerReset = 1;
+        private bool showGUI = true;
 
         public override void OnApplicationStart()
         {
@@ -87,7 +87,6 @@ namespace BW_Chaos
 
             #endregion
 
-            // todo: test this
             effectList = (from t in Assembly.GetTypes()
              where t.BaseType == typeof(EffectBase) && t != typeof(Template)
              select (EffectBase)Activator.CreateInstance(t)).ToList();
@@ -103,8 +102,8 @@ namespace BW_Chaos
             botProcess = new Process();
             botProcess.StartInfo.FileName = exePath;
             botProcess.StartInfo.WorkingDirectory = saveFolder;
-            botProcess.StartInfo.UseShellExecute = true;
-            botProcess.StartInfo.CreateNoWindow = false;
+            //botProcess.StartInfo.UseShellExecute = true;
+            //botProcess.StartInfo.CreateNoWindow = true;
             botProcess.Start();
 
             watsonClient = new WatsonWsClient("127.0.0.1", 8827, false);
