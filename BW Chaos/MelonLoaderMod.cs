@@ -3,13 +3,13 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Diagnostics;
-using System.Collections.Generic;
 
 using UnityEngine;
+using UnityEngine.UI;
+
 using MelonLoader;
 using WatsonWebsocket;
 using BW_Chaos.Effects;
-using System.Threading.Tasks;
 using ModThatIsNotMod.BoneMenu;
 
 namespace BW_Chaos
@@ -28,14 +28,10 @@ namespace BW_Chaos
         internal string botToken = "YOUR_TOKEN_HERE";
         internal string channelId = "CHANNEL_ID_HERE";
 
-        internal WatsonWsClient watsonClient;
         internal Process botProcess;
 
-        private List<EffectBase> effectList = new List<EffectBase>();
-        private List<EffectBase> candidateEffects = new List<EffectBase>();
-        private float timeSinceEnabled = 0f;
-        private int whenTimerReset = 1;
-        private bool showGUI = true;
+        private Sprite timerImage;
+        private GameObject effectsText;
 
         public override void OnApplicationStart()
         {
@@ -71,7 +67,7 @@ namespace BW_Chaos
             string exePath = Path.Combine(saveFolder, "BWChaosDiscordBot.exe");
 
             if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
-            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.BWChaosDiscordBot.exe"))
+            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.Resources.BWChaosDiscordBot.exe"))
             {
                 byte[] data;
                 using (var ms = new MemoryStream())
@@ -84,14 +80,33 @@ namespace BW_Chaos
 
             #endregion
 
-            effectList = (from t in Assembly.GetTypes()
+            #region Load Timer
+
+            MemoryStream memoryStream;
+            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.Resources.timerimage"))
+            {
+                memoryStream = new MemoryStream((int)stream.Length);
+                stream.CopyTo(memoryStream);
+            }
+            AssetBundle assetBundle = AssetBundle.LoadFromMemory(memoryStream.ToArray());
+            timerImage = assetBundle.LoadAsset("Assets/TimerCircle.prefab").Cast<GameObject>().GetComponent<StressLevelZero.DuckSeason.PizzaBox>().ogSprite;
+            timerImage.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            effectsText = assetBundle.LoadAsset("Assets/EffectsText.prefab").Cast<GameObject>();
+            effectsText.hideFlags = HideFlags.DontUnloadUnusedAsset;
+
+            #endregion
+
+            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<EffectHandler>();
+
+            EffectHandler.AllEffects = (from t in Assembly.GetTypes()
              where t.BaseType == typeof(EffectBase) && t != typeof(Template)
              select (EffectBase)Activator.CreateInstance(t)).ToList();
 
             #region BoneMenu for Debugging
 
             MenuCategory menu = MenuManager.CreateCategory("Chaos", Color.white);
-            foreach (EffectBase effect in effectList)
+            foreach (EffectBase effect in EffectHandler.AllEffects)
                 menu.CreateFunctionElement(effect.Name, Color.white, () => effect.Run());
 
             #endregion
@@ -99,20 +114,20 @@ namespace BW_Chaos
             botProcess = new Process();
             botProcess.StartInfo.FileName = exePath;
             botProcess.StartInfo.WorkingDirectory = saveFolder;
-            //botProcess.StartInfo.UseShellExecute = true;
-            //botProcess.StartInfo.CreateNoWindow = true;
+            botProcess.StartInfo.UseShellExecute = true;
+            botProcess.StartInfo.CreateNoWindow = true;
             botProcess.Start();
 
-            watsonClient = new WatsonWsClient("127.0.0.1", 8827, false);
-            watsonClient.ServerConnected += ClientConnectedToServer;
-            watsonClient.ServerDisconnected += ClientDisconnectedFromServer;
-            watsonClient.MessageReceived += ClientReceiveMessage;
-            watsonClient.Start();
+            GlobalVariables.WatsonClient = new WatsonWsClient("127.0.0.1", 8827, false);
+            GlobalVariables.WatsonClient.ServerConnected += ClientConnectedToServer;
+            GlobalVariables.WatsonClient.ServerDisconnected += ClientDisconnectedFromServer;
+            GlobalVariables.WatsonClient.MessageReceived += ClientReceiveMessage;
+            GlobalVariables.WatsonClient.Start();
         }
 
         public override void OnApplicationQuit()
         {
-            watsonClient?.Stop();
+            GlobalVariables.WatsonClient?.Stop();
             botProcess?.Kill();
             botProcess?.Dispose();
         }
@@ -127,6 +142,44 @@ namespace BW_Chaos
                 GameObject.FindObjectOfType<Player_Health>();
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
+
+            Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
+
+            #region Main Handler
+
+            Canvas canvas = BoneworksModdingToolkit.UI.CreateWorldSpaceCanvas(Vector2.one, new Vector3(0, 1, 0), "ChaosCanvas");
+            Transform image = new GameObject("TimerImage").transform;
+            image.parent = canvas.transform;
+            image.Reset();
+
+            Image imageComp = image.gameObject.AddComponent<Image>();
+            imageComp.sprite = timerImage;
+            imageComp.type = Image.Type.Filled;
+            imageComp.fillAmount = 0;
+            EffectHandler handler = imageComp.gameObject.AddComponent<EffectHandler>();
+
+            canvas.transform.parent = wristTransform;
+            canvas.transform.Reset();
+            canvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
+            canvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+
+            #endregion
+
+            #region Effects Text
+
+            GameObject effectText = GameObject.Instantiate(effectsText, wristTransform);
+            Text textComp = effectText.transform.Find("Text").GetComponent<Text>();
+            textComp.color = Color.white;
+            handler.text = textComp;
+
+            effectText.transform.Reset();
+            effectText.transform.Find("Text").Reset();
+
+            effectText.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            effectText.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
+            effectText.transform.localPosition = new Vector3(0f, -0.25f, 0f);
+
+            #endregion
         }
 
         public override void OnUpdate()
@@ -135,84 +188,13 @@ namespace BW_Chaos
                 effect.OnEffectUpdate();
         }
 
-        public override void OnGUI()
-        {
-            if (showGUI)
-            {
-                float timeSinceReset = Time.timeSinceLevelLoad - timeSinceEnabled;
-                if (!(timeSinceReset >= 30))
-                {
-                    GUI.Box(new Rect(50, 25, 350, 25),
-                        "BW Chaos: Waiting " + (30 - Math.Floor(timeSinceReset)) + " seconds before starting");
-                    GUI.Box(new Rect(50, 50, 350, 25), "Made by extraes");
-                    return;
-                }
-                int effectNumber = 0;
-                foreach (EffectBase effect in candidateEffects)
-                {
-                    GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: {effect.Name}");
-                    effectNumber++;
-                }
-                GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: Random Effect");
-                GUI.Box(new Rect(50, 250, 500, (GlobalVariables.ActiveEffects.Count + 1) * 20 + 10), "Active effects:\n" + string.Join("\n", GlobalVariables.ActiveEffects));
-                GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
-                GUI.Box(new Rect(Screen.width - 550, 75, 500 * Math.Min(timeSinceReset % 30 / 30, 1f), 25), "");
-
-                if ((timeSinceReset / 30) >= whenTimerReset)
-                {
-                    whenTimerReset++;
-                    RunVotedEffect();
-                    ResetEffectCandidates();
-                }
-            }
-        }
-
-        private async void RunVotedEffect()
-        {
-            await watsonClient.SendAsync("sendvotes:");
-            while (accumulatedVotes == null) await Task.Delay(250);
-            (int, int) topVoted = (0, 0); // format is (arrIndex, value)
-            for (int i = 0; i < accumulatedVotes.Length; i++)
-            {
-                if (accumulatedVotes[i] > topVoted.Item2)
-                    topVoted = (i, accumulatedVotes[i]);
-            }
-
-            if (topVoted.Item1 == 4)
-            {
-                EffectBase e = effectList[UnityEngine.Random.Range(0, effectList.Count)];
-                MelonLogger.Msg(e.Name + " (random) was chosen");
-                e.Run();
-            }
-            else
-            {
-                EffectBase e = candidateEffects[topVoted.Item1];
-                MelonLogger.Msg(e.Name + " was chosen");
-                e.Run();
-            }
-        }
-
-        private void ResetEffectCandidates()
-        {
-            candidateEffects.Clear();
-            for (int i = 0; i < 4; i++)
-            {
-                EffectBase effect = effectList[UnityEngine.Random.Range(0, effectList.Count)];
-                while (candidateEffects.Contains(effect))
-                    effect = effectList[UnityEngine.Random.Range(0, effectList.Count)];
-                candidateEffects.Add(effect);
-            }
-        }
-
         #region Websocket Methods
-
-        private int[] accumulatedVotes = null;
 
         private async void ClientConnectedToServer(object sender, EventArgs e)
         {
             MelonLogger.Msg("Connected to the Discord bot!");
-            await watsonClient.SendAsync("token:" + botToken);
-            await watsonClient.SendAsync("channel:" + channelId);
+            await GlobalVariables.WatsonClient.SendAsync("token:" + botToken);
+            await GlobalVariables.WatsonClient.SendAsync("channel:" + channelId);
         }
 
         private void ClientDisconnectedFromServer(object sender, EventArgs e)
@@ -235,7 +217,7 @@ namespace BW_Chaos
                     MelonLogger.Msg(messageData);
                     break;
                 case "receivevotes":
-                    accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
+                    GlobalVariables.AccumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
                     break;
                 default:
                     MelonLogger.Error("UNKNOWN MESSAGE TYPE: " + messageType);
