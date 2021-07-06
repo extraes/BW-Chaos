@@ -22,7 +22,6 @@ namespace BW_Chaos
         public Text text;
 
         private Image mask;
-        private float lerp;
 
         private float timeSinceEnabled = 0f;
         private bool showGUI = true;
@@ -37,12 +36,6 @@ namespace BW_Chaos
 
         public void Update()
         {
-            lerp = (secondsEachEffect > 0 && lerp < 1)
-                ? Mathf.MoveTowards(lerp, 1, Time.deltaTime / secondsEachEffect)
-                : 1;
-
-            mask.fillAmount = Mathf.Lerp(0, 1, lerp);
-
             string newString = string.Empty;
             foreach (EffectBase e in GlobalVariables.ActiveEffects)
                 newString += e.Name + "\n";
@@ -83,6 +76,7 @@ namespace BW_Chaos
                 yield return new WaitForSeconds(1);
 
                 currentTimerValue += 1;
+                mask.fillAmount = (float)currentTimerValue / secondsEachEffect;
 
                 if (currentTimerValue == secondsEachEffect)
                 {
