@@ -87,13 +87,13 @@ namespace BWChaosDiscordBot
 
         private static void ClientConnected(object sender, ClientConnectedEventArgs args)
         {
-            Console.WriteLine("Client connected: " + args.IpPort);
+            //Console.WriteLine("Client connected: " + args.IpPort);
             currentClientIpPort = args.IpPort;
         }
 
         private static void ClientDisconnected(object sender, ClientDisconnectedEventArgs args)
         {
-            Console.WriteLine("Client disconnected: " + args.IpPort);
+            //Console.WriteLine("Client disconnected: " + args.IpPort);
             if (currentClientIpPort == args.IpPort)
             {
                 discordClient.DisconnectAsync().Wait();
@@ -106,7 +106,7 @@ namespace BWChaosDiscordBot
 
         private static void MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Console.WriteLine("Message received from " + e.IpPort + ": " + Encoding.UTF8.GetString(e.Data));
+            //Console.WriteLine("Message received from " + e.IpPort + ": " + Encoding.UTF8.GetString(e.Data));
             string messageType = Encoding.UTF8.GetString(e.Data).Split(':')[0];
             string messageData = Encoding.UTF8.GetString(e.Data).Split(':')[1] ?? string.Empty;
             switch (messageType)
