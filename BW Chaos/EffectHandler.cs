@@ -63,7 +63,7 @@ namespace BW_Chaos
         {
             while (true)
             {
-                yield return new WaitForSeconds(1);
+                yield return new WaitForSecondsRealtime(1);
 
                 currentTimerValue += 1;
                 float fillAmount = (float)currentTimerValue / secondsEachEffect;
@@ -83,7 +83,7 @@ namespace BW_Chaos
             string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
             int[] accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);  // todo: test this using the SendAndWait method
 
-            MelonLogger.Msg(accumulatedVotes);
+            MelonLogger.Msg(messageData);
 
             (int, int) topVoted = (0, 0); // format is (arrIndex, value)
             for (int i = 0; i < accumulatedVotes.Length; i++)
