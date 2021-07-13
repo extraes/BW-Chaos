@@ -80,6 +80,7 @@ namespace BW_Chaos
                 if (currentTimerValue == secondsEachEffect)
                 {
                     MelonCoroutines.Start(RunVotedEffect()); // todo: test if meloncoroutine waits until finish to return
+                    MelonLogger.Msg("about to run ResetEffect");
                     ResetEffectCandidates();
                 }
             }
@@ -99,7 +100,7 @@ namespace BW_Chaos
                     topVoted = (i, GlobalVariables.AccumulatedVotes[i]);
             }
 
-            if (topVoted.Item1 == 4 || topVoted.Item2 == 0)
+            if (topVoted.Item1 == 4 || topVoted.Item2 == 0) // todo: for the second `if` here, we should choose a random one from the effect candidates
             {
                 EffectBase e = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
                 MelonLogger.Msg(e.Name + " (random) was chosen");
@@ -111,6 +112,7 @@ namespace BW_Chaos
                 MelonLogger.Msg(e.Name + " was chosen");
                 e.Run();
             }
+            MelonLogger.Msg("RunVoted ended");
         }
 
         private void ResetEffectCandidates()
