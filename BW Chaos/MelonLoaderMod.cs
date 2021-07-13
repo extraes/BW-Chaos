@@ -166,8 +166,9 @@ namespace BW_Chaos
         private void ClientReceiveMessage(object sender, MessageReceivedEventArgs e)
         {
             //MelonLogger.Msg("Message received from " + e.IpPort + ": " + Encoding.UTF8.GetString(e.Data));
-            string messageType = Encoding.UTF8.GetString(e.Data).Split(':')[0];
-            string messageData = Encoding.UTF8.GetString(e.Data).Split(':')[1] ?? string.Empty;
+            string[] splitMessage = Encoding.UTF8.GetString(e.Data).Split(':');
+            string messageType = splitMessage[0];
+            string messageData = splitMessage[1] ?? string.Empty;
             switch (messageType)
             {
                 case "error":

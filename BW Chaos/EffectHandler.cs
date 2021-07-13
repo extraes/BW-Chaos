@@ -86,7 +86,7 @@ namespace BW_Chaos
         private void RunVotedEffect()
         {
             string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
-            int[] accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);  // todo: test this using the SendAndWait method
+            int[] accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
 
             MelonLogger.Msg(messageData);
 
@@ -130,7 +130,7 @@ namespace BW_Chaos
                 botMesssage += $"\n{i + 1}: {effect.Name}";
             }
 
-            MelonLogger.Msg(botMesssage);
+            botMesssage += "\n5: Random Effect";
             GlobalVariables.WatsonClient.SendAsync("sendtochannel:" + botMesssage);
         }
     }

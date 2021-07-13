@@ -107,8 +107,9 @@ namespace BWChaosDiscordBot
         private static void MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             //Console.WriteLine("Message received from " + e.IpPort + ": " + Encoding.UTF8.GetString(e.Data));
-            string messageType = Encoding.UTF8.GetString(e.Data).Split(':')[0];
-            string messageData = Encoding.UTF8.GetString(e.Data).Split(':')[1] ?? string.Empty;
+            string[] splitMessage = Encoding.UTF8.GetString(e.Data).Split(':', 2);
+            string messageType = splitMessage[0];
+            string messageData = splitMessage[1] ?? string.Empty;
             switch (messageType)
             {
                 case "token":
