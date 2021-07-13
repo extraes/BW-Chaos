@@ -18,6 +18,8 @@ namespace BW_Chaos
         private int secondsEachEffect = 30;
         private int currentTimerValue;
 
+        private IEnumerator timerInstance;
+
         #region Wrist and Overlay Variables
 
         private Image overlayImage;
@@ -45,8 +47,10 @@ namespace BW_Chaos
             wristCanvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
             wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
 
-            MelonCoroutines.Start(Timer());
+            timerInstance = (IEnumerator)MelonCoroutines.Start(Timer());
         }
+
+        public void OnDestroy() => MelonCoroutines.Stop(timerInstance);
 
         public void Update()
         {
@@ -67,6 +71,7 @@ namespace BW_Chaos
 
                 currentTimerValue += 1;
                 float fillAmount = (float)currentTimerValue / secondsEachEffect;
+
                 overlayImage.fillAmount = fillAmount;
                 wristImage.fillAmount = fillAmount;
 
@@ -110,8 +115,8 @@ namespace BW_Chaos
         {
             // todo: add candidates text in overlay ui
             currentTimerValue = 0;
-            try { overlayImage.fillAmount = 0; } catch { } // nullref sometimes happens here, no clue why but i added a trycatch for it
-            try { wristImage.fillAmount = 0; } catch { }
+            overlayImage.fillAmount = 0;
+            wristImage.fillAmount = 0;
 
             string botMesssage = "-- New Candidate Effects --";
 
@@ -122,9 +127,10 @@ namespace BW_Chaos
                 while (GlobalVariables.CandidateEffects.Contains(effect))
                     effect = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
                 GlobalVariables.CandidateEffects.Add(effect);
-                botMesssage += $"\n{i}: {effect.Name}";
+                botMesssage += $"\n{i + 1}: {effect.Name}";
             }
 
+            MelonLogger.Msg(botMesssage);
             GlobalVariables.WatsonClient.SendAsync("sendtochannel:" + botMesssage);
         }
     }

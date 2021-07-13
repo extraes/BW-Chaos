@@ -24,6 +24,7 @@ namespace BW_Chaos.Effects
 
         private IEnumerator SpawnCrablets()
         {
+            // todo: nullrefs
             while (Active)
             {
                 yield return new WaitForSeconds(10 * UnityEngine.Random.value);
