@@ -30,9 +30,6 @@ namespace BW_Chaos
 
         internal Process botProcess;
 
-        private Sprite timerImage;
-        private GameObject effectsText;
-
         public override void OnApplicationStart()
         {
             #region MelonPref Setup
@@ -82,17 +79,17 @@ namespace BW_Chaos
             #region Load Timer
 
             MemoryStream memoryStream;
-            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.Resources.timerimage"))
+            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.Resources.chaos_ui_elements"))
             {
                 memoryStream = new MemoryStream((int)stream.Length);
                 stream.CopyTo(memoryStream);
             }
             AssetBundle assetBundle = AssetBundle.LoadFromMemory(memoryStream.ToArray());
-            timerImage = assetBundle.LoadAsset("Assets/TimerCircle.prefab").Cast<GameObject>().GetComponent<StressLevelZero.DuckSeason.PizzaBox>().ogSprite;
-            timerImage.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            GlobalVariables.WristChaosUI = assetBundle.LoadAsset("Assets/UIStuff/prefabs/ChaosCanvas.prefab").Cast<GameObject>();
+            GlobalVariables.WristChaosUI.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-            effectsText = assetBundle.LoadAsset("Assets/EffectsText.prefab").Cast<GameObject>();
-            effectsText.hideFlags = HideFlags.DontUnloadUnusedAsset;
+            GlobalVariables.OverlayChaosUI = assetBundle.LoadAsset("Assets/UIStuff/prefabs/ChaosCanvasOverlay.prefab").Cast<GameObject>();
+            GlobalVariables.OverlayChaosUI.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
             #endregion
 
@@ -142,43 +139,8 @@ namespace BW_Chaos
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
 
-            Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
-
-            #region Main Handler
-
-            Canvas canvas = BoneworksModdingToolkit.UI.CreateWorldSpaceCanvas(Vector2.one, new Vector3(0, 1, 0), "ChaosCanvas");
-            Transform image = new GameObject("TimerImage").transform;
-            image.parent = canvas.transform;
-            image.Reset();
-
-            Image imageComp = image.gameObject.AddComponent<Image>();
-            imageComp.sprite = timerImage;
-            imageComp.type = Image.Type.Filled;
-            imageComp.fillAmount = 0;
-            EffectHandler handler = imageComp.gameObject.AddComponent<EffectHandler>();
-
-            canvas.transform.parent = wristTransform;
-            canvas.transform.Reset();
-            canvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
-            canvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-
-            #endregion
-
-            #region Effects Text
-
-            GameObject effectText = GameObject.Instantiate(effectsText, wristTransform);
-            Text textComp = effectText.transform.Find("Text").GetComponent<Text>();
-            textComp.color = Color.white;
-            handler.text = textComp;
-
-            effectText.transform.Reset();
-            effectText.transform.Find("Text").Reset();
-
-            effectText.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
-            effectText.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
-            effectText.transform.localPosition = new Vector3(0f, -0.25f, 0f);
-
-            #endregion
+            // todo: test this
+            new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
         }
 
         public override void OnUpdate()
@@ -214,9 +176,6 @@ namespace BW_Chaos
                     break;
                 case "log":
                     MelonLogger.Msg(messageData);
-                    break;
-                case "receivevotes":
-                    GlobalVariables.AccumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
                     break;
                 default:
                     MelonLogger.Error("UNKNOWN MESSAGE TYPE: " + messageType);

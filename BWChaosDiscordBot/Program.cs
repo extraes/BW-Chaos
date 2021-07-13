@@ -117,9 +117,8 @@ namespace BWChaosDiscordBot
                 case "channel":
                     discordChannelId = messageData;
                     break;
-                case "sendvotes": // todo: switch this over to using SendAndWait instead of using 2 message types
-                    watsonServer.SendAsync(currentClientIpPort, "receivevotes:" +
-                        JsonConvert.SerializeObject(accumulatedVotes, Formatting.None));
+                case "sendvotes":
+                    watsonServer.SendAsync(currentClientIpPort, JsonConvert.SerializeObject(accumulatedVotes, Formatting.None));
                     for (int i = 0; i < accumulatedVotes.Length; i++)
                         accumulatedVotes[i] = 0;
                     break;

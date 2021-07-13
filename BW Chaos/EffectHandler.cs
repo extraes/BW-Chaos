@@ -15,20 +15,36 @@ namespace BW_Chaos
         public static System.Collections.Generic.List<EffectBase> AllEffects;
         public static EffectHandler Instance;
 
-        public int secondsEachEffect = 30;
-        public int currentTimerValue;
-        public Text text;
+        private int secondsEachEffect = 30;
+        private int currentTimerValue;
 
-        private Image mask;
+        #region Wrist and Overlay Variables
 
-        private float timeSinceEnabled = 0f;
-        private bool showGUI = true;
+        private Image overlayImage;
+        private Text overlayText;
+        private Image wristImage;
+        private Text wristText;
+
+        #endregion
 
         public void Start()
         {
             Instance = this;
 
-            mask = GetComponent<Image>();
+            Canvas overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
+            overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
+            overlayImage.fillAmount = 0;
+            overlayText = overlayCanvas.transform.Find("Text").GetComponent<Text>();
+
+            Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
+            Canvas wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
+            wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
+            wristImage.fillAmount = 0;
+            wristText = wristCanvas.transform.Find("Text").GetComponent<Text>();
+            wristCanvas.transform.Reset();
+            wristCanvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
+            wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+
             MelonCoroutines.Start(Timer());
         }
 
@@ -38,33 +54,8 @@ namespace BW_Chaos
             string newString = string.Empty;
             foreach (EffectBase e in GlobalVariables.ActiveEffects)
                 newString += e.Name + "\n";
-            text.text = newString;
-        }
-
-        public void OnGUI()
-        {
-            if (showGUI)
-            {
-                /*float timeSinceReset = Time.timeSinceLevelLoad - timeSinceEnabled;
-                if (!(timeSinceReset >= 30))
-                {
-                    GUI.Box(new Rect(50, 25, 350, 25),
-                        "BW Chaos: Waiting " + (30 - Math.Floor(timeSinceReset)) + " seconds before starting");
-                    GUI.Box(new Rect(50, 50, 350, 25), "Made by extraes");
-                    return;
-                }*/
-
-                int effectNumber = 0;
-                foreach (EffectBase effect in GlobalVariables.CandidateEffects)
-                {
-                    GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: {effect.Name}");
-                    effectNumber++;
-                }
-                GUI.Box(new Rect(50, 50 + (effectNumber * 25), 500, 25), $"{effectNumber + 1}: Random Effect");
-                /*GUI.Box(new Rect(50, 250, 500, (GlobalVariables.ActiveEffects.Count + 1) * 20 + 10), "Active effects:\n" + string.Join("\n", GlobalVariables.ActiveEffects));
-                GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
-                GUI.Box(new Rect(Screen.width - 550, 75, 500 * Math.Min(timeSinceReset % 30 / 30, 1f), 25), "");*/
-            }
+            overlayText.text = newString;
+            wristText.text = newString;
         }
 
         [UnhollowerBaseLib.Attributes.HideFromIl2Cpp]
@@ -75,32 +66,33 @@ namespace BW_Chaos
                 yield return new WaitForSeconds(1);
 
                 currentTimerValue += 1;
-                mask.fillAmount = (float)currentTimerValue / secondsEachEffect;
+                float fillAmount = (float)currentTimerValue / secondsEachEffect;
+                overlayImage.fillAmount = fillAmount;
+                wristImage.fillAmount = fillAmount;
 
                 if (currentTimerValue == secondsEachEffect)
                 {
-                    MelonCoroutines.Start(RunVotedEffect()); // todo: test if meloncoroutine waits until finish to return
-                    MelonLogger.Msg("about to run ResetEffect");
+                    RunVotedEffect();
                     ResetEffectCandidates();
                 }
             }
         }
 
-        private IEnumerator RunVotedEffect()
+        private void RunVotedEffect()
         {
-            GlobalVariables.WatsonClient.SendAsync("sendvotes:").Wait();
-            while (GlobalVariables.AccumulatedVotes == null) yield return new WaitForEndOfFrame();
+            string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
+            int[] accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);  // todo: test this using the SendAndWait method
 
-            MelonLogger.Msg(GlobalVariables.AccumulatedVotes);
+            MelonLogger.Msg(accumulatedVotes);
 
             (int, int) topVoted = (0, 0); // format is (arrIndex, value)
-            for (int i = 0; i < GlobalVariables.AccumulatedVotes.Length; i++)
+            for (int i = 0; i < accumulatedVotes.Length; i++)
             {
-                if (GlobalVariables.AccumulatedVotes[i] > topVoted.Item2)
-                    topVoted = (i, GlobalVariables.AccumulatedVotes[i]);
+                if (accumulatedVotes[i] > topVoted.Item2)
+                    topVoted = (i, accumulatedVotes[i]);
             }
 
-            if (topVoted.Item1 == 4 || topVoted.Item2 == 0) // todo: for the second `if` here, we should choose a random one from the effect candidates
+            if (topVoted.Item1 == 4 || topVoted.Item2 == 0) // todo: for the second if condition here, we should choose a random one from the effect candidates
             {
                 EffectBase e = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
                 MelonLogger.Msg(e.Name + " (random) was chosen");
@@ -112,13 +104,14 @@ namespace BW_Chaos
                 MelonLogger.Msg(e.Name + " was chosen");
                 e.Run();
             }
-            MelonLogger.Msg("RunVoted ended");
         }
 
         private void ResetEffectCandidates()
         {
+            // todo: add candidates text in overlay ui
             currentTimerValue = 0;
-            try { mask.fillAmount = 0; } catch { }
+            try { overlayImage.fillAmount = 0; } catch { } // nullref sometimes happens here, no clue why but i added a trycatch for it
+            try { wristImage.fillAmount = 0; } catch { }
 
             string botMesssage = "-- New Candidate Effects --";
 
