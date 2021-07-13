@@ -5,8 +5,6 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using BW_Chaos.Effects;
-using System.Threading.Tasks;
-using System.Linq;
 
 namespace BW_Chaos
 {
@@ -81,16 +79,16 @@ namespace BW_Chaos
 
                 if (currentTimerValue == secondsEachEffect)
                 {
-                    RunVotedEffect(); // todo: find why this calls the effect from the next batch (MIGHT NEED TO MOVE RESET CALL TO END OF RUNVOTEDEFFECT)
+                    MelonCoroutines.Start(RunVotedEffect()); // todo: test if meloncoroutine waits until finish to return
                     ResetEffectCandidates();
                 }
             }
         }
 
-        private async void RunVotedEffect()
+        private IEnumerator RunVotedEffect()
         {
-            await GlobalVariables.WatsonClient.SendAsync("sendvotes:");
-            while (GlobalVariables.AccumulatedVotes == null) await Task.Delay(250);
+            GlobalVariables.WatsonClient.SendAsync("sendvotes:").Wait();
+            while (GlobalVariables.AccumulatedVotes == null) yield return new WaitForEndOfFrame();
 
             MelonLogger.Msg(GlobalVariables.AccumulatedVotes);
 
@@ -120,6 +118,8 @@ namespace BW_Chaos
             currentTimerValue = 0;
             try { mask.fillAmount = 0; } catch { }
 
+            string botMesssage = "-- New Candidate Effects --";
+
             GlobalVariables.CandidateEffects.Clear();
             for (int i = 0; i < 4; i++)
             {
@@ -127,7 +127,10 @@ namespace BW_Chaos
                 while (GlobalVariables.CandidateEffects.Contains(effect))
                     effect = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
                 GlobalVariables.CandidateEffects.Add(effect);
+                botMesssage += $"\n{i}: {effect.Name}";
             }
+
+            GlobalVariables.WatsonClient.SendAsync("sendtochannel:" + botMesssage);
         }
     }
 }

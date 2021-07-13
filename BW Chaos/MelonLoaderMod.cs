@@ -45,8 +45,7 @@ namespace BW_Chaos
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelId, "channel");
             channelId = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
 
-            // todo: dviperHmm
-            MelonPreferences.Save(); // BECAUSE IF I DONT SAVE IT RN THEN THE FAT BASTARD WONT CHANGE IT UNTIL THE GAME CLOSES
+            MelonPreferences.Save();
 
             #endregion
 
