@@ -4,9 +4,9 @@ using System.Collections;
 
 using UnityEngine;
 using UnityEngine.UI;
-using BW_Chaos.Effects;
+using BWChaos.Effects;
 
-namespace BW_Chaos
+namespace BWChaos
 {
     internal class EffectHandler : MonoBehaviour
     {

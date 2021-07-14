@@ -1,4 +1,4 @@
-﻿namespace BW_Chaos.Effects
+﻿namespace BWChaos.Effects
 {
     internal class SpawnDogAd : EffectBase
     {

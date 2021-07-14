@@ -7,8 +7,8 @@
     <ProjectGuid>{C33921DC-5778-4EEC-A2D0-E0AE522CC701}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BW_Chaos</RootNamespace>
-    <AssemblyName>BW Chaos</AssemblyName>
+    <RootNamespace>BWChaos</RootNamespace>
+    <AssemblyName>BWChaos</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -107,7 +107,7 @@
     <Compile Include="Effects\Guns\MassiveKnockback.cs" />
     <Compile Include="Effects\Misc\SpawnDogAd.cs" />
     <Compile Include="Effects\Misc\4xSpeed.cs" />
-    <Compile Include="Effects\Misc\Template.cs" />
+    <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />
     <Compile Include="Effects\Player\Accelerate.cs" />

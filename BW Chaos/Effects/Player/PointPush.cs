@@ -2,7 +2,7 @@
 using MelonLoader;
 using ModThatIsNotMod;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class PointPush : EffectBase
     {

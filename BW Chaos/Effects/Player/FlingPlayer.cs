@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using MelonLoader;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class FlingPlayer : EffectBase
     {

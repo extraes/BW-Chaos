@@ -9,10 +9,10 @@ using UnityEngine.UI;
 
 using MelonLoader;
 using WatsonWebsocket;
-using BW_Chaos.Effects;
+using BWChaos.Effects;
 using ModThatIsNotMod.BoneMenu;
 
-namespace BW_Chaos
+namespace BWChaos
 {
     public static class BuildInfo
     {
@@ -139,7 +139,6 @@ namespace BW_Chaos
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
 
-            // todo: test this
             new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
         }
 

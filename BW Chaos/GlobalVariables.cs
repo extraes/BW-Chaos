@@ -1,11 +1,11 @@
 ﻿using System.Collections.Generic;
 using UnityEngine;
 using WatsonWebsocket;
-using BW_Chaos.Effects;
+using BWChaos.Effects;
 using StressLevelZero.Rig;
 using StressLevelZero.VRMK;
 
-namespace BW_Chaos
+namespace BWChaos
 {
     internal static class GlobalVariables
     {

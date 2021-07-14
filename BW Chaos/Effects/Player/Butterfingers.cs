@@ -3,7 +3,7 @@ using MelonLoader;
 using ModThatIsNotMod;
 using StressLevelZero.Interaction;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class Butterfingers : EffectBase
     {

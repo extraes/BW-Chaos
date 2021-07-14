@@ -3,7 +3,7 @@ using UnityEngine;
 using MelonLoader;
 using ModThatIsNotMod;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class PointGravity : EffectBase
     {

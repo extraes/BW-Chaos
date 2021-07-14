@@ -5,7 +5,7 @@ using StressLevelZero.Pool;
 using StressLevelZero.Interaction;
 using ModThatIsNotMod;
 
-namespace BW_Chaos
+namespace BWChaos
 {
     public static class Utilities
     {

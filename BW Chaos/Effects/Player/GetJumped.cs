@@ -6,7 +6,7 @@ using UnityEngine;
 using MelonLoader;
 using StressLevelZero.Pool;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class GetJumped : EffectBase
     {

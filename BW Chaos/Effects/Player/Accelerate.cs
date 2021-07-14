@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using ModThatIsNotMod;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class Accelerate : EffectBase
     {

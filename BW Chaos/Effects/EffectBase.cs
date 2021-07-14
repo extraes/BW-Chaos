@@ -1,9 +1,9 @@
-﻿using BW_Chaos;
+﻿using BWChaos;
 using UnityEngine;
 using MelonLoader;
 using System.Collections;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     // todo: maybe add a "conflicting effects" list variable in case of something such as 2 effects modifying gravity
     internal class EffectBase

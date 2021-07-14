@@ -4,7 +4,7 @@ using ModThatIsNotMod;
 using StressLevelZero.Interaction;
 using StressLevelZero.Props.Weapons;
 
-namespace BW_Chaos.Effects
+namespace BWChaos.Effects
 {
     internal class FuckYourItem : EffectBase
     {
