@@ -33,16 +33,27 @@ namespace BWChaos
         {
             Instance = this;
 
+            // this is pretty messy looking, but in a nutshell
+            // spawn overlaycanvas, move it to corner
+            // spawn wristcanvas, adjust transform a bunch
             Canvas overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
             overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
             overlayImage.fillAmount = 0;
+            overlayImage.GetComponent<RectTransform>().position =
+                new Vector3(Screen.width - 100, Screen.height - 201, 0);
             overlayText = overlayCanvas.transform.Find("Text").GetComponent<Text>();
+            overlayText.GetComponent<RectTransform>().position
+                = new Vector3(Screen.width - 100, Screen.height - 80, 0);
 
             Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
             Canvas wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
             wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
             wristImage.fillAmount = 0;
             wristText = wristCanvas.transform.Find("Text").GetComponent<Text>();
+            wristText.transform.Reset();
+            wristText.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+            wristText.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
+            wristText.transform.localPosition = new Vector3(0f, -0.25f, 0f);
             wristCanvas.transform.Reset();
             wristCanvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
             wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
