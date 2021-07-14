@@ -63,7 +63,7 @@ namespace BWChaos
             string exePath = Path.Combine(saveFolder, "BWChaosDiscordBot.exe");
 
             if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
-            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.Resources.BWChaosDiscordBot.exe"))
+            using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.BWChaosDiscordBot.exe"))
             {
                 byte[] data;
                 using (var ms = new MemoryStream())
@@ -79,7 +79,7 @@ namespace BWChaos
             #region Load Timer
 
             MemoryStream memoryStream;
-            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.Resources.chaos_ui_elements"))
+            using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.chaos_ui_elements"))
             {
                 memoryStream = new MemoryStream((int)stream.Length);
                 stream.CopyTo(memoryStream);
