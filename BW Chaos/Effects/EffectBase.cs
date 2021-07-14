@@ -13,6 +13,9 @@ namespace BWChaos.Effects
 
         public bool Active { get; private set; }
 
+        private IEnumerator CoRunEnumerator;
+        private bool hasFinished;
+
         public EffectBase(string eName, int eDuration)
         {
             Name = eName;
@@ -32,7 +35,19 @@ namespace BWChaos.Effects
         public void Run()
         {
             if (Duration == 0) OnEffectStart();
-            else MelonCoroutines.Start(CoRun());
+            else CoRunEnumerator = (IEnumerator)MelonCoroutines.Start(CoRun());
+
+            AddToPrevEffects();
+        }
+
+        public void ForceEnd()
+        {
+            if (!hasFinished)
+            {
+                MelonCoroutines.Stop(CoRunEnumerator);
+                try { GlobalVariables.ActiveEffects.Remove(this); } catch { }
+                Active = false;
+            }
         }
 
         private IEnumerator CoRun()
@@ -48,6 +63,14 @@ namespace BWChaos.Effects
             Active = false;
 
             OnEffectEnd();
+            hasFinished = true;
+        }
+
+        private void AddToPrevEffects()
+        {
+            if (GlobalVariables.PreviousEffects.Count >= 7)
+                GlobalVariables.PreviousEffects.RemoveAt(0);
+            GlobalVariables.PreviousEffects.Add(this);
         }
     }
 }

@@ -40,18 +40,19 @@ namespace BWChaos
             overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
             overlayImage.fillAmount = 0;
             overlayImage.GetComponent<RectTransform>().position =
-                new Vector3(Screen.width - 100, Screen.height - 201, 0);
+                new Vector3(Screen.width - 200, Screen.height - 201, 0);
             overlayText = overlayCanvas.transform.Find("Text").GetComponent<Text>();
+            overlayText.alignment = TextAnchor.LowerCenter;
             overlayText.GetComponent<RectTransform>().position
-                = new Vector3(Screen.width - 100, Screen.height - 80, 0);
+                = new Vector3(Screen.width - 200, Screen.height - 80, 0);
 
             Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
             Canvas wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
             wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
             wristImage.fillAmount = 0;
             wristText = wristCanvas.transform.Find("Text").GetComponent<Text>();
+            wristText.alignment = TextAnchor.LowerCenter;
             wristText.transform.Reset();
-            wristText.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
             wristText.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
             wristText.transform.localPosition = new Vector3(0f, -0.25f, 0f);
             wristCanvas.transform.Reset();
@@ -59,16 +60,25 @@ namespace BWChaos
             wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
 
             timerInstance = (IEnumerator)MelonCoroutines.Start(Timer());
+            ResetEffectCandidates();
         }
 
-        public void OnDestroy() => MelonCoroutines.Stop(timerInstance);
+        public void OnDestroy()
+        {
+            MelonCoroutines.Stop(timerInstance);
+            foreach (EffectBase e in GlobalVariables.ActiveEffects) e.ForceEnd();
+
+            GlobalVariables.ActiveEffects.Clear();
+            GlobalVariables.CandidateEffects.Clear();
+            GlobalVariables.PreviousEffects.Clear();
+        }
 
         public void Update()
         {
-            // todo: find way to display "one-shot" effects (0 duration effects)
             string newString = string.Empty;
-            foreach (EffectBase e in GlobalVariables.ActiveEffects)
-                newString += e.Name + "\n";
+            foreach (EffectBase e in GlobalVariables.PreviousEffects)
+                newString += e.Active ? $"{e.Name} (ACTIVE)\n" : $"{e.Name}\n";
+
             overlayText.text = newString;
             wristText.text = newString;
         }
