@@ -16,5 +16,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyFileVersion(BWChaos.BuildInfo.Version)]
 [assembly: NeutralResourcesLanguage("en")]
 
-[assembly: MelonInfo(typeof(BWChaos.BW_Chaos), BWChaos.BuildInfo.Name, BWChaos.BuildInfo.Version, BWChaos.BuildInfo.Author, BWChaos.BuildInfo.DownloadLink)]
+[assembly: MelonInfo(typeof(BWChaos.BWChaos), BWChaos.BuildInfo.Name, BWChaos.BuildInfo.Version, BWChaos.BuildInfo.Author, BWChaos.BuildInfo.DownloadLink)]
 [assembly: MelonGame("Stress Level Zero", "BONEWORKS")]

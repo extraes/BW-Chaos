@@ -16,14 +16,14 @@ namespace BWChaos
 {
     public static class BuildInfo
     {
-        public const string Name = "BW_Chaos";
+        public const string Name = "BWChaos";
         public const string Author = "extraes";
         public const string Company = null;
         public const string Version = "0.1.2";
         public const string DownloadLink = null;      
     }
 
-    public class BW_Chaos : MelonMod
+    public class BWChaos : MelonMod
     {
         internal string botToken = "YOUR_TOKEN_HERE";
         internal string channelId = "CHANNEL_ID_HERE";
