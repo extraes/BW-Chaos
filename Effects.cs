@@ -585,8 +585,10 @@ namespace BW_Chaos.Effects
         public void EffectEnds()
         {
             Player_Health PlayerHealth = GameObject.FindObjectOfType<Player_Health>();
-            PlayerHealth.wait_Regen_t = 3;
-            PlayerHealth.SetFullHealth();
+            if (PlayerHealth != null) {
+                PlayerHealth.wait_Regen_t = 3;
+                PlayerHealth.SetFullHealth();
+            }
         }
     }
 
