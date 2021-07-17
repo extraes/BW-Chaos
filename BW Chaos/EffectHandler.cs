@@ -149,6 +149,7 @@ namespace BWChaos
                     effect = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
                 GlobalVariables.CandidateEffects.Add(effect);
                 botMesssage += $"\n{i + 1}: {effect.Name}";
+                // do we really need to do any number flipping? this aint twitch chat, you get slow mode anyway
             }
 
             botMesssage += "\n5: Random Effect";
