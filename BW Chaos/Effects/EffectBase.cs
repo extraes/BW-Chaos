@@ -8,6 +8,13 @@ namespace BWChaos.Effects
     // todo: maybe add a "conflicting effects" list variable in case of something such as 2 effects modifying gravity
     internal class EffectBase
     {
+        //todo: enum
+        public enum EffectTypes
+        {
+            AFFECT_GRAVITY,
+            AFFECT_STEAM
+        }
+
         public string Name { get; }
         public int Duration { get; }
 

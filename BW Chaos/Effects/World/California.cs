@@ -17,8 +17,8 @@ namespace BWChaos.Effects
             float theta = Time.realtimeSinceStartup % 3 * 360;
             float x = (float)(Math.Cos(theta * Math.PI / 180));
             float y = (float)(Math.Sin(theta * Math.PI / 180));
-            float updown = (float)(Math.Sin(theta * 3 * Math.PI / 180) - 0.1f);
-            Physics.gravity = new Vector3(x * 10, updown * 15, y * 10);
+            float updown = (float)(Math.Sin(theta * 3 * Math.PI / 180) - 0.15f);
+            Physics.gravity = new Vector3(x * 10, updown * 25, y * 10);
         }
 
         public override void OnEffectEnd() => Physics.gravity = previousGrav;

@@ -7,7 +7,7 @@ namespace BWChaos.Effects
 {
     internal class PointGravity : EffectBase
     {
-        public PointGravity() : base("Point Gravity", 30) { }
+        public PointGravity() : base("Point To Go", 30) { }
 
         private Vector3 previousGrav;
 

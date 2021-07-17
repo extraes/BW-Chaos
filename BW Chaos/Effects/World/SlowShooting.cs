@@ -10,7 +10,7 @@ namespace BWChaos.Effects
 {
     internal class SlowShooting : EffectBase
     {
-        public SlowShooting() : base("Slow Shooting", 30) { }
+        public SlowShooting() : base("SUPERSHOT", 90) { }
 
         private IEnumerator coroutine;
 
@@ -27,7 +27,6 @@ namespace BWChaos.Effects
 
         private IEnumerator BringBackTime()
         {
-            // todo: wait might want to be changed
             Time.timeScale = 0.05f;
             while (Time.timeScale < 1f && Active)
             {

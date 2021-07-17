@@ -10,9 +10,9 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            // todo: force may be too much, explosion position may not work properly
+            // todo: test this
             foreach (Rigidbody body in GameObject.FindObjectsOfType<Rigidbody>())
-                body.AddExplosionForce(200f, body.transform.position, 5f);
+                body.AddExplosionForce(1000f, body.transform.position, 10f);
         }
     }
 }

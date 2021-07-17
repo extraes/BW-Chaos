@@ -5,7 +5,7 @@ namespace BWChaos.Effects
 {
     internal class Parkinsons : EffectBase
     {
-        public Parkinsons() : base("Parkinsons", 90) { }
+        public Parkinsons() : base("Parkinsons", 30) { }
 
         public override void OnEffectUpdate()
         {

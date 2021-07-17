@@ -6,7 +6,7 @@ namespace BWChaos.Effects
 {
     internal class Centrifuge : EffectBase
     {
-        public Centrifuge() : base("Centrifuge", 30) { }
+        public Centrifuge() : base("Centrifuge", 90) { }
 
         public override void OnEffectUpdate()
         {

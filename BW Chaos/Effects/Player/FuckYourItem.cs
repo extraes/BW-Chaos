@@ -1,8 +1,5 @@
-﻿using System;
-using MelonLoader;
-using ModThatIsNotMod;
+﻿using ModThatIsNotMod;
 using StressLevelZero.Interaction;
-using StressLevelZero.Props.Weapons;
 
 namespace BWChaos.Effects
 {
@@ -12,6 +9,7 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
+            // todo: do we actually need to drop before disabling?
             Interactable interactable = Player.leftHand.attachedInteractable;
             InteractableHost host = interactable?.GetComponentInParent<InteractableHost>();
             host?.Drop();

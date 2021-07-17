@@ -1,20 +1,31 @@
 ﻿using System;
+using System.Collections;
+using UnityEngine;
 using MelonLoader;
 using ModThatIsNotMod;
+using StressLevelZero.Interaction;
 using StressLevelZero.Props.Weapons;
 
 namespace BWChaos.Effects
 {
     internal class FuckYourMag : EffectBase
     {
-        public FuckYourMag() : base("Fuck Your Magazines") { }
+        public FuckYourMag() : base("Fuck Your Magazine", 90) { }
 
-        public override void OnEffectStart()
+        public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
+
+        private IEnumerator CoRun()
         {
-            Gun gun = Player.GetGunInHand(Player.leftHand);
-            gun?.magazineSocket?.MagazineRelease();
-            gun = Player.GetGunInHand(Player.rightHand);
-            gun?.magazineSocket?.MagazineRelease();
+            while (Active)
+            {
+                Gun gun = UnityEngine.Random.Range(0, 2) == 1
+                ? Player.GetGunInHand(Player.leftHand)
+                : Player.GetGunInHand(Player.rightHand);
+
+                gun?.magazineSocket?.MagazineRelease();
+
+                yield return new WaitForSecondsRealtime(UnityEngine.Random.value * 5);
+            }
         }
     }
 }

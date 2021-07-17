@@ -8,7 +8,16 @@ namespace BWChaos.Effects
     {
         public Immortality() : base("Immortality", 60) { }
 
-        public override void OnEffectStart() => GlobalVariables.Player_Health.healthMode = Player_Health.HealthMode.Invincible;
-        public override void OnEffectEnd() => GlobalVariables.Player_Health.healthMode = Player_Health.HealthMode.Mortal;
+        public override void OnEffectStart()
+        {
+            GlobalVariables.Player_Health.healthMode = Player_Health.HealthMode.Invincible;
+            GlobalVariables.Player_Health.damageFromAttack = false;
+        }
+
+        public override void OnEffectEnd()
+        {
+            GlobalVariables.Player_Health.healthMode = Player_Health.HealthMode.Mortal;
+            GlobalVariables.Player_Health.damageFromAttack = true;
+        }
     }
 }

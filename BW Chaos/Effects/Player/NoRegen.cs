@@ -6,17 +6,20 @@ namespace BWChaos.Effects
 {
     internal class NoRegen : EffectBase
     {
-        public NoRegen() : base("No Regen", 120) { }
+        public NoRegen() : base("No Regen", 180) { }
 
         private float previousWaitRegen;
 
         public override void OnEffectStart()
         {
-            // todo: using Infinity may not be the best idea but idk
             previousWaitRegen = GlobalVariables.Player_Health.wait_Regen_t;
-            GlobalVariables.Player_Health.wait_Regen_t = float.PositiveInfinity;
+            GlobalVariables.Player_Health.wait_Regen_t = 420;
         }
 
-        public override void OnEffectEnd() => GlobalVariables.Player_Health.wait_Regen_t = previousWaitRegen;
+        public override void OnEffectEnd()
+        {
+            GlobalVariables.Player_Health.wait_Regen_t = previousWaitRegen;
+            GlobalVariables.Player_Health.SetFullHealth();
+        }
     }
 }
