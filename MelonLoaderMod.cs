@@ -1,5 +1,6 @@
-﻿using BW_Chaos_Effects;
+﻿using BW_Chaos.Effects;
 using MelonLoader;
+using ModThatIsNotMod.BoneMenu;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -11,6 +12,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using WatsonWebsocket;
 
 namespace BW_Chaos
@@ -20,16 +22,22 @@ namespace BW_Chaos
         public const string Name = "BW_Chaos"; // Name of the Mod.  (MUST BE SET)
         public const string Author = "extraes"; // Author of the Mod.  (Set as null if none)
         public const string Company = null; // Company that made the Mod.  (Set as null if none)
-        public const string Version = "0.1.2"; // Version of the Mod.  (MUST BE SET)
+        public const string Version = "0.1.6"; // Version of the Mod.  (MUST BE SET)
         public const string DownloadLink = null; // Download Link for the Mod.  (Set as null if none)        
     }
 
     public class BW_Chaos : MelonMod
     {
+        #region ML Preferences
         internal string token = "YOUR_TOKEN_HERE";
         internal string channelPref = "CHANNEL_ID_HERE";
         internal string nodePref = @"C:\Program Files\nodejs\node.exe";
-
+        internal bool randomOnNoVotes = false;
+        internal bool boneMenuEntries = false;
+        internal bool steamFuckery = true;
+        internal bool useGravityEffects = true;
+        internal bool useLaggyEffects = true;
+        #endregion
         public override void OnApplicationStart()
         {
             if (token == null)
@@ -38,43 +46,75 @@ namespace BW_Chaos
                 MelonLogger.Msg("https://hastebin.com/udoveyazoy.pl");
                 MelonLogger.Msg("");
                 MelonLogger.Msg("");
-                MelonLogger.Msg("");
+                MelonLogger.Msg("Since you're here, if you don't know already, the next major version will be the rewritten version done in collaboration with TrevTV, so it should be less stupidly made.");
                 MelonLogger.Msg("No but for real, this mod is closed source for a reason. Distributing this mod without prior permission of me, extraes, is messed up.");
                 MelonLogger.Msg("Distributing a version of this mod with slight alterations is also messed up, and you shouldn't do it.");
-                MelonLogger.Msg("This is my first serious mod project, and this build is the culmination of a lot of effort and two weeks of learning C#.");
+                MelonLogger.Msg("This is my first serious mod project, and this build is the culmination of a lot of effort and four weeks of learning C#.");
                 MelonLogger.Msg("If you want to look at some of my code, tell me and I might give you some of the source, because as it is, DNSpy shows some hokey shit for some of my functions");
             }
 
             #region Get and set values from MelonPrefs
+            // pragmas here because ML decides to obsolete shit for no fucking reason, like MelonLogger.Log and now MelonPreferences.CreateCategory and MelonPreferences.CreateEntry
+#pragma warning disable CS0612 // Type or member is obsolete
             MelonPreferences.CreateCategory("BW_Chaos", "BW_Chaos");
             MelonPreferences.CreateEntry("BW_Chaos", "token", token, "token", false);
             token = MelonPreferences.GetEntryValue<string>("BW_Chaos", "token");
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelPref, "channel", false);
             channelPref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
-            MelonPreferences.CreateEntry("BW_Chaos", "node_path", nodePref, "node_path", false);
-            nodePref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "node_path");
+            MelonPreferences.CreateEntry("BW_Chaos", "nodePath", nodePref, "nodePath", false);
+            nodePref = MelonPreferences.GetEntryValue<string>("BW_Chaos", "nodePath");
+            MelonPreferences.CreateEntry("BW_Chaos", "randomEffectOnNoVotes", randomOnNoVotes, "randomEffectOnNoVotes", false);
+            randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
+            MelonPreferences.CreateEntry("BW_Chaos", "enterEffectsIntoBonemenu", boneMenuEntries, "enterEffectsIntoBonemenu", false);
+            boneMenuEntries = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enterEffectsIntoBonemenu");
+            MelonPreferences.CreateEntry("BW_Chaos", "messWithSteamProfile", steamFuckery, "messWithSteamProfile", false);
+            steamFuckery = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "messWithSteamProfile");
+            MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", useGravityEffects, "useGravityEffects", false);
+            useGravityEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useGravityEffects");
+            MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects", false);
+            useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
             MelonPreferences.Save(); // BECAUSE IF I DONT SAVE IT RN THEN THE FAT BASTARD WONT CHANGE IT UNTIL THE GAME CLOSES
+#pragma warning restore CS0612 // Type or member is obsolete
             #endregion
 
             if (token != "YOUR_TOKEN_HERE" || channelPref != "CHANNEL_ID_HERE")
             {
                 MelonLogger.Msg("Token and channel fetched!");
-
+                UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<STOPEFFECTSFORFUCKSSAKE>();
                 MainAsync().GetAwaiter().GetResult();
             }
             else
             {
                 MelonLogger.Msg("Welcome to BW Chaos!");
                 MelonLogger.Msg("This mod will remain inactive until you place a Discord BOT token and channel ID into melonprefs.");
-                MelonLogger.Msg("If you have Node.js installed and at a different location than" + @"C:\Program Files\nodejs\node.exe" + ", edit the entry in MelonPrefs with the location of node.exe.");
+                MelonLogger.Msg("If you have Node.js installed and at a different location than" + nodePref + ", edit the entry in MelonPrefs with the location of node.exe.");
+                MelonLogger.Msg("If you want to play the campaign, you can disable effects that change gravity by changing useGravityEffects in melonprefs.\n" +
+                                "(This is because if you change gravity, you update every rigidbody, which Unity does not like)");
             }
         }
 
-        #region Effects declaration
+        public override void OnUpdate()
+        {
+            if (Input.GetKeyDown(KeyCode.RightControl)) GameObject.FindObjectOfType<Data_Manager>().RELOADSCENE();
+            if (Input.GetKeyDown(KeyCode.L))
+            {
+                string es = "";
+                foreach (var e in EffectList) es += ("\n" + e.Name);
+                MelonLogger.Msg(es);
+            }
+        }
+
+        public override void OnSceneWasInitialized(int buildIndex, string sceneName)
+        {
+            ModThatIsNotMod.Player.GetRigManager().AddComponent<STOPEFFECTSFORFUCKSSAKE>();
+
+        }
+
+        #region Effect lists declaration
         public int EffectNumberOffset = 0;
-        public List<IChaosEffect> EffectList = new List<IChaosEffect> { };
-        public List<IChaosEffect> CandidateEffects = new List<IChaosEffect> { };
-        public List<string> ActiveEffects = new List<string> { };
+        static public List<IChaosEffect> EffectList = new List<IChaosEffect> { };
+        public List<IChaosEffect> candidateEffects = new List<IChaosEffect> { };
+        static public List<string> ActiveEffects = new List<string> { };
         public IChaosEffect RandomEffect;
         bool GUIEnabled = false;
         float timeSinceEnabled = 0f;
@@ -90,24 +130,25 @@ namespace BW_Chaos
                     GUI.Box(new Rect(Screen.width * (TimeSinceReset % 2) * 0.5f, 25, 50, 25), "");
                     if (TimeSinceReset > 40f)
                     {
-                        if (token != "YOUR_TOKEN_HERE" && channelPref != "CHANNEL_ID_HERE") {
+                        if (token != "YOUR_TOKEN_HERE" && channelPref != "CHANNEL_ID_HERE")
+                        {
                             GUI.Box(new Rect(Screen.width - 550, 100, 500, 25), "It looks like the mod is spinning idly. This is likely a result of the bot crashing.");
-                            GUI.Box(new Rect(Screen.width - 550, 125, 500, 25), "Restart BONEWORKS and ping '<@261631460727980033>' (extraes) in the BW server.");
-                            if (TimeSinceReset < 40.5f) MelonLogger.Error("Mod is spinning, ping extraes in the bw server '<@261631460727980033>'");
+                            GUI.Box(new Rect(Screen.width - 550, 125, 500, 25), "Restart BW & ping '<@261631460727980033>' (extraes) in the BW server.");
+                            if (TimeSinceReset < 40.1f) MelonLogger.Error("Mod is spinning, ping extraes in the bw server '<@261631460727980033>'");
                         }
-                        else GUI.Box(new Rect(Screen.width - 550, 125, 500, 25), "Fill out the token and channel ID in MelonPrefs!");
+                        else GUI.Box(new Rect(Screen.width - 600, 125, 600, 25), "Fill out the token and channel ID in MelonPrefs!");
                     }
                 }
                 else
                 {
                     int EffectNumber = 0;
-                    foreach (IChaosEffect effect in CandidateEffects)
+                    foreach (IChaosEffect effect in candidateEffects)
                     {
                         GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + EffectNumberOffset + 1}: {effect.Name}");
                         EffectNumber++;
                     }
                     GUI.Box(new Rect(50, 50 + (EffectNumber * 25), 500, 25), $"{EffectNumber + EffectNumberOffset + 1}: Random effect");
-                    GUI.Box(new Rect(50, 250, 500, (ActiveEffects.Count + 1) * 20 + 10), "Active effects:\n" + String.Join("\n", ActiveEffects));
+                    GUI.Box(new Rect(50, 250, 500, (ActiveEffects.Count + 1) * 15 + 10), "Active effects:\n" + string.Join("\n", ActiveEffects));
                     GUI.Box(new Rect(Screen.width - 550, 50, 500, 25), "Time");
                     GUI.Box(new Rect(Screen.width - 550, 75, 500 * Math.Min(TimeSinceReset % 30 / 30, 1f), 25), "");
                 }
@@ -118,7 +159,8 @@ namespace BW_Chaos
                 else
                 {
                     GUI.Box(new Rect(50, 25, 350, 25), "BW Chaos: Waiting for start at 32 seconds - " + Time.realtimeSinceStartup);
-                    GUI.Box(new Rect(50, 50, 350, 25), "Made by extraes");
+                    //todo: remove this on release
+                    GUI.Box(new Rect(50, 50, 350, 25), "Hawaii Build - By extraes");
                 }
             }
             await Task.Delay(0);
@@ -175,65 +217,99 @@ namespace BW_Chaos
 
             #region Read and extract zip
             string folder = Path.Combine(Path.GetTempPath(), "BW-Chaos");
-            string ZipPath = Path.Combine(folder, "cbot.zip");
-
-            if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
-            using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.cbot.zip"))
+            string zipPath = Path.Combine(folder, "cbot.zip");
+            string extractedPath = Path.Combine(folder, "cbot-extracted");
+            string nodeModulesPath = Path.Combine(extractedPath, "node_modules");
+            string JSPath = Path.Combine(extractedPath, BuildInfo.Version + "main.js"); //todo: if this fails, its because of a version & name mismatch
+            if (!(File.Exists(JSPath) && Directory.Exists(nodeModulesPath)))
             {
-                byte[] data;
-                using (var ms = new MemoryStream())
+                if (!Directory.Exists(folder)) Directory.CreateDirectory(folder);
+                using (Stream stream = Assembly.GetManifestResourceStream("BW_Chaos.cbot.zip"))
                 {
-                    stream.CopyTo(ms);
-                    data = ms.ToArray();
+                    byte[] data;
+                    using (var ms = new MemoryStream())
+                    {
+                        stream.CopyTo(ms);
+                        data = ms.ToArray();
+                    }
+                    if (File.Exists(zipPath)) File.Delete(zipPath);
+                    File.WriteAllBytes(zipPath, data);
                 }
-                if (File.Exists(ZipPath)) File.Delete(ZipPath);
-                File.WriteAllBytes(ZipPath, data);
-            }
 
-            string ExtractedPath = Path.Combine(folder, "cbot-extracted");
-            if (Directory.Exists(ExtractedPath)) Directory.Delete(ExtractedPath, true);
-            Directory.CreateDirectory(ExtractedPath);
-            ZipFile.ExtractToDirectory(ZipPath, ExtractedPath);
-            string JSPath = Path.Combine(ExtractedPath, "main.js");
+                if (Directory.Exists(extractedPath)) Directory.Delete(extractedPath, true);
+                Directory.CreateDirectory(extractedPath);
+                ZipFile.ExtractToDirectory(zipPath, extractedPath);
+            }
+            else MelonLogger.Msg("The bot is already unzipped and up to date!");
             #endregion
 
             #region Populate effect list
-            if (token == null) MelonLogger.Msg("since youre looking, can you propose a better way to do this? cause this right here looks dumb as fuck.");
-            EffectList.Add(new ZeroGravity());
-            EffectList.Add(new Fling());
+            if (useGravityEffects)
+            {
+                EffectList.Add(new ZeroGravity());
+                EffectList.Add(new Fling());
+                EffectList.Add(new PointToGo());
+                EffectList.Add(new Centrifuge());
+                EffectList.Add(new California());
+                EffectList.Add(new GravityCube());
+                EffectList.Add(new InvertGravity());
+            }
             EffectList.Add(new Butterfingers());
             EffectList.Add(new FuckYourMagazine());
-            EffectList.Add(new Lag());
             EffectList.Add(new FlingPlayer());
             EffectList.Add(new CreateDogAd());
-            EffectList.Add(new InvertGravity());
-            EffectList.Add(new PointToGo());
             EffectList.Add(new PlayerPointToGo());
-            EffectList.Add(new Centrifuge());
-            EffectList.Add(new California());
             EffectList.Add(new PlayerCentrifuge());
             EffectList.Add(new SlowShooting());
             EffectList.Add(new Paralyze());
-            EffectList.Add(new BootlegGravityCube());
             EffectList.Add(new Parkinsons());
             EffectList.Add(new NoRegen());
-            EffectList.Add(new FuckYourItem());
-            EffectList.Add(new CrabletRain());
+            //EffectList.Add(new FuckYourItem()); //todo: test this //todo: this crashes the game
+            //todo: spawning npc's breaks game
+            //EffectList.Add(new CrabletRain());
+            //EffectList.Add(new JumpThePlayer()); // tentative add, let's see if it works
             EffectList.Add(new SpeedUpTime());
             EffectList.Add(new Immortality());
-            EffectList.Add(new Accelerate());
-            EffectList.Add(new RandomRigShit());
-            EffectList.Add(new JumpThePlayer());
-            EffectList.Add(new PlayerGravity());
-            EffectList.Add(new PlayerInverseGravity());
-            EffectList.Add(new WhenNoVTEC());
-            EffectList.Add(new WhenVTEC());
+            EffectList.Add(new GhostWorld());
+            if (useLaggyEffects)
+            {
+                EffectList.Add(new PlayerGravity());
+                EffectList.Add(new PlayerInverseGravity());
+                EffectList.Add(new Lag());
+            }
+            //BORKED, no crash
+            //EffectList.Add(new WhenNoVTEC());
+            //EffectList.Add(new WhenVTEC());
+            EffectList.Add(new BarrySteakfries());
             EffectList.Add(new VibeCheck());
-            EffectList.Add(new MassiveKnockback());
+            EffectList.Add(new MazdaRX8Moment());
+            //EffectList.Add(new NullratBath());
+            //EffectList.Add(new AdaptiveResBeLike());
+            EffectList.Add(new IndexControllerSimulator());
+            EffectList.Add(new ClipPlaneScan());
+            EffectList.Add(new Nearsighted());
+            EffectList.Add(new LowQuality19200());
+            if (steamFuckery) EffectList.Add(new ChangeSteamName()); // hey, you can disable it now!
+            EffectList.Add(new RandomTimeScale());
+            EffectList.Add(new INSTALLGENTOO());
+            //EffectList.Add(new WindowsErrorSound());
+            EffectList.Add(new CreateRandomAds());
+            //EffectList.Add(new FakeCrash());
+            //EffectList.Add(new SlowPunch());
             #endregion
-            
+
+            #region Register effects in BoneMenu (if applicable)
+            if (boneMenuEntries)
+            {
+                var menu = MenuManager.CreateCategory("BW Chaos", Color.grey);
+                foreach (var e in EffectList)
+                {
+                    menu.CreateFunctionElement(e.Name, Color.cyan, new Action(() => { DoEffect(e); }));
+                }
+            }
+            #endregion
+
             #region Start node, hook websocket
-            MelonLogger.Msg(nodePref);
             try { Process.Start(nodePref, $" {JSPath} {token} {channelPref}"); }
             catch (Exception err) { MelonLogger.Warning("Node wasn't found! Did you install it to another folder and not update the path in MelonPreferences.cfg?"); throw err; }
             await Task.Delay(2000);
@@ -242,6 +318,20 @@ namespace BW_Chaos
             client.ServerDisconnected += Disconnected;
             client.Start();
             #endregion
+        }
+
+        public override void BONEWORKS_OnLoadingScreen()
+        {
+            MelonLogger.Msg("oh god, the game is loading! quick! end the effects!");
+            foreach (var e in EffectList)
+            {
+                if (ActiveEffects.Contains(e.Name))
+                {
+                    MelonLogger.Msg("forcibly stopping effect " + e.Name + "! hopefully this doesnt break anything");
+                    ActiveEffects.Remove(e.Name);
+                    e.EffectEnds();
+                }
+            }
         }
 
         private void MessageRecieved(object sender, MessageReceivedEventArgs args)
@@ -256,27 +346,35 @@ namespace BW_Chaos
                     if (EffectNumberOffset == 0) EffectNumberOffset = 4;
                     else EffectNumberOffset = 0;
                     // Apply effects
-                    int MaxIndex = 0;
+                    int totalvotes = 0;
                     int MaxValue = votes[0];
                     for (int i = 0; i < votes.Length; i++)
                     {
+                        totalvotes += votes[i];
                         if (MaxValue < votes[i])
                         {
                             MaxValue = votes[i];
-                            MaxIndex = i;
                         }
                     };
-                    CandidateEffects.Add(RandomEffect);
-                    if (MaxValue == 0) MelonLogger.Msg("There were no votes, skipping this round of effects.");
-                    else DoEffect(CandidateEffects[MaxIndex]);
+
+                    int winnar = 3;
+                    if (MaxValue != 0) winnar = GetProportionalWinner(votes);
+
+                    candidateEffects.Add(RandomEffect);
+                    var sceneName = SceneManager.GetActiveScene().name;
+                    if (MaxValue == 0 && !randomOnNoVotes) MelonLogger.Msg("There were no votes, skipping this round of effects.");
+                    else if (sceneName == "loadingScene" || sceneName == "scene_mainMenu") MelonLogger.Warning($"The current scene is {sceneName}, not running effect {candidateEffects[winnar]}");
+                    else if (ModThatIsNotMod.Player.GetRigManager()?.GetComponent<STOPEFFECTSFORFUCKSSAKE>() == null)
+                        MelonLogger.Warning("There was either no rig manager or no SEFFS MB on the rig manager! This is likely a result of a loading screen being active! So, not running " + candidateEffects[winnar]);
+                    else DoEffect(candidateEffects[winnar]);
 
                 }
                 // Generate new list of effects
                 MelonLogger.Msg("Generating new list of candidate effects from list of " + EffectList.Count + " effects");
-                CandidateEffects.Clear();
+                candidateEffects.Clear();
                 foreach (int number in NonconflictingRandom(EffectList.Count, 3))
                 {
-                    CandidateEffects.Add(EffectList[number]);
+                    candidateEffects.Add(EffectList[number]);
                 }
                 RandomEffect = EffectList[new System.Random().Next(EffectList.Count)];
                 timeSinceEnabled = Time.realtimeSinceStartup;
@@ -301,13 +399,13 @@ namespace BW_Chaos
             MelonLogger.Msg("Disconnected from bot, BW Chaos will not function");
         }
 
-        private async Task CheckOnServer()
+        /*private async Task CheckOnServer()
         {
             await Task.Delay(32000);
             MelonLogger.Msg("Joe nuts lol");
             _ = CheckOnServer();
             _ = client.SendAsync("It's me, your favorite client, just checking in to tell you I'm alive", System.Net.WebSockets.WebSocketMessageType.Text);
-        }
+        }*/
 
         private async void DoEffect(IChaosEffect effect)
         {
@@ -317,10 +415,15 @@ namespace BW_Chaos
                 effect.EffectStarts();
                 ActiveEffects.Add(effect.Name);
                 await Task.Delay(effect.Duration * 1000);
-                MelonLogger.Msg("Ending effect " + effect.Name);
-                effect.EffectEnds();
-                ActiveEffects.Remove(effect.Name);
-            } catch (Exception err)
+                if (ActiveEffects.Contains(effect.Name))
+                {
+                    MelonLogger.Msg("Ending effect " + effect.Name);
+                    effect.EffectEnds();
+                    ActiveEffects.Remove(effect.Name);
+                }
+                else MelonLogger.Msg("Tried ending " + effect.Name + " but it was removed from the list... what?");
+            }
+            catch (Exception err)
             {
                 MelonLogger.Msg("Error running/ending effect " + effect.Name + ", removing it from list of effects");
                 MelonLogger.Error(err);
@@ -359,7 +462,60 @@ namespace BW_Chaos
             return listNumbers;
 
         }
+
+        private static int GetProportionalWinner(int[] votes)
+        {
+            int totalvotes = 0;
+            foreach (int vote in votes) totalvotes += vote;
+
+            var ran = new System.Random().Next(0, totalvotes) + 1;
+            for (var i = 0; i < votes.Length; i++)
+            {
+                if (ran - votes[i] <= 0)
+                {
+                    return i;
+                }
+                else ran -= votes[i];
+            }
+            return 0;
+        }
+
+        #region Hook punch
+        public static event Action<Collision, float, float> OnPunch; //= new Action<Collision, float, float>(;
+        /*[HarmonyPatch(typeof(HandSFX), "PunchAttack")]
+        public static class PunchPatch
+        {
+            public static void Prefix(Collision c, float impulse, float relVelSqr)
+            {
+                OnPunch(c, impulse, relVelSqr);
+            }
+        }*/
+        #endregion
+
     }
+
+    class STOPEFFECTSFORFUCKSSAKE : MonoBehaviour
+    {
+        public STOPEFFECTSFORFUCKSSAKE(IntPtr ptr) : base(ptr) { }
+
+        public void OnDestroy()
+        {
+            MelonLogger.Msg("oh god, the game is loading! quick! end the effects!");
+            while (BW_Chaos.ActiveEffects.Count < 0)
+            {
+                foreach (var e in BW_Chaos.EffectList)
+                {
+                    if (BW_Chaos.ActiveEffects.Contains(e.Name))
+                    {
+                        MelonLogger.Msg("forcibly stopping effect " + e.Name + "! hopefully this doesnt break anything");
+                        BW_Chaos.ActiveEffects.Remove(e.Name);
+                        e.EffectEnds();
+                    }
+                }
+            }
+        }
+    }
+
 }
 /* LIST OF EFFECTS
  * Pause time at random intervals or when gun is shot
@@ -376,25 +532,38 @@ namespace BW_Chaos
  */
 
 /* ATTRIBUTIONS
+ * Hawaii - Being GMT-11, it's still technically friday as of the time of upload, so that's why this is the Hawaii build.
+ * GS - Testing the mod with me over several weeks. The tens of crashes you endured weren't in vain (I hope)
+ * GS - Suggesting new QOL modpref settings (Changing nodejs path)
+ * Cyanide - Testing during the final ~2 weeks of development
+ * The homies in chill (Mr. Gaming, D4-LT, KooloEdits, Maranara, Riggle, Parzival, TabloidA, TheDarkElk, L4rs, TrevTV, WNP78) - Helping test the mod by voting on effects
  * TrevTV - General C# help
  * TrevTV - MelonPreferences implementation
  * TrevTV - Packaging nodejs and file into an executable
- * TrevTV - Embedding executable into dll and read it (I didnt end up needing to embed an executable, but I embedded)
+ * TrevTV - Embedding executable into dll and read it (I didnt end up needing to embed an executable, but I embedded a zip file)
  * TrevTV - Pointing me towards the Unity Scripting Reference and websockets and WatsonWebsocket
- * TrevTV - Rewriting the discord bot in C# (testing builds still use cbot.zip though lol)
+ * TrevTV - Rewriting the discord bot in C# (testing builds still use cbot.zip though lol) <- and the first release, apparently
+ * TrevTV - Giving me code to hook punching (used in SUPER PUNCH)
+ * TrevTV the fucking GOAT - telling me how to attach a monobehaviour to the player and make code run when the player's gameobject is destroyed
+ * Lars - & tear, if you get me
  * WNP - Told me to use sqrMagnitude instead of calculating the distance becaust sqrt is slower
- * * Iterating through a long ass list of gameobjects needs to be as fast as possible, so this was important to PlayerGravity
- * YOWChap & WNP - Helping me with stupid problems I should have noticed
+ * * Iterating through a long ass list of gameobjects needs to be as fast as possible, so this was important to PlayerGravity and the other effects that use "local gravity"
+ * WNP - Telling me about GlobalPool.Spawn
+ * WNP & Lars - Telling me that Poolee.Despawn() is broken and to just set a gameobject as inactive
+ * WNP & Lars - Telling me about Poolee.Pool.Despawnall() (it may come in handy later lol)
+ * YOWChap, Lars, & WNP - Helping me with stupid problems I should have noticed
  * YOWChap - BMTK/MTINM
- * * Like seriously, there's no SHOT this mod could be done without MTINM, it's basically a mod of "idk how to do this shit, but mtinm probably has a function for it"
- * Adamdev - Testing
+ * Adamdev - Testing the initial proof of concept
  * Adamdev - Telling me about UnityExplorer (and sending me the DLL)
  * Adamdev - Helping me with FuckYourMagazine and Butterfingers
  * Lakatrazz - Telling me about PhysBody
+ * TheShadowNinja - Telling me about AddComponent (add rb to gravity cube)
+ * Elarelda - Elareldeffect idea & details
  * Microsoft - C# documentation (duh)
  * FatWrinkleZ - SusArrow, I dnspy'd it to get the code for bootleg gravity cube & pointtogo.
  * C# - If else statements 🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏🙏
  * Stackoverflow - Generate list of random numbers without repeats (https://stackoverflow.com/questions/30014901/generating-random-numbers-without-repeating-c)
+ * Stackoverflow - Probably a lot of other things but I don't remember
  * Forums - Change gravity direction, get list of all gameobjects
  * ChaosModV - "Inspiration" for some effects
  */
