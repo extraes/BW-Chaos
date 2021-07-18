@@ -3,6 +3,7 @@ using MelonLoader;
 using ModThatIsNotMod.BoneMenu;
 using Newtonsoft.Json;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -304,7 +305,7 @@ namespace BW_Chaos
                 var menu = MenuManager.CreateCategory("BW Chaos", Color.grey);
                 foreach (var e in EffectList)
                 {
-                    menu.CreateFunctionElement(e.Name, Color.cyan, new Action(() => { DoEffect(e); }));
+                    menu.CreateFunctionElement(e.Name, Color.cyan, new Action(() => { _ = MelonCoroutines.Start(DoEffect(e)); }));
                 }
             }
             #endregion
@@ -366,7 +367,7 @@ namespace BW_Chaos
                     else if (sceneName == "loadingScene" || sceneName == "scene_mainMenu") MelonLogger.Warning($"The current scene is {sceneName}, not running effect {candidateEffects[winnar]}");
                     else if (ModThatIsNotMod.Player.GetRigManager()?.GetComponent<STOPEFFECTSFORFUCKSSAKE>() == null)
                         MelonLogger.Warning("There was either no rig manager or no SEFFS MB on the rig manager! This is likely a result of a loading screen being active! So, not running " + candidateEffects[winnar]);
-                    else DoEffect(candidateEffects[winnar]);
+                    else _ = MelonCoroutines.Start(DoEffect(candidateEffects[winnar]));
 
                 }
                 // Generate new list of effects
@@ -407,14 +408,28 @@ namespace BW_Chaos
             _ = client.SendAsync("It's me, your favorite client, just checking in to tell you I'm alive", System.Net.WebSockets.WebSocketMessageType.Text);
         }*/
 
-        private async void DoEffect(IChaosEffect effect)
+        private IEnumerator DoEffect(IChaosEffect effect)
         {
+            #region Start effect
             try
             {
                 MelonLogger.Msg("Starting effect " + effect.Name);
                 effect.EffectStarts();
                 ActiveEffects.Add(effect.Name);
-                await Task.Delay(effect.Duration * 1000);
+            }
+            catch (Exception err)
+            {
+                MelonLogger.Msg("Error running effect " + effect.Name + ", removing it from list of effects");
+                MelonLogger.Error(err);
+                EffectList.Remove(effect);
+            }
+            #endregion
+
+            yield return new WaitForSecondsRealtime(effect.Duration * 1000);
+
+            #region End effect
+            try
+            { 
                 if (ActiveEffects.Contains(effect.Name))
                 {
                     MelonLogger.Msg("Ending effect " + effect.Name);
@@ -425,10 +440,11 @@ namespace BW_Chaos
             }
             catch (Exception err)
             {
-                MelonLogger.Msg("Error running/ending effect " + effect.Name + ", removing it from list of effects");
+                MelonLogger.Msg("Error ending effect " + effect.Name + ", removing it from list of effects");
                 MelonLogger.Error(err);
                 EffectList.Remove(effect);
             }
+            #endregion
         }
 
         private static List<int> NonconflictingRandom(int max, int number)

@@ -748,15 +748,21 @@ namespace BW_Chaos.Effects
         public void EffectStarts()
         {
             var ph = GameObject.FindObjectOfType<Player_Health>();
-            ph.healthMode = Player_Health.HealthMode.Invincible;
-            ph.damageFromAttack = false;
+            if (ph)
+            {
+                ph.healthMode = Player_Health.HealthMode.Invincible;
+                ph.damageFromAttack = false;
+            }
 
         }
         public void EffectEnds()
         {
             var ph = GameObject.FindObjectOfType<Player_Health>();
-            ph.healthMode = Player_Health.HealthMode.Mortal;
-            ph.damageFromAttack = true;
+            if (ph != null)
+            {
+                ph.healthMode = Player_Health.HealthMode.Mortal;
+                ph.damageFromAttack = true;
+            }
         }
     }
 
@@ -1606,14 +1612,14 @@ namespace BW_Chaos.Effects
             "Chester Chucklenuts",
             "Your little PogChamp",
             "✨ 💓💞❤️ Deku X Bakugo ❤️💞💓 ✨",
-            "Sydney, 14, Bi, They/Them, BLM, ACAB",
-            "lars | gay | transmasc | allosexual/poly | libra | ravenclaw",
+            "Sydney|14|Bi|They/Them|BLM|ACAB",
+            "lars|gay|transmasc|allosexual/poly|libra|ravenclaw",
             "xXx_DD0S_H4XX_xXx",
             "Oragani",
             "4K African",
-            "Brayden | 32 | ladies man | haulin' ass 24/7 | 4'3\" | short kings stay winning",
+            "Brayden|32|ladies man|4'3\"|short kings stay winning",
             "Brylan the wolf owo",
-            "Brylan Bristopher Woods | CEO | LLC Owner | $DOGE HODLer🚀🚀 | Multimillionaire | Bossman, ❌suit ❌tie",
+            "Brylan Bristopher Woods|CEO|LLC Owner|$DOGE HODLer🚀|Multimillionaire|Bossman, ❌suit ❌tie",
             "xXAn0nym0usXx",
             "shoutouts to simpleflips",
         };
@@ -1725,6 +1731,8 @@ namespace BW_Chaos.Effects
             "have you, perchance considered getting good?",
             "ur dogwater",
             "python has shit bytecode and even worse syntax",
+            "fresh water is a privilege, not a right",
+            "i will pee your pants",
         };
 
         private bool effectIsEnded = false;
