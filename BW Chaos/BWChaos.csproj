@@ -105,6 +105,7 @@
     <Compile Include="Effects\Guns\LowRPM.cs" />
     <Compile Include="Effects\Guns\HighRPM.cs" />
     <Compile Include="Effects\Guns\MassiveKnockback.cs" />
+    <Compile Include="Effects\Misc\SpawnAds.cs" />
     <Compile Include="Effects\Misc\SpawnDogAd.cs" />
     <Compile Include="Effects\Misc\4xSpeed.cs" />
     <Compile Include="Effects\Template.cs" />
@@ -121,8 +122,8 @@
     <Compile Include="Effects\Player\Immortality.cs" />
     <Compile Include="Effects\Player\GetJumped.cs" />
     <Compile Include="Effects\World\Fling.cs" />
-    <Compile Include="Effects\World\BootlegGravityCube.cs" />
     <Compile Include="Effects\Misc\Lag.cs" />
+    <Compile Include="Effects\World\GravityCube.cs" />
     <Compile Include="Effects\World\InvertGravity.cs" />
     <Compile Include="Effects\World\PointGravity.cs" />
     <Compile Include="Effects\World\California.cs" />
