@@ -1,6 +1,8 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
+using System.Collections;
+using Random = UnityEngine.Random;
 
 namespace BWChaos.Effects
 {
@@ -8,11 +10,15 @@ namespace BWChaos.Effects
     {
         public Fling() : base("Fling Everything") { }
 
-        public override void OnEffectStart()
+        public override void OnEffectStart() => MelonLoader.MelonCoroutines.Start(CoRun());
+
+        public IEnumerator CoRun ()
         {
-            // todo: test this
-            foreach (Rigidbody body in GameObject.FindObjectsOfType<Rigidbody>())
-                body.AddExplosionForce(1000f, body.transform.position, 10f);
+            int[] arr = new int[] { -1, 1 };
+            Physics.gravity = new Vector3(9.8f * 4 * arr[Random.RandomRange(0, 2)], 9.8f * 8, 9.8f * 4 * arr[Random.RandomRange(0, 2)]);
+            yield return new WaitForSecondsRealtime(1);
+            Physics.gravity = new Vector3(0, -9.8f, 0);
+
         }
     }
 }
