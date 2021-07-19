@@ -51,9 +51,9 @@ namespace BWChaos.Effects
             "in memory of chad and megaroachpussy",
             "this better be worth code modder",
             "im bouta get racially insensitive!!!!",
-            "times new roman 12pt font",
+            "double space times new roman 12pt font",
             "i love arial font!!!!!!!!!!!!!!!!!!",
-            "the p4 teaser will probably come out before i release this mod",
+            "the p4 teaser didnt come out before i released this mod",
             "gee thanks il2cpp for fucking my shit up",
             "franzj presents",
             "install gentoo",
@@ -66,7 +66,7 @@ namespace BWChaos.Effects
             "hotel? trivago.\nyour mom? done.",
             "if you will indulge me, please suspend disbelief for a moment. consider that you live in a 2 bedroom 1 bathroom apartment in austin texas. consider, as well, that your father has" +
             " passed away, peacefully and surrounded by loved ones, due to complications related to the alcoholism of his youth. your mother, now in her 60s, is mourning the passing of her husband."+
-            " now here's where i come in, i console your mother and help her come to terms with her husband's death, and i do your mom, do do do your mom, as ray william johnson, in the year 2010.",
+            " now here's where i come in, i console your mother and help her come to terms with her husband's death, and i do your mom, do do do your mom, like ray william johnson, in the year 2010, did before me.",
             "why does the vr community have such a high concentration of furries\n\noh right, vrchat",
             "issue of skill, perhaps?",
             "have you, perchance considered getting good?",
@@ -74,8 +74,9 @@ namespace BWChaos.Effects
             "python has shit bytecode and even worse syntax",
             "fresh water is a privilege, not a right",
             "i will pee your pants",
-            "YOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU",
+            "YOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU soulja boy tell em",
             "you already know what it is homebolio",
+            "polio.",
             "maybe if you get rid of that yeeyee ass quest you got youd get some bitches on your dick",
             "currently: sockemboppers",
             "[Verse 1: 2-D]\nThe world is spinning too fast\nI'm buying lead Nike shoes\nTo keep myself tethered\nTo the days I've tried to lose\nMy mama said to slow down\nYou must make your own shoes" + 
@@ -87,6 +88,10 @@ namespace BWChaos.Effects
             "\nGet the cool shoeshine\nGet the cool\nGet the cool shoeshine\nGet the cool\nGet the cool shoeshine\nGet the cool\nGet the cool shoeshine\n[Outro: 2-D]\nThey do the bump\nThey do the bump\nThey do the bump\nThey do the bump",
             "smoky barbecue bacon buford from checkers (that shit bussin')",
             "are nascar fans racists?",
+            "i forgor",
+            "steam cuts off usernames so let me tell you the long ones\nBrylan Bristopher Woods|CEO|LLC Owner|$DOGE HODLer🚀|Multimillionaire|Bossman, ❌suit ❌tie"+
+            "\nBrayden|32|ladies man|4'3\"|short kings stay winning\nlars|gay|transmasc|allosexual/poly|libra|ravenclaw\nSydney|14|Bi|They/Them|BLM|ACAB",
+            "harse effect when",
         };
     }
 }
