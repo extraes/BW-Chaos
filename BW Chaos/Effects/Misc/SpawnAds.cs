@@ -86,7 +86,7 @@ namespace BWChaos.Effects
             "\nThey do the bump\nYeah, yeah\nThey do the bump\nThey do the bump\nThey do the bump\nThey do the bump\n\n[Interlude]\nOkay, bring it down here\nWe goin' back out\n\n[Chorus: Noodle]\nGet the cool"+
             "\nGet the cool shoeshine\nGet the cool\nGet the cool shoeshine\nGet the cool\nGet the cool shoeshine\nGet the cool\nGet the cool shoeshine\n[Outro: 2-D]\nThey do the bump\nThey do the bump\nThey do the bump\nThey do the bump",
             "smoky barbecue bacon buford from checkers (that shit bussin')",
-            "smoky barbecue bacon buford from checkers (that shit bussin')",
+            "are nascar fans racists?",
         };
     }
 }
