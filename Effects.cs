@@ -56,12 +56,12 @@ namespace BW_Chaos.Effects
 
         public void EffectStarts()
         {
-            Physics.gravity = new Vector3(0, -0.001f, 0f);
+            Physics.gravity = new Vector3(0, 0.1f, 0f);
         }
 
         public void EffectEnds()
         {
-            Physics.gravity = new Vector3(0, -9.8f, 0);
+            Physics.gravity = new Vector3(0, -9.81f, 0);
 
         }
     }
@@ -261,7 +261,7 @@ namespace BW_Chaos.Effects
             var rbg = GObj.AddComponent<Rigidbody>();
             rbg.angularDrag = 0.05f;
             rbg.collisionDetectionMode = CollisionDetectionMode.Discrete;
-            rbg.set_detectCollisions(true);
+            rbg.detectCollisions = true;
             rbg.drag = 0.05f;
             rbg.mass = 1;
             rbg.maxAngularVelocity = 7;
@@ -273,7 +273,7 @@ namespace BW_Chaos.Effects
             rbg.solverVelocityIterations = 2;
             rbg.useGravity = true;
             var cf = GObj.AddComponent<ConstantForce>();
-            cf.set_force(new Vector3(10, 10, 10));
+            cf.force = new Vector3(10, 10, 10);
             cf.torque = new Vector3(10, 10, 10);
             #endregion
 
@@ -482,6 +482,7 @@ namespace BW_Chaos.Effects
         {
             EffectIsEnded = false;
             Hooking.OnPostFireGun += BringBackTime;
+            _ = "I’ll side load this zip bomb if you peek here again";
         }
         public void EffectEnds()
         {
@@ -585,7 +586,8 @@ namespace BW_Chaos.Effects
         public void EffectEnds()
         {
             Player_Health PlayerHealth = GameObject.FindObjectOfType<Player_Health>();
-            if (PlayerHealth != null) {
+            if (PlayerHealth != null)
+            {
                 PlayerHealth.wait_Regen_t = 3;
                 PlayerHealth.SetFullHealth();
             }
@@ -774,71 +776,71 @@ namespace BW_Chaos.Effects
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
 
-        private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
-        private bool EffectIsEnded = false;
-        private bool modifyingRbs = true;
+        private List<Rigidbody> LISTICLETESTICEBALLSNUTSACKEVENCAJONESIFYOURESOINCLINED = new List<Rigidbody> { };
+        private bool FATFUCK_YESYOU_FAT_FUCK = false;
+        private bool PLEASEASSISTMETHEYREGOINGTOTAKEMYHOUSEIFIDONT180TREEHOUSETHISTEXASCOUNTRYBUMPKINASSFOOLINA2V2ONMIRAGEASITEAKSONLYNOAUTOSWITHCHINESEAYYWARE = true;
         public void EffectStarts()
         {
-            EffectIsEnded = false;
-            modifyingRbs = true;
-            _ = MelonCoroutines.Start(RefreshList());
-            _ = MelonCoroutines.Start(ApplyForce());
+            FATFUCK_YESYOU_FAT_FUCK = false;
+            PLEASEASSISTMETHEYREGOINGTOTAKEMYHOUSEIFIDONT180TREEHOUSETHISTEXASCOUNTRYBUMPKINASSFOOLINA2V2ONMIRAGEASITEAKSONLYNOAUTOSWITHCHINESEAYYWARE = true;
+            MelonCoroutines.Start(THISISLIKEVARIABLESINCEXCEPTIMNOTUSINGUNDERSCORESVERYFREQUENTLY_ANDIMEPIC());
+            MelonCoroutines.Start(YESISHOOTANAZIWITHATHOTTIEONMYTOOLIE());
         }
         public void EffectEnds()
         {
-            EffectIsEnded = true;
+            FATFUCK_YESYOU_FAT_FUCK = true;
+            MelonCoroutines.Stop(THISISLIKEVARIABLESINCEXCEPTIMNOTUSINGUNDERSCORESVERYFREQUENTLY_ANDIMEPIC());
+            MelonCoroutines.Stop(YESISHOOTANAZIWITHATHOTTIEONMYTOOLIE());
         }
 
-        private int continueFrom = 0;
-        private IEnumerator ApplyForce()
+        private IEnumerator YESISHOOTANAZIWITHATHOTTIEONMYTOOLIE()
         {
             yield return new WaitForFixedUpdate();
-            if (EffectIsEnded) yield break;
-            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+            if (FATFUCK_YESYOU_FAT_FUCK) yield break;
+            Vector3 WHOMEGALUL_THELOCATIONOFSOMECLOWNSFUCKINGDOME = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
 
-            if (!modifyingRbs)
+            if (!PLEASEASSISTMETHEYREGOINGTOTAKEMYHOUSEIFIDONT180TREEHOUSETHISTEXASCOUNTRYBUMPKINASSFOOLINA2V2ONMIRAGEASITEAKSONLYNOAUTOSWITHCHINESEAYYWARE)
             {
-                for (int i = 0; i < 1; i++)
+                var chuckle_nut = LISTICLETESTICEBALLSNUTSACKEVENCAJONESIFYOURESOINCLINED.ToArray();
+                int NOCAPDOMERONASTACKDOMERKEEPINGITABUCKFIFTYDOMEYFORREALFORREALONGODONGOD = 0;
+                foreach (var RIPINPISSPACKWATCHRIPBOZO in chuckle_nut)
                 {
-                    // Make sure we don't get an outofrange exception
-                    if ((i + continueFrom) >= rigidbodies.Count)
-                    {
-                        continueFrom = 0;
-                        break;
-                    }
-
-                    var rb = rigidbodies[i + continueFrom];
-                    //MelonLogger.Msg($"Applying force to RB at ({rb.position.x},{rb.position.y},{rb.position.z})");
-                    rb.AddForce((playerPos - rb.position) / 1 + new Vector3(0, 1f, 0), ForceMode.VelocityChange);
+                    if (FATFUCK_YESYOU_FAT_FUCK || RIPINPISSPACKWATCHRIPBOZO == null) yield break;
+                    NOCAPDOMERONASTACKDOMERKEEPINGITABUCKFIFTYDOMEYFORREALFORREALONGODONGOD++;
+                    if (NOCAPDOMERONASTACKDOMERKEEPINGITABUCKFIFTYDOMEYFORREALFORREALONGODONGOD % 5 == 0) WHOMEGALUL_THELOCATIONOFSOMECLOWNSFUCKINGDOME = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+                    RIPINPISSPACKWATCHRIPBOZO.AddExplosionForce(-3f, WHOMEGALUL_THELOCATIONOFSOMECLOWNSFUCKINGDOME, 10, 2, ForceMode.VelocityChange);
+                    yield return new WaitForFixedUpdate();
                 }
-                continueFrom += 1;
             }
-            _ = MelonCoroutines.Start(ApplyForce());
-            yield break;
+            MelonCoroutines.Start(YESISHOOTANAZIWITHATHOTTIEONMYTOOLIE());
         }
 
-        private IEnumerator RefreshList()
+        private IEnumerator THISISLIKEVARIABLESINCEXCEPTIMNOTUSINGUNDERSCORESVERYFREQUENTLY_ANDIMEPIC()
         {
-            yield return new WaitForSecondsRealtime(1);
-            if (EffectIsEnded) yield break;
+            if (FATFUCK_YESYOU_FAT_FUCK) yield break;
 
             // Don't modify the rigidbody list without marking it
-            modifyingRbs = true;
-            rigidbodies.Clear();
+            PLEASEASSISTMETHEYREGOINGTOTAKEMYHOUSEIFIDONT180TREEHOUSETHISTEXASCOUNTRYBUMPKINASSFOOLINA2V2ONMIRAGEASITEAKSONLYNOAUTOSWITHCHINESEAYYWARE = true;
+            LISTICLETESTICEBALLSNUTSACKEVENCAJONESIFYOURESOINCLINED.Clear();
             // Get the position of the player's head
-            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-            Rigidbody[] allObjects = UnityEngine.Object.FindObjectsOfType<Rigidbody>();
+            var IMNOTEVENGOINGTOLIETOYOU_IDIDNTFUCKINGSPELLCHECKTHESEVARIABLES_WHY_BECAUSEITDOESNTFUCKINGMATTER = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
             // For every gameobject, if it has a rigidbody and is within 7 meters of the player, add it to the list of rigidbodies (as long as its not attached to the player)
-            foreach (Rigidbody rb in allObjects)
+            int TRAVIS = 0;
+            foreach (Collider ONE_TWO_THREE_FOUR_IDECLAREARACEWAR in Physics.OverlapSphere(IMNOTEVENGOINGTOLIETOYOU_IDIDNTFUCKINGSPELLCHECKTHESEVARIABLES_WHY_BECAUSEITDOESNTFUCKINGMATTER, 10))
             {
-                if (Vector3.SqrMagnitude(rb.transform.position - playerPos) < 5 * 5)
-                    if (rb.gameObject.GetComponentInParent<PhysicsRig>() == null)
-                    {
-                        rigidbodies.Add(rb);
-                    }
+                if (FATFUCK_YESYOU_FAT_FUCK || ONE_TWO_THREE_FOUR_IDECLAREARACEWAR) yield break;
+                if (!(LISTICLETESTICEBALLSNUTSACKEVENCAJONESIFYOURESOINCLINED.Contains(ONE_TWO_THREE_FOUR_IDECLAREARACEWAR.attachedRigidbody) || ONE_TWO_THREE_FOUR_IDECLAREARACEWAR.gameObject.transform.root.name == "[RigManager (Default Brett)]"))
+                {
+                    if (ONE_TWO_THREE_FOUR_IDECLAREARACEWAR.attachedRigidbody != null)
+                        LISTICLETESTICEBALLSNUTSACKEVENCAJONESIFYOURESOINCLINED.Add(ONE_TWO_THREE_FOUR_IDECLAREARACEWAR.attachedRigidbody);
+                }
+                TRAVIS++;
+                if (TRAVIS % 5 == 0) yield return new WaitForFixedUpdate();
             }
-            modifyingRbs = false;
-            _ = MelonCoroutines.Start(RefreshList());
+            PLEASEASSISTMETHEYREGOINGTOTAKEMYHOUSEIFIDONT180TREEHOUSETHISTEXASCOUNTRYBUMPKINASSFOOLINA2V2ONMIRAGEASITEAKSONLYNOAUTOSWITHCHINESEAYYWARE = false;
+
+            yield return new WaitForSecondsRealtime(1);
+            MelonCoroutines.Start(THISISLIKEVARIABLESINCEXCEPTIMNOTUSINGUNDERSCORESVERYFREQUENTLY_ANDIMEPIC());
         }
     }
 
@@ -850,76 +852,76 @@ namespace BW_Chaos.Effects
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
 
-        private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
-        private bool EffectIsEnded = false;
-        private bool modifyingRbs = true;
+        private List<Rigidbody> CLICKCLACKCLICKCLACK_THATSTHESOUNDOFMEPLAYINGWITHMYBALLSTHEYGOCLICKCLACK = new List<Rigidbody> { };
+        private bool SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO = false;
+        private bool DONTTOUCHMYBALLSIWILLCALLTHEPOLICEONYOUANDGETARESTRAININGORDER = true;
         public void EffectStarts()
         {
-            EffectIsEnded = false;
-            modifyingRbs = true;
-            _ = MelonCoroutines.Start(RefreshList());
-            _ = MelonCoroutines.Start(ApplyForce());
+            SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO = false;
+            DONTTOUCHMYBALLSIWILLCALLTHEPOLICEONYOUANDGETARESTRAININGORDER = true;
+            MelonCoroutines.Start(FUCKYOUUNITYFORNULLINGMYSHITOUT_ILLDOYOURMOMFORTHAT());
+            MelonCoroutines.Start(EXPLOSIONFORCEISEPICBECAUSEYOURENOTDOINGTHINGSYOURSELF());
         }
         public void EffectEnds()
         {
-            EffectIsEnded = true;
-            rigidbodies.Clear();
+            SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO = true;
+            MelonCoroutines.Stop(FUCKYOUUNITYFORNULLINGMYSHITOUT_ILLDOYOURMOMFORTHAT());
+            MelonCoroutines.Stop(EXPLOSIONFORCEISEPICBECAUSEYOURENOTDOINGTHINGSYOURSELF());
         }
 
-        private int continueFrom = 0;
-        private IEnumerator ApplyForce()
+        private IEnumerator EXPLOSIONFORCEISEPICBECAUSEYOURENOTDOINGTHINGSYOURSELF()
         {
             yield return new WaitForFixedUpdate();
-            if (EffectIsEnded) yield break;
+            if (SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO) yield break;
+            Vector3 MYSUPERMEGALASERPISSJUSTLIKEEGGMANSBUTBETTERANDMOREEPIC = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
 
-
-            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-
-            if (!modifyingRbs)
+            if (!DONTTOUCHMYBALLSIWILLCALLTHEPOLICEONYOUANDGETARESTRAININGORDER)
             {
-                for (int i = 0; i < 1; i++)
+                var SNEEDFROMSNEEDSFEEDANDSEED = CLICKCLACKCLICKCLACK_THATSTHESOUNDOFMEPLAYINGWITHMYBALLSTHEYGOCLICKCLACK.ToArray();
+                int CHUCKFROMCHUCKSSUCKANDFUCK = 0;
+                foreach (var THERIGHTBUMPERONTHEXBOX360ANDXBOXONEASWELLASXBOXSERIESXANDSCONTROLLERS in SNEEDFROMSNEEDSFEEDANDSEED)
                 {
-                    // Make sure we don't get an outofrange exception
-                    if ((i + continueFrom) >= rigidbodies.Count)
-                    {
-                        continueFrom = 0;
-                        break;
-                    }
-
-                    var rb = rigidbodies[i + continueFrom];
-                    var revvec = -(playerPos - rb.position);
-                    var inversevector = new Vector3(10 / revvec.x, 10 / revvec.y, 10 / revvec.z);
-                    rb.AddForce(inversevector + new Vector3(0, 5f, 0), ForceMode.VelocityChange);
+                    if (SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO || THERIGHTBUMPERONTHEXBOX360ANDXBOXONEASWELLASXBOXSERIESXANDSCONTROLLERS == null) yield break;
+                    CHUCKFROMCHUCKSSUCKANDFUCK++;
+                    if (CHUCKFROMCHUCKSSUCKANDFUCK % 5 == 0) MYSUPERMEGALASERPISSJUSTLIKEEGGMANSBUTBETTERANDMOREEPIC = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
+                    THERIGHTBUMPERONTHEXBOX360ANDXBOXONEASWELLASXBOXSERIESXANDSCONTROLLERS.AddExplosionForce(2f, MYSUPERMEGALASERPISSJUSTLIKEEGGMANSBUTBETTERANDMOREEPIC, 10, 2, ForceMode.VelocityChange);
+                    if (CHUCKFROMCHUCKSSUCKANDFUCK % 2 == 0) yield return new WaitForFixedUpdate();
                 }
-                continueFrom += 1;
             }
-            _ = MelonCoroutines.Start(ApplyForce());
-            yield break;
+            MelonCoroutines.Start(EXPLOSIONFORCEISEPICBECAUSEYOURENOTDOINGTHINGSYOURSELF());
         }
 
-        private IEnumerator RefreshList()
+        private IEnumerator FUCKYOUUNITYFORNULLINGMYSHITOUT_ILLDOYOURMOMFORTHAT()
         {
-            if (EffectIsEnded) yield break;
+            if (SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO) yield break;
 
             // Don't modify the rigidbody list without marking it
-            modifyingRbs = true;
-            rigidbodies.Clear();
+            DONTTOUCHMYBALLSIWILLCALLTHEPOLICEONYOUANDGETARESTRAININGORDER = true;
+            CLICKCLACKCLICKCLACK_THATSTHESOUNDOFMEPLAYINGWITHMYBALLSTHEYGOCLICKCLACK.Clear();
             // Get the position of the player's head
-            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-            Rigidbody[] allObjects = UnityEngine.Object.FindObjectsOfType<Rigidbody>();
+            var PISS = GameObject.FindObjectOfType<PhysBody>();
+            if (PISS == null) yield break;
+            var playerPos = PISS.rbHead.transform.position;
             // For every gameobject, if it has a rigidbody and is within 7 meters of the player, add it to the list of rigidbodies (as long as its not attached to the player)
-            foreach (Rigidbody rb in allObjects)
+            int TRAVIS = 0;
+
+            foreach (Collider CLUBFUCKINBANGINWHENWEBOPPINEXITTHISEARTHSATMOSPHEREBYCAMELLIA in Physics.OverlapSphere(playerPos, 10))
             {
-                if (Vector3.SqrMagnitude(rb.transform.position - playerPos) < 7 * 7)
-                    if (rb.gameObject.GetComponentInParent<PhysicsRig>() == null)
-                    {
-                        rigidbodies.Add(rb);
-                    }
+                if (SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO || CLUBFUCKINBANGINWHENWEBOPPINEXITTHISEARTHSATMOSPHEREBYCAMELLIA == null) yield break;
+                if (!(CLICKCLACKCLICKCLACK_THATSTHESOUNDOFMEPLAYINGWITHMYBALLSTHEYGOCLICKCLACK.Contains(CLUBFUCKINBANGINWHENWEBOPPINEXITTHISEARTHSATMOSPHEREBYCAMELLIA.attachedRigidbody) || CLUBFUCKINBANGINWHENWEBOPPINEXITTHISEARTHSATMOSPHEREBYCAMELLIA.gameObject.transform.root.name == "[RigManager (Default Brett)]"))
+                {
+                    if (CLUBFUCKINBANGINWHENWEBOPPINEXITTHISEARTHSATMOSPHEREBYCAMELLIA.attachedRigidbody != null)
+                        CLICKCLACKCLICKCLACK_THATSTHESOUNDOFMEPLAYINGWITHMYBALLSTHEYGOCLICKCLACK.Add(CLUBFUCKINBANGINWHENWEBOPPINEXITTHISEARTHSATMOSPHEREBYCAMELLIA.attachedRigidbody);
+                }
+                TRAVIS++;
+                if (TRAVIS % 5 == 0) yield return new WaitForFixedUpdate();
+                if (SUPERMEGATAXAUDITING_MEANSDONTDOSHITWHENISAYSO) yield break;
+
             }
-            modifyingRbs = false;
+            DONTTOUCHMYBALLSIWILLCALLTHEPOLICEONYOUANDGETARESTRAININGORDER = false;
 
             yield return new WaitForSecondsRealtime(1);
-            _ = MelonCoroutines.Start(RefreshList());
+            MelonCoroutines.Start(FUCKYOUUNITYFORNULLINGMYSHITOUT_ILLDOYOURMOMFORTHAT());
         }
     }
 
@@ -931,73 +933,31 @@ namespace BW_Chaos.Effects
         int IChaosEffect.Duration { get => Duration; }
         string IChaosEffect.Name { get => Name; set => Name = value; }
 
-        private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
-        private bool EffectIsEnded = false;
         public void EffectStarts()
         {
-            EffectIsEnded = false;
-            _ = MelonCoroutines.Start(Start());
+            MelonCoroutines.Start(PACKWATCH_SMOKINGTHATTOPSHELFIL2CPP_PACK());
         }
         public void EffectEnds()
         {
-            EffectIsEnded = true;
-            rigidbodies.Clear();
+            // MY BALLS LOL!
         }
 
-        private int continueFrom = 0;
-        private IEnumerator ApplyForce()
+        private IEnumerator PACKWATCH_SMOKINGTHATTOPSHELFIL2CPP_PACK()
         {
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            yield return new WaitForFixedUpdate();
-            if (EffectIsEnded) yield break;
-
-
-            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-
-            for (int i = 0; i < 5; i++)
-            {
-                // Make sure we don't get an outofrange exception
-                if ((i + continueFrom) >= rigidbodies.Count)
-                {
-                    continueFrom = 0;
-                    yield break;
-                }
-
-                var rb = rigidbodies[i + continueFrom];
-                var revvec = -(playerPos - rb.position);
-                var inversevector = new Vector3(15 / revvec.x, 5 / revvec.y, 15 / revvec.z);
-                rb.AddForce(inversevector + new Vector3(0, 15f, 0), ForceMode.VelocityChange);
-            }
-            continueFrom += 5;
-            _ = MelonCoroutines.Start(ApplyForce());
-            yield break;
-        }
-
-        private IEnumerator Start()
-        {
-            yield return null;
-
-            // Don't modify the rigidbody list without marking it
-            rigidbodies.Clear();
             // Get the position of the player's head
-            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-            GameObject[] allObjects = UnityEngine.Object.FindObjectsOfType<GameObject>();
-            // For every gameobject, if it has a rigidbody and is within 7 meters of the player, add it to the list of rigidbodies (as long as its not attached to the player)
-            foreach (GameObject go in allObjects)
+            Vector3 playerPos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position - Vector3.up * 2;
+            Rigidbody[] allObjects = UnityEngine.Object.FindObjectsOfType<Rigidbody>();
+            // For every gameobject, if it has a rigidbody and is within 15 meters of the player, do the "it is what it is" thing
+            var CHESMOND = 0;
+            foreach (Rigidbody IAMCURRENTLYLISTENINGTOACAMELLIASONG in allObjects)
             {
-                Rigidbody rb = go.GetComponent<Rigidbody>();
-                if (rb != null)
+                if (IAMCURRENTLYLISTENINGTOACAMELLIASONG.gameObject.GetComponentInParent<PhysicsRig>() == null)
                 {
-                    if (Vector3.SqrMagnitude(go.transform.position - playerPos) < 12 * 12)
-                        if (go.GetComponentInParent<PhysicsRig>() == null)
-                        {
-                            rigidbodies.Add(rb);
-                        }
+                    IAMCURRENTLYLISTENINGTOACAMELLIASONG.AddExplosionForce(40000f, playerPos, 15, 2);
+                    CHESMOND++;
+                    if (CHESMOND % 5 == 0) yield return new WaitForFixedUpdate();
                 }
             }
-
-            _ = MelonCoroutines.Start(ApplyForce());
         }
     }
 
@@ -1628,7 +1588,7 @@ namespace BW_Chaos.Effects
         public void EffectStarts()
         {
             steamName = SteamFriends.GetPersonaName();
-            SteamFriends.SetPersonaName($"{names[Random.RandomRange(0, names.Length)]} - BWC");
+            SteamFriends.SetPersonaName($"{names[Random.RandomRange(0, names.Length)]}-BWC");
             // ok but could you imagine: SteamFriends.ReplyToFriendMessage(new CSteamID(76561198060337335), "HI CAM!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
         }
         public void EffectEnds()
@@ -1856,4 +1816,4 @@ namespace BW_Chaos.Effects
 /* KNOWN ISSUES
  * Effects that modify the same values will fuck each other up upon ending (assuming they're longer than 30 seconds and overlap)
  * 
- */ 
+ */

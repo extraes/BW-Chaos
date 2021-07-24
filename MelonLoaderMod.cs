@@ -81,7 +81,6 @@ namespace BW_Chaos
             if (token != "YOUR_TOKEN_HERE" || channelPref != "CHANNEL_ID_HERE")
             {
                 MelonLogger.Msg("Token and channel fetched!");
-                UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<STOPEFFECTSFORFUCKSSAKE>();
                 MainAsync().GetAwaiter().GetResult();
             }
             else
@@ -101,7 +100,13 @@ namespace BW_Chaos
             {
                 string es = "";
                 foreach (var e in EffectList) es += ("\n" + e.Name);
-                MelonLogger.Msg(es);
+                MelonLogger.Msg(es + "\n" + EffectList.Count + " effects");
+            }
+            if (Input.GetKeyDown(KeyCode.Z))
+            {
+                MelonLogger.Msg("pogger");
+                var e = new PlayerInverseGravity();
+                MelonCoroutines.Start(DoEffect(e));
             }
         }
 
@@ -161,7 +166,7 @@ namespace BW_Chaos
                 {
                     GUI.Box(new Rect(50, 25, 350, 25), "BW Chaos: Waiting for start at 32 seconds - " + Time.realtimeSinceStartup);
                     //todo: remove this on release
-                    GUI.Box(new Rect(50, 50, 350, 25), "Hawaii Build - By extraes");
+                    GUI.Box(new Rect(50, 50, 350, 25), "Clackin' build - By extraes");
                 }
             }
             await Task.Delay(0);
@@ -425,7 +430,7 @@ namespace BW_Chaos
             }
             #endregion
 
-            yield return new WaitForSecondsRealtime(effect.Duration * 1000);
+            yield return new WaitForSecondsRealtime(effect.Duration);
 
             #region End effect
             try
@@ -509,7 +514,7 @@ namespace BW_Chaos
         #endregion
 
     }
-
+    [RegisterTypeInIl2Cpp]
     class STOPEFFECTSFORFUCKSSAKE : MonoBehaviour
     {
         public STOPEFFECTSFORFUCKSSAKE(IntPtr ptr) : base(ptr) { }
@@ -548,7 +553,6 @@ namespace BW_Chaos
  */
 
 /* ATTRIBUTIONS
- * Hawaii - Being GMT-11, it's still technically friday as of the time of upload, so that's why this is the Hawaii build.
  * GS - Testing the mod with me over several weeks. The tens of crashes you endured weren't in vain (I hope)
  * GS - Suggesting new QOL modpref settings (Changing nodejs path)
  * Cyanide - Testing during the final ~2 weeks of development
@@ -563,6 +567,7 @@ namespace BW_Chaos
  * TrevTV the fucking GOAT - telling me how to attach a monobehaviour to the player and make code run when the player's gameobject is destroyed
  * Lars - & tear, if you get me
  * WNP - Told me to use sqrMagnitude instead of calculating the distance becaust sqrt is slower
+ * Camobiwon - Telling me about Physics.overlapSphere
  * * Iterating through a long ass list of gameobjects needs to be as fast as possible, so this was important to PlayerGravity and the other effects that use "local gravity"
  * WNP - Telling me about GlobalPool.Spawn
  * WNP & Lars - Telling me that Poolee.Despawn() is broken and to just set a gameobject as inactive
@@ -573,6 +578,7 @@ namespace BW_Chaos
  * Adamdev - Telling me about UnityExplorer (and sending me the DLL)
  * Adamdev - Helping me with FuckYourMagazine and Butterfingers
  * Lakatrazz - Telling me about PhysBody
+ * Lakatrazz - Minor optimization in localgravity effects (col.gameObject.transform.root.name != "[RigManager (Default Brett)]")
  * TheShadowNinja - Telling me about AddComponent (add rb to gravity cube)
  * Elarelda - Elareldeffect idea & details
  * Microsoft - C# documentation (duh)
