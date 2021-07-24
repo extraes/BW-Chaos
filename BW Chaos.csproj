@@ -263,6 +263,9 @@
     <EmbeddedResource Include="cbot.zip" />
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="readme.md" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
     <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\Mods"</PostBuildEvent>
