@@ -4,6 +4,7 @@ using MelonLoader;
 using ModThatIsNotMod;
 using StressLevelZero.Props.Weapons;
 
+//todo: this effect, and its sister, dont work. probably something about gun.fireDuration?
 namespace BWChaos.Effects
 {
     internal class HighRPM : EffectBase

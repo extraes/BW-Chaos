@@ -14,6 +14,7 @@ namespace BWChaos.Effects
 
         public override void OnEffectUpdate()
         {
+            //todo: would it make any difference if it was linear instead of a circle? computationally and gameplay-wise i mean
             float theta = Time.realtimeSinceStartup % 3 * 360;
             float x = (float)(Math.Cos(theta * Math.PI / 180));
             float y = (float)(Math.Sin(theta * Math.PI / 180));

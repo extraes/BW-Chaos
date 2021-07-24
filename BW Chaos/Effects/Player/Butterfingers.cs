@@ -24,7 +24,7 @@ namespace BWChaos.Effects
                 InteractableHost interactableHost = interactable?.GetComponentInParent<InteractableHost>();
                 interactableHost?.Drop();
 
-                yield return new WaitForSecondsRealtime(UnityEngine.Random.value * 10);
+                yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(5f,10f));
             }
         }
     }

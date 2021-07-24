@@ -104,14 +104,13 @@
     <Compile Include="Effects\EffectBase.cs" />
     <Compile Include="Effects\Guns\LowRPM.cs" />
     <Compile Include="Effects\Guns\HighRPM.cs" />
-    <Compile Include="Effects\Guns\MassiveKnockback.cs" />
+    <Compile Include="Effects\Guns\BarrySteakfries.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
     <Compile Include="Effects\Misc\SpawnDogAd.cs" />
     <Compile Include="Effects\Misc\4xSpeed.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />
-    <Compile Include="Effects\Player\Accelerate.cs" />
     <Compile Include="Effects\Player\Paralyze.cs" />
     <Compile Include="Effects\Player\PointPush.cs" />
     <Compile Include="Effects\Guns\FuckYourMag.cs" />

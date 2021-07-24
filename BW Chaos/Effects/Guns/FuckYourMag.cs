@@ -24,7 +24,7 @@ namespace BWChaos.Effects
 
                 gun?.magazineSocket?.MagazineRelease();
 
-                yield return new WaitForSecondsRealtime(UnityEngine.Random.value * 5);
+                yield return new WaitForSecondsRealtime(UnityEngine.Random.RandomRange(5f,10f));
             }
         }
     }

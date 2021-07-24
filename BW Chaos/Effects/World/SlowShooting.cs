@@ -31,7 +31,7 @@ namespace BWChaos.Effects
             while (Time.timeScale < 1f && Active)
             {
                 Time.timeScale += 0.05f;
-                yield return new WaitForSeconds(0.1f);
+                yield return new WaitForSeconds(0.05f);
             }
             Time.timeScale = 1;
         }

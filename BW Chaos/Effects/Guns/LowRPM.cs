@@ -4,12 +4,12 @@ using MelonLoader;
 using ModThatIsNotMod;
 using StressLevelZero.Props.Weapons;
 
+//todo: this effect, and its brother, dont work. probably something about gun.fireDuration?
 namespace BWChaos.Effects
 {
     internal class LowRPM : EffectBase
     {
         public LowRPM() : base("When No VTEC", 30) { }
-
         public override void OnEffectStart()
         {
             Hooking.OnPreFireGun += GunFirePre;

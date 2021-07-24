@@ -92,6 +92,8 @@ namespace BWChaos.Effects
             "steam cuts off usernames so let me tell you the long ones\nBrylan Bristopher Woods|CEO|LLC Owner|$DOGE HODLer🚀|Multimillionaire|Bossman, ❌suit ❌tie"+
             "\nBrayden|32|ladies man|4'3\"|short kings stay winning\nlars|gay|transmasc|allosexual/poly|libra|ravenclaw\nSydney|14|Bi|They/Them|BLM|ACAB",
             "harse effect when",
+            "*vine boom sound effect*",
+            "notascam.bwchaos.tk/download.php.js.aspx?dl=download_bone_work_chaos_free_punjabi_no_viroos_safe_clean_working_2020\n\n(real)",
         };
     }
 }
