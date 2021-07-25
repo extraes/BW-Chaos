@@ -92,7 +92,7 @@ namespace BW_Chaos
                                 "(This is because if you change gravity, you update every rigidbody, which Unity does not like)");
             }
         }
-
+        private bool dis = false;
         public override void OnUpdate()
         {
             if (Input.GetKeyDown(KeyCode.RightControl)) GameObject.FindObjectOfType<Data_Manager>().RELOADSCENE();
@@ -105,8 +105,12 @@ namespace BW_Chaos
             if (Input.GetKeyDown(KeyCode.Z))
             {
                 MelonLogger.Msg("pogger");
-                var e = new PlayerInverseGravity();
+                var e = new PlayerGravity();
                 MelonCoroutines.Start(DoEffect(e));
+            }
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                dis = !dis;
             }
         }
 
@@ -127,6 +131,7 @@ namespace BW_Chaos
         #endregion
         public override async void OnGUI()
         {
+            if (dis) return;
             // Load chaos bars into onscreen UI
             if (GUIEnabled)
             {
@@ -166,7 +171,7 @@ namespace BW_Chaos
                 {
                     GUI.Box(new Rect(50, 25, 350, 25), "BW Chaos: Waiting for start at 32 seconds - " + Time.realtimeSinceStartup);
                     //todo: remove this on release
-                    GUI.Box(new Rect(50, 50, 350, 25), "Clackin' build - By extraes");
+                    GUI.Box(new Rect(50, 50, 350, 25), "ALL CAPS build - By extraes");
                 }
             }
             await Task.Delay(0);

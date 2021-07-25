@@ -41,7 +41,6 @@ These "rules" are here because I just want to make a mod, I don't want to be a s
 
 # ATTRIBUTIONS 
 
- * Hawaii - Being GMT-11, it's still technically friday as of the time of upload, so that's why this is the Hawaii build.
  * GS - Testing the mod with me over several weeks. The tens of crashes you endured weren't in vain (I hope)
  * GS - Suggesting new QOL modpref settings (Changing nodejs path)
  * Cyanide - Testing during the final ~2 weeks of development
