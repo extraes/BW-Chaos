@@ -92,7 +92,7 @@ namespace BW_Chaos
                                 "(This is because if you change gravity, you update every rigidbody, which Unity does not like)");
             }
         }
-
+        private bool dis = false;
         public override void OnUpdate()
         {
             if (Input.GetKeyDown(KeyCode.RightControl)) GameObject.FindObjectOfType<Data_Manager>().RELOADSCENE();
@@ -107,6 +107,10 @@ namespace BW_Chaos
                 MelonLogger.Msg("pogger");
                 var e = new PlayerGravity();
                 MelonCoroutines.Start(DoEffect(e));
+            }
+            if (Input.GetKeyDown(KeyCode.F8))
+            {
+                dis = !dis;
             }
         }
 
@@ -127,6 +131,7 @@ namespace BW_Chaos
         #endregion
         public override async void OnGUI()
         {
+            if (dis) return;
             // Load chaos bars into onscreen UI
             if (GUIEnabled)
             {
