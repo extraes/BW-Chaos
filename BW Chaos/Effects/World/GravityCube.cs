@@ -25,7 +25,6 @@ namespace BWChaos.Effects
             Rigidbody rb = gravObject.gameObject.AddComponent<Rigidbody>();
             rb.angularDrag = 0.05f;
             rb.drag = 0.05f;
-            // todo: using direct `set_force` is a cpp2il bug, it should be fixed in 0.4.2
             ConstantForce cf = gravObject.gameObject.AddComponent<ConstantForce>();
             cf.force = new Vector3(10, 10, 10);
             cf.torque = new Vector3(10, 10, 10);
