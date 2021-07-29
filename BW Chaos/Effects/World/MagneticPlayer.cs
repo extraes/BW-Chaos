@@ -57,8 +57,8 @@ namespace BWChaos.Effects
             if (physBody == null) yield break;
             var pos = physBody.rbHead.transform.position;
 
-            // For every collider in 10 meters, make sure it isn't already in the list and make sure it's not a part of the player.
-            var cols = Physics.OverlapSphere(pos, 10);
+            // For every collider in 7 meters, make sure it isn't already in the list and make sure it's not a part of the player.
+            var cols = Physics.OverlapSphere(pos, 7);
             for (int i = 0; i < cols.Length; i++)
             {
                 Collider col = cols[i];
