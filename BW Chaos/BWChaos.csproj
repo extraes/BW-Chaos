@@ -124,10 +124,13 @@
     <Compile Include="Effects\Misc\Lag.cs" />
     <Compile Include="Effects\World\GravityCube.cs" />
     <Compile Include="Effects\World\InvertGravity.cs" />
+    <Compile Include="Effects\World\RepulsivePlayer.cs" />
     <Compile Include="Effects\World\PointGravity.cs" />
     <Compile Include="Effects\World\California.cs" />
     <Compile Include="Effects\World\SlowShooting.cs" />
     <Compile Include="Effects\World\CrabletRain.cs" />
+    <Compile Include="Effects\World\PullAllGrips.cs" />
+    <Compile Include="Effects\World\MagneticPlayer.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
