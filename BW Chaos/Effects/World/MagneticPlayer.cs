@@ -1,9 +1,8 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
+﻿using MelonLoader;
+using StressLevelZero.VRMK;
 using System.Collections;
 using System.Collections.Generic;
-using StressLevelZero.VRMK;
+using UnityEngine;
 
 namespace BWChaos.Effects
 {
@@ -76,5 +75,5 @@ namespace BWChaos.Effects
             MelonCoroutines.Start(refreshRigidbodies());
         }
     }
-}
+
 }

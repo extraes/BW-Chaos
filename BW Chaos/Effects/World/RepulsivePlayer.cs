@@ -1,9 +1,8 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
+﻿using MelonLoader;
+using StressLevelZero.VRMK;
 using System.Collections;
 using System.Collections.Generic;
-using StressLevelZero.VRMK;
+using UnityEngine;
 
 namespace BWChaos.Effects
 {
@@ -34,7 +33,8 @@ namespace BWChaos.Effects
             if (!Active)
             {
                 var rbArray = rigidbodies.ToArray();
-                for (int i = 0; i< rbArray.Length; i++) {
+                for (int i = 0; i < rbArray.Length; i++)
+                {
                     var rb = rbArray[i];
                     if (!Active || rb == null) yield break;
                     if (i % 5 == 0) pos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
@@ -58,7 +58,7 @@ namespace BWChaos.Effects
 
             // For every collider in 10 meters, make sure it isn't already in the list and make sure it's not a part of the player.
             var cols = Physics.OverlapSphere(pos, 10);
-            for (int i = 0; i< cols.Length; i++)
+            for (int i = 0; i < cols.Length; i++)
             {
                 Collider col = cols[i];
                 if (!Active || col == null) yield break;
