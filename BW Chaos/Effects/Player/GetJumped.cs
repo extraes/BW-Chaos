@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-
+﻿using StressLevelZero.Pool;
+using System;
 using UnityEngine;
-using MelonLoader;
-using StressLevelZero.Pool;
-using ModThatIsNotMod;
 
 namespace BWChaos.Effects
 {
@@ -15,6 +10,7 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
+            var pool = GameObject.Find("NullBody [").GetComponent<Pool>();
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
             for (int i = 0; i < 8; i++)
             {
@@ -23,7 +19,9 @@ namespace BWChaos.Effects
                 float y = (float)(Math.Sin(theta * Math.PI / 180));
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
-                CustomItems.SpawnFromPool("Null Body", spawnPos, Quaternion.identity);
+                var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
+                var spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
+                spawnedNB.gameObject.SetActive(true);
             }
         }
     }
