@@ -30,9 +30,11 @@ namespace BWChaos.Effects
 
             Light light = null;
             float cycleTime = 1f;
+            Color originalColor = Color.white;
             void Start()
             {
                 light = this.gameObject.GetComponent<Light>();
+                originalColor = light.color;
                 light.color = Color.cyan;
             }
 
@@ -44,6 +46,11 @@ namespace BWChaos.Effects
 
                 light.color = Color.HSVToRGB(h + Time.deltaTime * (1 / cycleTime), s, v);
             }
+
+            void Destroy ()
+            {
+                light.color = originalColor;
+            }
         }
 
         [RegisterTypeInIl2Cpp]
@@ -54,11 +61,13 @@ namespace BWChaos.Effects
             BeamGeometry beamGeometry = null;
             float alpha = 0f;
             float cycleTime = 1f;
+            Color originalColor = Color.white;
             void Start()
             {
                 // Save the beamgeometry now so I don't need to call GetComponent every frame & get the alpha now to maintain the intensity of the light
                 beamGeometry = this.gameObject.GetComponent<BeamGeometry>();
                 alpha = beamGeometry.material.color.a;
+                originalColor = beamGeometry.material.color;
                 // Set the color to cyan so it can be scrolled in Update(). Without this, any white light would remain white
                 beamGeometry.material.color = Color.cyan;
             }
@@ -73,6 +82,11 @@ namespace BWChaos.Effects
                 var color = Color.HSVToRGB(h + Time.deltaTime * (1 / cycleTime), s, v);
                 color.a = alpha;
                 beamGeometry.material.color = color;
+            }
+
+            void Destroy()
+            {
+                beamGeometry.material.color = originalColor;
             }
         }
     }
