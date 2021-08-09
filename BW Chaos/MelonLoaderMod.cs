@@ -27,6 +27,7 @@ namespace BWChaos
     {
         internal string botToken = "YOUR_TOKEN_HERE";
         internal string channelId = "CHANNEL_ID_HERE";
+        internal bool isSteamVer = !File.Exists(Path.Combine(Application.dataPath, "..", "Boneworks_Oculus_Windows64.exe")); //todo: get an oculus player to check if this works
 
         internal Process botProcess;
 
