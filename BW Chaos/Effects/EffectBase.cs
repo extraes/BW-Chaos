@@ -1,4 +1,4 @@
-﻿using BWChaos;
+using BWChaos;
 using UnityEngine;
 using MelonLoader;
 using System.Collections;
@@ -9,30 +9,36 @@ namespace BWChaos.Effects
     internal class EffectBase
     {
         //todo: enum
+        [System.Flags]
         public enum EffectTypes
         {
-            AFFECT_GRAVITY,
-            AFFECT_STEAM
+            NONE = 1 << 0, //todo: find out smarter way to do this
+            AFFECT_GRAVITY = 1 << 1,
+            AFFECT_STEAM = 1 << 2,
+            LAGGY = 1 << 3,
         }
 
         public string Name { get; }
         public int Duration { get; }
+        public EffectTypes Types { get; }
 
         public bool Active { get; private set; }
 
         private IEnumerator CoRunEnumerator;
         private bool hasFinished;
 
-        public EffectBase(string eName, int eDuration)
+        public EffectBase(string eName, int eDuration, EffectTypes eTypes = EffectTypes.NONE)
         {
             Name = eName;
             Duration = eDuration;
+            Types = eTypes;
         }
 
-        public EffectBase(string eName)
+        public EffectBase(string eName, EffectTypes eTypes = EffectTypes.NONE)
         {
             Name = eName;
             Duration = 0;
+            Types = eTypes;
         }
 
         public virtual void OnEffectStart() { }
