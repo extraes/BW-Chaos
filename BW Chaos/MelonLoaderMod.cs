@@ -1,16 +1,14 @@
-﻿using System;
+﻿using BWChaos.Effects;
+using MelonLoader;
+using ModThatIsNotMod.BoneMenu;
+using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Diagnostics;
-
 using UnityEngine;
-using UnityEngine.UI;
-
-using MelonLoader;
 using WatsonWebsocket;
-using BWChaos.Effects;
-using ModThatIsNotMod.BoneMenu;
+using static BWChaos.Effects.EffectBase;
 
 namespace BWChaos
 {
@@ -20,7 +18,7 @@ namespace BWChaos
         public const string Author = "extraes, trev";
         public const string Company = null;
         public const string Version = "0.2.0";
-        public const string DownloadLink = null;      
+        public const string DownloadLink = null;
     }
 
     public class BWChaos : MelonMod
@@ -29,6 +27,9 @@ namespace BWChaos
         internal string channelId = "CHANNEL_ID_HERE";
         internal static bool isSteamVer = !File.Exists(Path.Combine(Application.dataPath, "..", "Boneworks_Oculus_Windows64.exe")); //todo: get an oculus player to check if this works
         internal bool randomOnNoVotes = false;
+        internal static bool useLaggyEffects = false;
+        internal static bool useGravityEffects = false;
+        internal static bool useSteamProfileEffects = false;
 
         internal Process botProcess;
 
@@ -46,6 +47,15 @@ namespace BWChaos
 
             MelonPreferences.CreateEntry("BW_Chaos", "randomEffectOnNoVotes", randomOnNoVotes, "randomEffectOnNoVotes");
             randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
+
+            MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects");
+            useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
+
+            MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", randomOnNoVotes, "useGravityEffects");
+            useGravityEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useGravityEffects");
+
+            MelonPreferences.CreateEntry("BW_Chaos", "useSteamProfileEffects", useSteamProfileEffects, "useSteamProfileEffects");
+            useSteamProfileEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useSteamProfileEffects");
 
             MelonPreferences.Save();
 
@@ -98,11 +108,20 @@ namespace BWChaos
 
             #endregion
 
-            UnhollowerRuntimeLib.ClassInjector.RegisterTypeInIl2Cpp<EffectHandler>();
-
             EffectHandler.AllEffects = (from t in Assembly.GetTypes()
-             where t.BaseType == typeof(EffectBase) && t != typeof(Template)
-             select (EffectBase)Activator.CreateInstance(t)).ToList();
+                where t.BaseType == typeof(EffectBase) && t != typeof(Template)
+                select (EffectBase)Activator.CreateInstance(t)).ToList();
+
+            #region Remove effects based on flags
+            // todo: do this better, cause this is fucking stupid - extraes, the dumbfuck writer of this shitty ass block of linq
+            EffectHandler.AllEffects = (from e in EffectHandler.AllEffects
+                where e.Types.HasFlag(EffectTypes.NONE) || // is this optimization?
+                      (e.Types.HasFlag(EffectTypes.USE_STEAM) && isSteamVer) &&
+                      (e.Types.HasFlag(EffectTypes.AFFECT_GRAVITY) && useGravityEffects) &&
+                      (e.Types.HasFlag(EffectTypes.AFFECT_STEAM_PROFILE) && useSteamProfileEffects) &&
+                      (e.Types.HasFlag(EffectTypes.LAGGY) && useLaggyEffects)
+                select e).ToList();
+            #endregion
 
             #region BoneMenu for Debugging
 
