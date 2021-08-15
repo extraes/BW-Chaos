@@ -64,7 +64,8 @@ namespace BWChaosDiscordBot
             }
             catch (Exception e)
             {
-                await watsonServer.SendAsync(currentClientIpPort, "error:" + e);
+                await watsonServer.SendAsync(currentClientIpPort, "error:" + e.ToString());
+                //Console.WriteLine(e.ToString());
             }
 
             await Task.Delay(-1);
