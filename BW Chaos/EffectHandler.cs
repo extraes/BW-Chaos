@@ -12,6 +12,8 @@ namespace BWChaos
     {
         public EffectHandler(IntPtr ptr) : base(ptr) { }
 
+        private bool randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
+
         public static System.Collections.Generic.List<EffectBase> AllEffects;
         public static EffectHandler Instance;
 
@@ -117,7 +119,8 @@ namespace BWChaos
                 if (accumulatedVotes[i] > topVoted.Item2)
                     topVoted = (i, accumulatedVotes[i]);
             }
-
+            
+            if (topVoted.Item2 == 0 && !randomOnNoVotes) return; // todo: find a better, not shit way to do this - extraes
             if (topVoted.Item1 == 4 || topVoted.Item2 == 0) // todo: for the second if condition here, we should choose a random one from the effect candidates
             {
                 EffectBase e = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
