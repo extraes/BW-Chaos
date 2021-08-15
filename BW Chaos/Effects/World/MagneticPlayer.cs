@@ -9,7 +9,7 @@ namespace BWChaos.Effects
     internal class MagneticPlayer : EffectBase
     {
         //TODO: Rework this if Dark makes the GravityWell custom item
-        public MagneticPlayer() : base("Magnetic player", 30) { }
+        public MagneticPlayer() : base("Magnetic player", 30, EffectTypes.LAGGY) { }
 
         private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
         private object[] coroutineTokens = new object[2];

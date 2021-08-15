@@ -8,7 +8,7 @@ namespace BWChaos.Effects
 {
     internal class RepulsivePlayer : EffectBase
     {
-        public RepulsivePlayer() : base("Repulsive player", 60) { }
+        public RepulsivePlayer() : base("Repulsive player", 60, EffectTypes.LAGGY) { }
 
 
         private List<Rigidbody> rigidbodies = new List<Rigidbody> { };

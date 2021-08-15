@@ -6,7 +6,7 @@ namespace BWChaos.Effects
 {
     internal class California : EffectBase
     {
-        public California() : base("California", 30) { }
+        public California() : base("California", 30, EffectTypes.AFFECT_GRAVITY) { }
 
         private Vector3 previousGrav;
 

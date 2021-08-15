@@ -1,7 +1,6 @@
-using BWChaos;
-using UnityEngine;
 using MelonLoader;
 using System.Collections;
+using UnityEngine;
 
 namespace BWChaos.Effects
 {
@@ -14,8 +13,9 @@ namespace BWChaos.Effects
         {
             NONE = 1 << 0, //todo: find out smarter way to do this
             AFFECT_GRAVITY = 1 << 1,
-            AFFECT_STEAM = 1 << 2,
-            LAGGY = 1 << 3,
+            AFFECT_STEAM_PROFILE = 1 << 2,
+            USE_STEAM = 1 << 3,
+            LAGGY = 1 << 4,
         }
 
         public string Name { get; }

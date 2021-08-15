@@ -9,7 +9,7 @@ namespace BWChaos.Effects
 {
     internal class GravityCube : EffectBase
     {
-        public GravityCube() : base("Gravity Cube", 90) { }
+        public GravityCube() : base("Gravity Cube", 90, EffectTypes.AFFECT_GRAVITY) { }
 
         private Transform gravObject;
         private Vector3 previousGrav;

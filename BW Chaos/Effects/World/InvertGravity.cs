@@ -6,7 +6,7 @@ namespace BWChaos.Effects
 {
     internal class InvertGravity : EffectBase
     {
-        public InvertGravity() : base("Invert Gravity", 45) { }
+        public InvertGravity() : base("Invert Gravity", 45, EffectTypes.AFFECT_GRAVITY) { }
 
         private Vector3 previousGrav;
         private Vector3 invertedGrav = new Vector3(0f, 0.01f, 0f);

@@ -8,7 +8,7 @@ namespace BWChaos.Effects
 {
     internal class Fling : EffectBase
     {
-        public Fling() : base("Fling Everything") { }
+        public Fling() : base("Fling Everything", EffectTypes.AFFECT_GRAVITY) { }
 
         public override void OnEffectStart() => MelonLoader.MelonCoroutines.Start(CoRun());
 

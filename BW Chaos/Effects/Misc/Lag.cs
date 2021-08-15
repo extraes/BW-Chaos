@@ -8,7 +8,7 @@ namespace BWChaos.Effects
 {
     internal class Lag : EffectBase
     {
-        public Lag() : base("Lag", 60) { }
+        public Lag() : base("Lag", 60, EffectTypes.LAGGY) { }
 
         public override void OnEffectStart()
         {
