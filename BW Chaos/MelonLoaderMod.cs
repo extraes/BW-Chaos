@@ -2,6 +2,7 @@
 using MelonLoader;
 using ModThatIsNotMod.BoneMenu;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -30,6 +31,7 @@ namespace BWChaos
         internal static bool useLaggyEffects = false;
         internal static bool useGravityEffects = false;
         internal static bool useSteamProfileEffects = false;
+        internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)> { (EffectTypes.USE_STEAM, isSteamVer) };
 
         internal Process botProcess;
 
@@ -48,14 +50,17 @@ namespace BWChaos
             MelonPreferences.CreateEntry("BW_Chaos", "randomEffectOnNoVotes", randomOnNoVotes, "randomEffectOnNoVotes");
             randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
 
-            MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects");
-            useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
-
-            MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", randomOnNoVotes, "useGravityEffects");
+            MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", useGravityEffects, "useGravityEffects");
             useGravityEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useGravityEffects");
+            eTypesToPrefs.Add((EffectTypes.AFFECT_GRAVITY, useGravityEffects));
 
             MelonPreferences.CreateEntry("BW_Chaos", "useSteamProfileEffects", useSteamProfileEffects, "useSteamProfileEffects");
             useSteamProfileEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useSteamProfileEffects");
+            eTypesToPrefs.Add((EffectTypes.AFFECT_STEAM_PROFILE, useSteamProfileEffects));
+
+            MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects");
+            useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
+            eTypesToPrefs.Add((EffectTypes.LAGGY, useLaggyEffects));
 
             MelonPreferences.Save();
 
@@ -143,6 +148,14 @@ namespace BWChaos
             GlobalVariables.WatsonClient.ServerDisconnected += ClientDisconnectedFromServer;
             GlobalVariables.WatsonClient.MessageReceived += ClientReceiveMessage;
             GlobalVariables.WatsonClient.Start();
+
+            bool IsEffectViable(EffectTypes eTypes)
+            {
+                foreach (var tuple in eTypesToPrefs) 
+                    if (!(eTypes.HasFlag(tuple.Item1) && tuple.Item2)) return false; //todo: does this fucking work?????????????
+                
+                return true;
+            }
         }
 
         public override void OnApplicationQuit()
