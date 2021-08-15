@@ -8,6 +8,7 @@ using BWChaos.Effects;
 
 namespace BWChaos
 {
+    [RegisterTypeInIl2Cpp]
     internal class EffectHandler : MonoBehaviour
     {
         public EffectHandler(IntPtr ptr) : base(ptr) { }
