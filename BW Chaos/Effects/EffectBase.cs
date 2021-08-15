@@ -11,11 +11,11 @@ namespace BWChaos.Effects
         [System.Flags]
         public enum EffectTypes
         {
-            NONE = 1 << 0, //todo: find out smarter way to do this
-            AFFECT_GRAVITY = 1 << 1,
-            AFFECT_STEAM_PROFILE = 1 << 2,
-            USE_STEAM = 1 << 3,
-            LAGGY = 1 << 4,
+            NONE = 0, //todo: find out smarter way to do this
+            AFFECT_GRAVITY = 1 << 0,
+            AFFECT_STEAM_PROFILE = 1 << 1,
+            USE_STEAM = 1 << 2,
+            LAGGY = 1 << 3,
         }
 
         public string Name { get; }
