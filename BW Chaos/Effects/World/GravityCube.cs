@@ -25,9 +25,6 @@ namespace BWChaos.Effects
             Rigidbody rb = gravObject.gameObject.AddComponent<Rigidbody>();
             rb.angularDrag = 0.05f;
             rb.drag = 0.05f;
-            ConstantForce cf = gravObject.gameObject.AddComponent<ConstantForce>();
-            cf.force = new Vector3(10, 10, 10);
-            cf.torque = new Vector3(10, 10, 10);
         }
 
         public override void OnEffectUpdate() => Physics.gravity = -gravObject.up * 12f;
