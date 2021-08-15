@@ -19,7 +19,7 @@ namespace BWChaos
         public const string Name = "BWChaos";
         public const string Author = "extraes, trev";
         public const string Company = null;
-        public const string Version = "0.1.2";
+        public const string Version = "0.2.0";
         public const string DownloadLink = null;      
     }
 
@@ -27,6 +27,7 @@ namespace BWChaos
     {
         internal string botToken = "YOUR_TOKEN_HERE";
         internal string channelId = "CHANNEL_ID_HERE";
+        internal bool randomOnNoVotes = false;
 
         internal Process botProcess;
 
@@ -41,6 +42,9 @@ namespace BWChaos
 
             MelonPreferences.CreateEntry("BW_Chaos", "channel", channelId, "channel");
             channelId = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
+
+            MelonPreferences.CreateEntry("BW_Chaos", "randomEffectOnNoVotes", randomOnNoVotes, "randomEffectOnNoVotes");
+            randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
 
             MelonPreferences.Save();
 
@@ -167,7 +171,7 @@ namespace BWChaos
             //MelonLogger.Msg("Message received from " + e.IpPort + ": " + Encoding.UTF8.GetString(e.Data));
             string[] splitMessage = Encoding.UTF8.GetString(e.Data).Split(':');
             string messageType = splitMessage[0];
-            string messageData = splitMessage[1] ?? string.Empty;
+            string messageData = string.Join(":", splitMessage?.Skip(1)?.ToArray()) ?? string.Empty;
             switch (messageType)
             {
                 case "error":
