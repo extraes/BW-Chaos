@@ -121,10 +121,7 @@ namespace BWChaos
             // todo: do this better, cause this is fucking stupid - extraes, the dumbfuck writer of this shitty ass block of linq
             EffectHandler.AllEffects = (from e in EffectHandler.AllEffects
                 where e.Types == EffectTypes.NONE || // is this optimization?
-                      (e.Types.HasFlag(EffectTypes.USE_STEAM) && isSteamVer) &&
-                      (e.Types.HasFlag(EffectTypes.AFFECT_GRAVITY) && useGravityEffects) &&
-                      (e.Types.HasFlag(EffectTypes.AFFECT_STEAM_PROFILE) && useSteamProfileEffects) &&
-                      (e.Types.HasFlag(EffectTypes.LAGGY) && useLaggyEffects)
+                      (e.Types.HasFlag(EffectTypes.USE_STEAM) && isSteamVer) && IsEffectViable(e.Types)
                 select e).ToList();
             #endregion
 
@@ -152,7 +149,7 @@ namespace BWChaos
             bool IsEffectViable(EffectTypes eTypes)
             {
                 foreach (var tuple in eTypesToPrefs) 
-                    if (!(eTypes.HasFlag(tuple.Item1) && tuple.Item2)) return false; //todo: does this fucking work?????????????
+                    if (!(eTypes.HasFlag(tuple.Item1) && tuple.Item2)) return false; //todid: this fucking works?????
                 
                 return true;
             }
