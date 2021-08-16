@@ -120,7 +120,7 @@ namespace BWChaos
             #region Remove effects based on flags
             // todo: do this better, cause this is fucking stupid - extraes, the dumbfuck writer of this shitty ass block of linq
             EffectHandler.AllEffects = (from e in EffectHandler.AllEffects
-                where e.Types.HasFlag(EffectTypes.NONE) || // is this optimization?
+                where e.Types == EffectTypes.NONE || // is this optimization?
                       (e.Types.HasFlag(EffectTypes.USE_STEAM) && isSteamVer) &&
                       (e.Types.HasFlag(EffectTypes.AFFECT_GRAVITY) && useGravityEffects) &&
                       (e.Types.HasFlag(EffectTypes.AFFECT_STEAM_PROFILE) && useSteamProfileEffects) &&
