@@ -74,6 +74,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.AudioModule">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.AudioModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.CoreModule.dll</HintPath>
@@ -106,9 +109,12 @@
     <Compile Include="Effects\Guns\LowRPM.cs" />
     <Compile Include="Effects\Guns\HighRPM.cs" />
     <Compile Include="Effects\Guns\BarrySteakfries.cs" />
+    <Compile Include="Effects\Misc\SlowmoPunch.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
     <Compile Include="Effects\Misc\SpawnDogAd.cs" />
     <Compile Include="Effects\Misc\4xSpeed.cs" />
+    <Compile Include="Effects\Misc\ChangeSteamName.cs" />
+    <Compile Include="Effects\Misc\FakeCrash.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />
@@ -133,6 +139,7 @@
     <Compile Include="Effects\World\PullAllGrips.cs" />
     <Compile Include="Effects\World\MagneticPlayer.cs" />
     <Compile Include="Effects\World\RGBLights.cs" />
+    <Compile Include="Effects\Misc\RandomTimeScale.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
@@ -144,6 +151,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\chaos_ui_elements" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\winsounds" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

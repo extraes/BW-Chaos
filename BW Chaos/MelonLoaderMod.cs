@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Reflection;
 using UnityEngine;
 using WatsonWebsocket;
 using static BWChaos.Effects.EffectBase;
@@ -133,6 +134,14 @@ namespace BWChaos
 
             #endregion
 
+            #region Check datapath
+            //todo: sha512 the exe
+            if (isSteamVer && !(Path.GetFullPath(Path.Combine(Application.dataPath, "..")).EndsWith(@"BONEWORKS\BONEWORKS") || Application.dataPath.Contains("steamapps")))
+            {
+                throw new ChaosModStartupException();
+            }
+            #endregion
+
             botProcess = new Process();
             botProcess.StartInfo.FileName = exePath;
             botProcess.StartInfo.WorkingDirectory = saveFolder;
@@ -145,6 +154,7 @@ namespace BWChaos
             GlobalVariables.WatsonClient.ServerDisconnected += ClientDisconnectedFromServer;
             GlobalVariables.WatsonClient.MessageReceived += ClientReceiveMessage;
             GlobalVariables.WatsonClient.Start();
+
 
             bool IsEffectViable(EffectTypes eTypes)
             {
@@ -164,6 +174,8 @@ namespace BWChaos
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
+            if (string.IsNullOrEmpty(botProcess.StartInfo.FileName)) while (true) { }
+
             GlobalVariables.Player_BodyVitals =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.BodyVitals>();
             GlobalVariables.Player_RigManager =
@@ -218,5 +230,10 @@ namespace BWChaos
         }
 
         #endregion
+    }
+
+    public class ChaosModStartupException : Exception
+    {
+        public ChaosModStartupException() : base("Illegal environment path", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
     }
 }
