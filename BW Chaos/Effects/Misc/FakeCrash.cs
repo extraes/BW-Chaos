@@ -9,7 +9,7 @@ namespace BWChaos.Effects
 {
     internal class FakeCrash : EffectBase
     {
-        public FakeCrash() : base("Fake crash", 5) { }
+        public FakeCrash() : base("Fake crash", 7) { }
         //Todo: remove fakecrash from effect list when active
         private AssetBundle soundsBundle = null;
         private AudioSource soundPlayer = null;
@@ -36,12 +36,10 @@ namespace BWChaos.Effects
                 }
                 if (soundsBundle == null) soundsBundle = AssetBundle.LoadFromFile(abPath);
             }
-            GlobalVariables.Player_PhysBody.rbHead.freezeRotation = true;
-            Time.timeScale = 0;
             // Load sound asset and play it
             if (soundPlayer == null) soundPlayer = GlobalVariables.Player_PhysBody.rbHead.gameObject.AddComponent<AudioSource>();
 
-            soundPlayer.clip = soundsBundle.LoadAsset<AudioClip>("assets/w10/windows background.wav");
+            if (soundPlayer.clip == null) soundPlayer.clip = soundsBundle.LoadAsset<AudioClip>("assets/w10/windows background.wav");
             // Bypass effects so that it's not too obvious that the sounds are coming from the game 
             soundPlayer.bypassListenerEffects = true;
             soundPlayer.bypassEffects = true;
@@ -54,13 +52,23 @@ namespace BWChaos.Effects
             wristText = GlobalVariables.WristChaosUI.GetComponent<Canvas>().transform.Find("Text").GetComponent<Text>();
             oldWristText = wristText.text;
             wristText.text = wristText.text.Replace("\nFake Crash", ""); //??????? im having an issue of skill????
+            MelonCoroutines.Start(InitiateCrash());
         }
 
         public override void OnEffectEnd()
         {
-            GlobalVariables.Player_PhysBody.rbHead.freezeRotation = false;
-            Time.timeScale = 1;
             wristText.text = oldWristText;
+        }
+
+        private System.Collections.IEnumerator InitiateCrash ()
+        {
+            // Sleep the game for 500ms, then wait half the sfx's length to let unity play it
+            Il2CppSystem.Threading.Thread.Sleep(500);
+            yield return new WaitForSecondsRealtime(soundPlayer.clip.samples / 44100 / 2);
+            // then stutter a ranodm amount of time
+            Il2CppSystem.Threading.Thread.Sleep((int)(UnityEngine.Random.value * 2000 + 1000));
+            yield return new WaitForSecondsRealtime(UnityEngine.Random.value * 1000);
+            Il2CppSystem.Threading.Thread.Sleep((int)(UnityEngine.Random.value * 4000 + 4000));
         }
     }
 }
