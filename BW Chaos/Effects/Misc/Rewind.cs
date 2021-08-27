@@ -56,6 +56,8 @@ namespace BWChaos.Effects
             }
             #endregion
 
+            MelonCoroutines.Start(CoRun());
+
         }
 
         public override void OnEffectUpdate()
