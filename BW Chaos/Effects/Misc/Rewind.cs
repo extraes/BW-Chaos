@@ -58,8 +58,11 @@ namespace BWChaos.Effects
 
         }
 
-        public override void OnEffectUpdate() => MelonLogger.Msg("Placeholder update");
-        public override void OnEffectEnd() => MelonLogger.Msg("Placeholder end");
+        public override void OnEffectUpdate()
+        {
+            clock.timeScale = 1;
+        }
+        
         private IEnumerator CoRun()
         {
             yield return new WaitForSecondsRealtime(15f);
