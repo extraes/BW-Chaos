@@ -10,8 +10,16 @@ namespace BWChaos.Effects
     {
         public Rewind() : base("Record then rewind 15 seconds", 30) { }
         private GlobalClock clock = null;
+        private bool isRewindAlreadyActive = false; // We don't want two rewinds at the same time. That would be bad.
         public override void OnEffectStart()
         {
+            if (isRewindAlreadyActive)
+            {
+                MelonLogger.Warning("Two instances of Rewind can't be active at the same time! Not running again!");
+            }
+
+            isRewindAlreadyActive = true;
+            GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
             #region Set up Chronos & clock
             GameObject chronos = new GameObject("ChronosController");
             clock = chronos.AddComponent<GlobalClock>();
@@ -58,11 +66,15 @@ namespace BWChaos.Effects
 
             MelonCoroutines.Start(CoRun());
 
+            // Force stop 4xSpeed if it's running
+            foreach (var e in GlobalVariables.ActiveEffects) if (e.Name == "4x Speed") e.ForceEnd();
         }
 
-        public override void OnEffectUpdate()
+        public override void OnEffectEnd()
         {
             clock.timeScale = 1;
+            GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
+            isRewindAlreadyActive = false;
         }
         
         private IEnumerator CoRun()
@@ -70,14 +82,7 @@ namespace BWChaos.Effects
             yield return new WaitForSecondsRealtime(15f);
             clock.timeScale = -1;
 
-            // To foolproof this effect, override Time.timeScale (By setting it every frame :DDDDD)
-            var startRewindTime = Time.realtimeSinceStartup;
-            while (Time.realtimeSinceStartup < startRewindTime + 15)
-            {
-                Time.timeScale = 1;
-                yield return new WaitForFixedUpdate();
-            }
-
+            Time.timeScale = 1;
         }
     }
 }
