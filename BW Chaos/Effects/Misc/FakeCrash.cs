@@ -10,7 +10,6 @@ namespace BWChaos.Effects
     internal class FakeCrash : EffectBase
     {
         public FakeCrash() : base("Fake crash", 7) { }
-        //Todo: remove fakecrash from effect list when active
         private AssetBundle soundsBundle = null;
         private AudioSource soundPlayer = null;
         Text wristText = null;
