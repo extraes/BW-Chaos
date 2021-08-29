@@ -122,7 +122,7 @@ namespace BWChaos
             }
             
             if (topVoted.Item2 == 0 && !randomOnNoVotes) return; // todo: find a better, not shit way to do this - extraes
-            if (topVoted.Item1 == 4 || topVoted.Item2 == 0) // todo: for the second if condition here, we should choose a random one from the effect candidates
+            if (topVoted.Item1 == 4 || topVoted.Item2 == 0)
             {
                 EffectBase e = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
                 MelonLogger.Msg(e.Name + " (random) was chosen");
