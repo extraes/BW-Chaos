@@ -120,6 +120,7 @@
     <Compile Include="Effects\Misc\ChangeSteamName.cs" />
     <Compile Include="Effects\Misc\FakeCrash.cs" />
     <Compile Include="Effects\Misc\Rewind.cs" />
+    <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />
@@ -145,6 +146,7 @@
     <Compile Include="Effects\World\MagneticPlayer.cs" />
     <Compile Include="Effects\World\RGBLights.cs" />
     <Compile Include="Effects\Misc\RandomTimeScale.cs" />
+    <Compile Include="Effects\World\InvertVelocity.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
