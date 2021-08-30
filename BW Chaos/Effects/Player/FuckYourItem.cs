@@ -10,16 +10,12 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            // todo: do we actually need to drop before disabling?
-            //todo: after investigating, we don't.   -extraes
             Interactable interactable = Player.leftHand.attachedInteractable;
             InteractableHost host = interactable?.GetComponentInParent<InteractableHost>();
-            //host?.Drop();
             host?.gameObject?.SetActive(false);
 
             interactable = Player.rightHand.attachedInteractable;
             host = interactable?.GetComponentInParent<InteractableHost>();
-            //host?.Drop();
             host?.gameObject?.SetActive(false);
         }
     }

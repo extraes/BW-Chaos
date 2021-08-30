@@ -13,7 +13,6 @@ namespace BWChaos.Effects
         {
             while (Active)
             {
-                // todo: stress test this
                 ModThatIsNotMod.RandomShit.AdManager.CreateDogAd();
                 yield return new WaitForSecondsRealtime(2.5f);
             }
