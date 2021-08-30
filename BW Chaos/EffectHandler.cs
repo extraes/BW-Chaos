@@ -5,6 +5,7 @@ using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 using BWChaos.Effects;
+using System.Text.RegularExpressions;
 
 namespace BWChaos
 {
@@ -79,11 +80,20 @@ namespace BWChaos
         public void Update()
         {
             string newString = string.Empty;
+            // Hide hidden effects (Like FakeCrash) from the player
             foreach (EffectBase e in GlobalVariables.PreviousEffects)
-                newString += e.Active ? $"{e.Name} (ACTIVE)\n" : $"{e.Name}\n";
+            {
+                // Is this more readable than ternary operatoring in a ternary operator?
+                var activeTag = e.Types.HasFlag(EffectBase.EffectTypes.HIDDEN) ? "HIDDEN" : "ACTIVE";
+                newString += e.Active ?
+                    $"{e.Name} {activeTag}\n": 
+                    $"{e.Name}\n";
+            }
 
             overlayText.text = newString;
-            wristText.text = newString;
+            // Hide all hidden effects, replace them with Immortality (because its relatively hard to discover)
+            //todo: replace immortality with a randomized effect name
+            wristText.text = Regex.Replace(newString, @".*\(HIDDEN\)", "Immortality", RegexOptions.Compiled | RegexOptions.ECMAScript);
         }
 
         [UnhollowerBaseLib.Attributes.HideFromIl2Cpp]

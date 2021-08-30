@@ -9,7 +9,7 @@ namespace BWChaos.Effects
 {
     internal class Butterfingers : EffectBase
     {
-        public Butterfingers() : base("Butterfingers", 75) { }
+        public Butterfingers() : base("Butterfingers", 75, EffectTypes.HIDDEN) { }
 
         public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
 

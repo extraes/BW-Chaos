@@ -10,7 +10,7 @@ namespace BWChaos.Effects
 {
     internal class FuckYourMag : EffectBase
     {
-        public FuckYourMag() : base("Fuck Your Magazine", 90) { }
+        public FuckYourMag() : base("Fuck Your Magazine", 90, EffectTypes.HIDDEN) { }
 
         public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
 

@@ -9,11 +9,9 @@ namespace BWChaos.Effects
 {
     internal class FakeCrash : EffectBase
     {
-        public FakeCrash() : base("Fake crash", 7) { }
+        public FakeCrash() : base("Fake crash", 7, EffectTypes.HIDDEN) { }
         private AssetBundle soundsBundle = null;
         private AudioSource soundPlayer = null;
-        Text wristText = null;
-        string oldWristText = string.Empty;
         public override void OnEffectStart()
         {
             if (soundsBundle == null)
@@ -48,15 +46,11 @@ namespace BWChaos.Effects
             soundPlayer.Play();
             //todo: create a new audio stream not tied to the game's entry in volume mixer
 
-            wristText = GlobalVariables.WristChaosUI.GetComponent<Canvas>().transform.Find("Text").GetComponent<Text>();
-            oldWristText = wristText.text;
-            wristText.text = wristText.text.Replace("\nFake Crash", ""); //??????? im having an issue of skill????
             MelonCoroutines.Start(InitiateCrash());
         }
 
         public override void OnEffectEnd()
         {
-            wristText.text = oldWristText;
         }
 
         private System.Collections.IEnumerator InitiateCrash ()
@@ -66,7 +60,7 @@ namespace BWChaos.Effects
             yield return new WaitForSecondsRealtime(soundPlayer.clip.samples / 44100 / 2);
             // then stutter a ranodm amount of time
             Il2CppSystem.Threading.Thread.Sleep((int)(UnityEngine.Random.value * 2000 + 1000));
-            yield return new WaitForSecondsRealtime(UnityEngine.Random.value * 1000);
+            yield return new WaitForSecondsRealtime(UnityEngine.Random.value * 100);
             Il2CppSystem.Threading.Thread.Sleep((int)(UnityEngine.Random.value * 4000 + 4000));
         }
     }

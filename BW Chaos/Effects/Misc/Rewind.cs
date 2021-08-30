@@ -70,6 +70,9 @@ namespace BWChaos.Effects
             foreach (var e in GlobalVariables.ActiveEffects) if (e.Name == "4x Speed") e.ForceEnd();
         }
 
+        public override void OnEffectUpdate() => Time.timeScale = 1;
+
+
         public override void OnEffectEnd()
         {
             clock.timeScale = 1;

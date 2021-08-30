@@ -16,6 +16,7 @@ namespace BWChaos.Effects
             AFFECT_STEAM_PROFILE = 1 << 1,
             USE_STEAM = 1 << 2,
             LAGGY = 1 << 3,
+            HIDDEN = 1 << 4,
         }
 
         public string Name { get; }

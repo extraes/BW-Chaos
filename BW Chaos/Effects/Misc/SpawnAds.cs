@@ -111,9 +111,12 @@ namespace BWChaos.Effects
             "this is my kingdom cum, this is my kingdom cum, when you feel my seed, look in to my ass, its where my semen hide, its where my penis hard",
             "i am very mature, this mod (mainly this effect) is a testament to that",
             "minecraft cave noises still creep me out",
-            "SHEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESH THAT LOOK BUSSIN BUSSIN ON GOD ON GOD FOR REAL FOR REAL",
+            "SHEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEESH THAT LOOK BUSSIN BUSSIN ON GOD ON GOD RESPECTFULLY FOR REAL FOR REAL",
             "I DONT KNOW HOW BUT this mod works, they didnt find me :)",
             "its the tax man, we're coming for you.",
+            "i hate paying taxes if theres anything i hate\ni supported ron paul back in 2008\nyou might think its unfair that i dont have to pay\nbut its ok because taxation is theft anyway",
+            "... do you really think im poggers..?",
+            "Dick Vitale's It's Awesome Baby College Hoops",
         };
     }
 }
