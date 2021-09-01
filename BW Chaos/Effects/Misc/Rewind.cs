@@ -22,9 +22,15 @@ namespace BWChaos.Effects
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
             #region Set up Chronos & clock
             GameObject chronos = new GameObject("ChronosController");
-            clock = chronos.AddComponent<GlobalClock>();
+            if (clock == null) clock = chronos.AddComponent<GlobalClock>();
             clock.key = "Root";
-            if (Timekeeper.instance == null) chronos.AddComponent<Timekeeper>();
+            try { if (Timekeeper.instance == null) chronos.AddComponent<Timekeeper>(); }
+            catch (System.Exception err)
+            {
+                MelonLogger.Warning("Caught Singleton exception, adding Timekeeper now.");
+                MelonLogger.Warning(err);
+                chronos.AddComponent<Timekeeper>();
+            }
             #endregion
 
             #region Register Rb's into clock
@@ -82,10 +88,13 @@ namespace BWChaos.Effects
         
         private IEnumerator CoRun()
         {
+            MelonLogger.Msg("HELLO! Rewind is working!");
             yield return new WaitForSecondsRealtime(15f);
-            clock.timeScale = -1;
-
-            Time.timeScale = 1;
+            MelonLogger.Msg("HELLO! Rewind is STILL working!");
+            clock.LerpTimeScale(-1, 1);
+            yield return new WaitForSecondsRealtime(15f);
+            MelonLogger.Msg("HELLO! Rewind is STILL STILL working!");
+            clock.LerpTimeScale(1, 1);
         }
     }
 }

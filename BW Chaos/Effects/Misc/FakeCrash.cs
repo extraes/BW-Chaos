@@ -35,7 +35,7 @@ namespace BWChaos.Effects
             }
             // Load sound asset and play it
             if (soundPlayer == null) soundPlayer = GlobalVariables.Player_PhysBody.rbHead.gameObject.AddComponent<AudioSource>();
-
+            
             if (soundPlayer.clip == null) soundPlayer.clip = soundsBundle.LoadAsset<AudioClip>("assets/w10/windows background.wav");
             // Bypass effects so that it's not too obvious that the sounds are coming from the game 
             soundPlayer.bypassListenerEffects = true;
@@ -48,7 +48,7 @@ namespace BWChaos.Effects
 
             MelonCoroutines.Start(InitiateCrash());
         }
-
+        
         public override void OnEffectEnd()
         {
         }

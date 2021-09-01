@@ -5,7 +5,7 @@ namespace BWChaos.Effects
 {
     internal class SpawnDogAd : EffectBase
     {
-        public SpawnDogAd() : base("Spawn Dog Ad", 75) { }
+        public SpawnDogAd() : base("Spawn Dog Ads", 75) { }
 
         public override void OnEffectStart() => MelonLoader.MelonCoroutines.Start(CoRun());
 

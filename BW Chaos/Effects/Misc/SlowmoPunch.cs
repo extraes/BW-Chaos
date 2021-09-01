@@ -29,10 +29,11 @@ namespace BWChaos.Effects
         [HarmonyPatch(typeof(HandSFX), "PunchAttack")]
         public static class PunchPatch
         {
-            public static void Prefix(Collision c, float impulse, float relVelSqr) => OnPunch(c, impulse, relVelSqr);
+            // Hopefully prevent this from throwing nullrefs
+            public static void Prefix(Collision c, float impulse = 0.5f, float relVelSqr = 0.5f) => OnPunch(c, impulse, relVelSqr);
         }
 
-        private IEnumerator Slowmo_OnPunch(Collision arg1, float arg2, float arg3)
+        private IEnumerator Slowmo_OnPunch(Collision arg1, float arg2 = 0.5f, float arg3 = 0.5f)
         {
             Time.timeScale = 0.05f;
             while (Time.timeScale < 1f && !Active)

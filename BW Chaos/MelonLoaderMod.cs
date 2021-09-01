@@ -32,7 +32,8 @@ namespace BWChaos
         internal static bool useLaggyEffects = false;
         internal static bool useGravityEffects = false;
         internal static bool useSteamProfileEffects = false;
-        internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)> { (EffectTypes.USE_STEAM, isSteamVer) };
+        internal static bool enableIMGUI = false;
+        internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)> { (EffectTypes.USE_STEAM, isSteamVer), (EffectTypes.HIDDEN, true) };
 
         internal Process botProcess;
 
@@ -62,6 +63,9 @@ namespace BWChaos
             MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects");
             useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
             eTypesToPrefs.Add((EffectTypes.LAGGY, useLaggyEffects));
+
+            MelonPreferences.CreateEntry("BW_Chaos", "enableIMGUI", enableIMGUI, "enableIMGUI", true);
+            enableIMGUI = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableIMGUI");
 
             MelonPreferences.Save();
 
@@ -142,6 +146,8 @@ namespace BWChaos
             }
             #endregion
 
+            #region Set up server
+
             botProcess = new Process();
             botProcess.StartInfo.FileName = exePath;
             botProcess.StartInfo.WorkingDirectory = saveFolder;
@@ -155,6 +161,7 @@ namespace BWChaos
             GlobalVariables.WatsonClient.MessageReceived += ClientReceiveMessage;
             GlobalVariables.WatsonClient.Start();
 
+            #endregion
 
             bool IsEffectViable(EffectTypes eTypes)
             {
@@ -174,7 +181,7 @@ namespace BWChaos
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
-            if (string.IsNullOrEmpty(botProcess.StartInfo.FileName)) while (true) { }
+            if (string.IsNullOrEmpty(botProcess.StartInfo.FileName) && !(botToken == "YOUR_TOKEN_HERE" || channelId == "CHANNEL_ID_HERE")) while (true) { }
 
             GlobalVariables.Player_BodyVitals =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.BodyVitals>();
@@ -192,6 +199,24 @@ namespace BWChaos
         {
             foreach (EffectBase effect in GlobalVariables.ActiveEffects)
                 effect.OnEffectUpdate();
+        }
+
+        // IMGUI for flatscreen debugging (when the vr no workie :woeis:)
+        internal Vector2 scrollPos = Vector2.zero;
+        public override void OnGUI()
+        {
+            if (enableIMGUI)
+            {
+                //GUI.BeginScrollView(new Rect(50, 50, 260, 500), scrollPos, new Rect(0, 0, 1024, 2048));
+
+                for (int i=0; i < EffectHandler.AllEffects.Count; i++)
+                {
+                    var e = EffectHandler.AllEffects[i];
+                    if (GUI.Button(new Rect(5, 5 + i * 30, 250, 25), e.Name)) e.Run();
+                }
+
+                //GUI.EndScrollView(true);
+            }
         }
 
         #region Websocket Methods
@@ -232,7 +257,7 @@ namespace BWChaos
         #endregion
     }
 
-    public class ChaosModStartupException : Exception
+    internal class ChaosModStartupException : Exception
     {
         public ChaosModStartupException() : base("Illegal environment path", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
     }

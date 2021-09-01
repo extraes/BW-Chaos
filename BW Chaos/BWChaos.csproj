@@ -115,7 +115,7 @@
     <Compile Include="Effects\Guns\BarrySteakfries.cs" />
     <Compile Include="Effects\Misc\SlowmoPunch.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
-    <Compile Include="Effects\Misc\SpawnDogAd.cs" />
+    <Compile Include="Effects\Misc\SpawnDogAds.cs" />
     <Compile Include="Effects\Misc\4xSpeed.cs" />
     <Compile Include="Effects\Misc\ChangeSteamName.cs" />
     <Compile Include="Effects\Misc\FakeCrash.cs" />
