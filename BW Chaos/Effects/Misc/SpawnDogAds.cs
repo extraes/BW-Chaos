@@ -11,6 +11,7 @@ namespace BWChaos.Effects
 
         private IEnumerator CoRun()
         {
+            yield return null;
             while (Active)
             {
                 ModThatIsNotMod.RandomShit.AdManager.CreateDogAd();

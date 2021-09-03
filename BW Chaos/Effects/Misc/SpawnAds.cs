@@ -11,6 +11,7 @@ namespace BWChaos.Effects
 
         private IEnumerator CoRun()
         {
+            yield return null; // Wait 1 frame because otherwise the IEnum thinks Active is false. Why? Beats me!
             while (Active)
             {
                 var ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(ads[Random.RandomRange(0, ads.Length)]);
@@ -27,7 +28,6 @@ namespace BWChaos.Effects
             "hey mods... ni-",
             "we do a little trolling",
             "ping camobiwan and tell him 'helo!!!!!!' for free chill role!",
-            //"you have nodejs installed? ew! a js user!", //todid: changed this in nonshitcode version
             "javascript users SEETHING at this release!",
             "shoutouts to trev for putting up with my fuckery",
             "localize mother 3",
