@@ -36,7 +36,7 @@ namespace BWChaos.Effects
             #region Register Rb's into clock
             foreach (Rigidbody rb in Resources.FindObjectsOfTypeAll<Rigidbody>())
             {
-                if (rb.GetComponentInParent<RigManager>() || rb.IsSleeping() || rb.isKinematic) continue;
+                if (rb.GetComponentInParent<RigManager>() /*|| rb.IsSleeping()*/ || rb.isKinematic) continue;
 
                 // Ignore rigidbodies that are a part of the body
                 Timeline timeline = rb.GetComponent<Timeline>();
@@ -88,12 +88,9 @@ namespace BWChaos.Effects
         
         private IEnumerator CoRun()
         {
-            MelonLogger.Msg("HELLO! Rewind is working!");
             yield return new WaitForSecondsRealtime(15f);
-            MelonLogger.Msg("HELLO! Rewind is STILL working!");
             clock.LerpTimeScale(-1, 1);
-            yield return new WaitForSecondsRealtime(15f);
-            MelonLogger.Msg("HELLO! Rewind is STILL STILL working!");
+            yield return new WaitForSecondsRealtime(14f);
             clock.LerpTimeScale(1, 1);
         }
     }
