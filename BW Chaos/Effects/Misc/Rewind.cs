@@ -27,7 +27,7 @@ namespace BWChaos.Effects
             try { if (Timekeeper.instance == null) chronos.AddComponent<Timekeeper>(); }
             catch (System.Exception err)
             {
-                MelonLogger.Warning("Caught Singleton exception, adding Timekeeper now.");
+                MelonLogger.Warning("Caught Singleton exception, adding Timekeeper now. In case you wanted the error, here:");
                 MelonLogger.Warning(err);
                 chronos.AddComponent<Timekeeper>();
             }
@@ -48,6 +48,9 @@ namespace BWChaos.Effects
                 timeline._clock = clock;
                 timeline.rewindable = true;
                 timeline.recordingDuration = 15f;
+                timeline._recordingDuration = 15f;
+                timeline.recordingInterval = 0.25f;
+                timeline._recordingInterval = 0.25f;
                 clock.Register(timeline);
             }
             #endregion
@@ -84,13 +87,24 @@ namespace BWChaos.Effects
             clock.timeScale = 1;
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
             isRewindAlreadyActive = false;
+            foreach (var tl in GameObject.FindObjectsOfType<Timeline>())
+            {
+                var rb = tl.gameObject.GetComponent<Rigidbody>();
+                if (rb != null)
+                {
+                    rb.useGravity = true;
+                    rb.Sleep(); // so it doesnt jump like they tend to do
+                }
+                
+                GameObject.Destroy(tl);
+            }
         }
         
         private IEnumerator CoRun()
         {
-            yield return new WaitForSecondsRealtime(15f);
-            clock.LerpTimeScale(-1, 1);
             yield return new WaitForSecondsRealtime(14f);
+            clock.LerpTimeScale(-1, 1);
+            yield return new WaitForSecondsRealtime(15f);
             clock.LerpTimeScale(1, 1);
         }
     }
