@@ -22,14 +22,22 @@ namespace BWChaos.Effects
 
         private IEnumerator SpawnCrablets()
         {
+            yield return null;
+
+            Pool pool = null;
+            foreach (var p in GameObject.FindObjectsOfType<Pool>()) if (p.name == "pool - Crablet") pool = p;
+
             // todo: test
             while (Active)
             {
-                yield return new WaitForSeconds(10 * UnityEngine.Random.value);
+                yield return new WaitForSeconds(5 * UnityEngine.Random.value);
                 var spawnPos =
                     Player.GetPlayerHead().transform.position +
                     new Vector3((UnityEngine.Random.value - 0.5f) * 5, 10, (UnityEngine.Random.value - 0.5f) * 5);
-                spawnedCrablets.Add(CustomItems.SpawnFromPool("Crablet", spawnPos, Quaternion.identity).GetComponent<Poolee>());
+
+                var c = pool.InstantiatePoolee(spawnPos, Quaternion.identity);
+                c.gameObject.SetActive(true);
+                spawnedCrablets.Add(c);
             }
         }
 

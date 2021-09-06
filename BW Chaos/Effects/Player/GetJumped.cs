@@ -10,8 +10,10 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            var pool = GameObject.Find("NullBody [").GetComponent<Pool>();
+            Pool pool = null;
+            foreach (var p in GameObject.FindObjectsOfType<Pool>()) if (p.name == "pool - Null Body") pool = p;
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
+
             for (int i = 0; i < 8; i++)
             {
                 float theta = (i / 8) * 360;
