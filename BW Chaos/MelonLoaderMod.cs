@@ -64,7 +64,9 @@ namespace BWChaos
             useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
             eTypesToPrefs.Add((EffectTypes.LAGGY, useLaggyEffects));
 
+#pragma warning disable CS0612 // Type or member is obsolete
             MelonPreferences.CreateEntry("BW_Chaos", "enableIMGUI", enableIMGUI, "enableIMGUI", true);
+#pragma warning restore CS0612 // Type or member is obsolete
             enableIMGUI = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableIMGUI");
 
             MelonPreferences.Save();
@@ -126,7 +128,7 @@ namespace BWChaos
             // todo: do this better, cause this is fucking stupid - extraes, the dumbfuck writer of this shitty ass block of linq
             EffectHandler.AllEffects = (from e in EffectHandler.AllEffects
                 where e.Types == EffectTypes.NONE || // is this optimization?
-                      (e.Types.HasFlag(EffectTypes.USE_STEAM) && isSteamVer) && IsEffectViable(e.Types)
+                      IsEffectViable(e.Types)
                 select e).ToList();
             #endregion
 
@@ -166,7 +168,7 @@ namespace BWChaos
             bool IsEffectViable(EffectTypes eTypes)
             {
                 foreach (var tuple in eTypesToPrefs) 
-                    if (!(eTypes.HasFlag(tuple.Item1) && tuple.Item2)) return false; //todid: this fucking works?????
+                    if (eTypes.HasFlag(tuple.Item1) && !tuple.Item2) return false; //todid: this fucking works?????
                 
                 return true;
             }
@@ -208,11 +210,18 @@ namespace BWChaos
             if (enableIMGUI)
             {
                 //GUI.BeginScrollView(new Rect(50, 50, 260, 500), scrollPos, new Rect(0, 0, 1024, 2048));
-
+                var horizOffset = 5;
+                var vertOffset = 5;
                 for (int i=0; i < EffectHandler.AllEffects.Count; i++)
                 {
+                    if (vertOffset + 50 > Screen.height)
+                    {
+                        vertOffset = 5;
+                        horizOffset += 255;
+                    }
                     var e = EffectHandler.AllEffects[i];
-                    if (GUI.Button(new Rect(5, 5 + i * 30, 250, 25), e.Name)) e.Run();
+                    if (GUI.Button(new Rect(horizOffset, vertOffset, 250, 25), e.Name)) e.Run();
+                    vertOffset += 30;
                 }
 
                 //GUI.EndScrollView(true);
