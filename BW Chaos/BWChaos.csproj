@@ -120,6 +120,8 @@
     <Compile Include="Effects\Misc\ChangeSteamName.cs" />
     <Compile Include="Effects\Misc\FakeCrash.cs" />
     <Compile Include="Effects\Misc\Rewind.cs" />
+    <Compile Include="Effects\Misc\GullibleOnTheCeiling.cs" />
+    <Compile Include="Effects\Misc\CaughtIn4K.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
