@@ -1,6 +1,6 @@
-﻿using System;
+﻿using MelonLoader;
+using System;
 using UnityEngine;
-using MelonLoader;
 using VLB;
 
 namespace BWChaos.Effects
@@ -8,86 +8,82 @@ namespace BWChaos.Effects
     internal class RGBLights : EffectBase
     {
         // Because instead of making RGBLights open source, I decided to do this. - extraes
-        public RGBLights() : base("Epic Gamer Pride (RGB Lights)", 180) { }
+        public RGBLights() : base("RGB-ify lights") { }
 
-        public override void OnEffectStart() 
+        public override void OnEffectStart()
         {
-            foreach (var light in GameObject.FindObjectsOfType<Light>()) light.gameObject.AddComponent<SuperEpicGamerRGB_Real>();
+            foreach (var light in GameObject.FindObjectsOfType<Light>())
+            {
+                //if (light.bakingOutput.isBaked) continue; commented because baked lights can have volumetrics
+                light.gameObject.AddComponent<UnityLightRGB>();
+            }
             // Hopefully this works because it should be ran when the scene is already loaded
-            foreach (var volumetric in GameObject.FindObjectsOfType<BeamGeometry>()) volumetric.gameObject.AddComponent<SuperEpicGamerRGB_Working2019_NoVirus>(); 
-        }
-        
-        public override void OnEffectEnd()
-        {
-            foreach (var rgbLight in GameObject.FindObjectsOfType<SuperEpicGamerRGB_Real>()) GameObject.Destroy(rgbLight);
-            foreach (var rgbVolumetric in GameObject.FindObjectsOfType<SuperEpicGamerRGB_Working2019_NoVirus>()) GameObject.Destroy(rgbVolumetric);
+            //foreach (var volumetric in GameObject.FindObjectsOfType<BeamGeometry>()) volumetric.gameObject.AddComponent<VolumetricRGB>(); 
         }
 
-        [RegisterTypeInIl2Cpp]
-        public class SuperEpicGamerRGB_Real : MonoBehaviour
+    }
+    [RegisterTypeInIl2Cpp]
+    public class UnityLightRGB : MonoBehaviour
+    {
+        public UnityLightRGB(IntPtr ptr) : base(ptr) { }
+
+        Light light = null;
+        bool foundBeamGeo = false;
+        float cycleTime = 1f;
+        void Start()
         {
-            public SuperEpicGamerRGB_Real(IntPtr ptr) : base(ptr) { }
-
-            Light light = null;
-            float cycleTime = 1f;
-            Color originalColor = Color.white;
-            void Start()
-            {
-                light = this.gameObject.GetComponent<Light>();
-                originalColor = light.color;
-                light.color = Color.cyan;
-            }
-
-            void Update()
-            {
-                if (light.color == Color.white || light.color == Color.black) light.color = Color.cyan;
-
-                Color.RGBToHSV(light.color, out float h, out float s, out float v);
-
-                light.color = Color.HSVToRGB(h + Time.deltaTime * (1 / cycleTime), s, v);
-            }
-
-            void Destroy ()
-            {
-                light.color = originalColor;
-            }
+            light = this.gameObject.GetComponent<Light>();
+            light.color = Color.cyan;
         }
 
-        [RegisterTypeInIl2Cpp]
-        public class SuperEpicGamerRGB_Working2019_NoVirus : MonoBehaviour
+        void Update()
         {
-            public SuperEpicGamerRGB_Working2019_NoVirus(IntPtr ptr) : base(ptr) { }
+            if (light.color == Color.white || light.color == Color.black) light.color = Color.cyan;
 
-            BeamGeometry beamGeometry = null;
-            float alpha = 0f;
-            float cycleTime = 1f;
-            Color originalColor = Color.white;
-            void Start()
+            if (foundBeamGeo == false)
             {
-                // Save the beamgeometry now so I don't need to call GetComponent every frame & get the alpha now to maintain the intensity of the light
-                beamGeometry = this.gameObject.GetComponent<BeamGeometry>();
-                alpha = beamGeometry.material.color.a;
-                originalColor = beamGeometry.material.color;
-                // Set the color to cyan so it can be scrolled in Update(). Without this, any white light would remain white
-                beamGeometry.material.color = Color.cyan;
+                if (this.gameObject.GetComponent<VolumetricLightBeam>() == null) foundBeamGeo = true;
+                else
+                {
+                    var beamGeo = this.gameObject.GetComponentInChildren<BeamGeometry>();
+                    if (beamGeo != null)
+                    {
+                        beamGeo.gameObject.AddComponent<VolumetricRGB>();
+                        foundBeamGeo = true;
+                    }
+                }
             }
+            Color.RGBToHSV(light.color, out float h, out float s, out float v);
 
-            void Update()
-            {
-                var c = beamGeometry.material.color;
-                c.a = 1;
-                if (c == Color.white || c == Color.black) beamGeometry.material.color = Color.cyan;
-                Color.RGBToHSV(beamGeometry.material.color, out float h, out float s, out float v);
+            light.color = Color.HSVToRGB(h + Time.deltaTime * (1 / cycleTime), s, v);
+        }
+    }
 
-                var color = Color.HSVToRGB(h + Time.deltaTime * (1 / cycleTime), s, v);
-                color.a = alpha;
-                beamGeometry.material.color = color;
-            }
+    [RegisterTypeInIl2Cpp]
+    public class VolumetricRGB : MonoBehaviour
+    {
+        public VolumetricRGB(IntPtr ptr) : base(ptr) { }
 
-            void Destroy()
-            {
-                beamGeometry.material.color = originalColor;
-            }
+        BeamGeometry beamGeometry = null;
+        float alpha = 0f;
+        float cycleTime = 1f;
+        void Start()
+        {
+            beamGeometry = this.gameObject.GetComponent<BeamGeometry>();
+            alpha = beamGeometry.material.color.a;
+            beamGeometry.material.color = Color.cyan;
+        }
+
+        void Update()
+        {
+            var c = beamGeometry.material.color;
+            c.a = 1;
+            if (c == Color.white || c == Color.black) beamGeometry.material.color = Color.cyan;
+            Color.RGBToHSV(beamGeometry.material.color, out float h, out float s, out float v);
+
+            var color = Color.HSVToRGB(h + Time.deltaTime * (1 / cycleTime), s, v);
+            color.a = alpha;
+            beamGeometry.material.color = color;
         }
     }
 }
