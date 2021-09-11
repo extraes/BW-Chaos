@@ -21,8 +21,19 @@ namespace BWChaos.Effects
             yield return null;
             spawnAd("let's see here...", false);
             yield return new WaitForSecondsRealtime(5f);
-            //todid: check for osu, valorant, genshin, roblox, overwatch, and league 
-            // nvm the registry is annoying, use Environment.SpecialFolder.[Common]StartMenu
+
+            if (Directory.GetCurrentDirectory().Contains("r2modman"))
+            {
+                spawnAd("I see you're using r2modman...");
+                yield return new WaitForSecondsRealtime(8f);
+                spawnAd("not that you asked, but once i was against r2modman");
+                spawnAd("it took some control out of the hands of mod makers");
+                spawnAd("but now i dont really care because theres less 'how do i extract a 7z' questions", false);
+                yield return new WaitForSecondsRealtime(8f);
+            }
+
+            #region Read start menu shortcuts
+
             // Get entries from User's start menu
             var files =
                 (from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "*.lnk", SearchOption.AllDirectories)
@@ -34,7 +45,11 @@ namespace BWChaos.Effects
                  where !files.Contains(Path.GetFileName(file))
                  select Path.GetFileName(file)).ToList() //TOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLIST
                  ).ToList(); //TOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLIST
-                 // ToList() actually prevents a StackOverflowException, because well, otherwise an IEnumerable is looping over itself, and ToList() static-izes it or something
+                             // ToList() actually prevents a StackOverflowException, because well, otherwise an IEnumerable is looping over itself, and ToList() static-izes it or something
+
+            #endregion
+
+            #region Check shortcuts list
 
             if (files.Contains("Roblox Player.lnk"))
             {
@@ -144,7 +159,10 @@ namespace BWChaos.Effects
                 yield return new WaitForSecondsRealtime(8f);
             }
 
+            #endregion
+            
             #region Check for things in game
+            
             if ((from ab in GameObject.FindObjectsOfType<StressLevelZero.AI.AIBrain>()
                  select ab.name).Contains("protogen"))
             {
