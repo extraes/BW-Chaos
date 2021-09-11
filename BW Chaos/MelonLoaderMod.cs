@@ -130,6 +130,7 @@ namespace BWChaos
                 where e.Types == EffectTypes.NONE || // is this optimization?
                       IsEffectViable(e.Types)
                 select e).ToList();
+            
             #endregion
 
             #region BoneMenu for Debugging
