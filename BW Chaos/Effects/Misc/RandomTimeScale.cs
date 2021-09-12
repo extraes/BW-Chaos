@@ -8,7 +8,7 @@ namespace BWChaos.Effects
 {
     internal class RandomTimeScale : EffectBase
     {
-        public RandomTimeScale() : base("Random slowmo") { }
+        public RandomTimeScale() : base("Random slowmo", 90) { }
 
         public override void OnEffectStart()
         {
@@ -17,6 +17,7 @@ namespace BWChaos.Effects
         
         public override void OnEffectEnd()
         {
+            Time.timeScale = 1;
         }
 
         private IEnumerator ChangeTime()
