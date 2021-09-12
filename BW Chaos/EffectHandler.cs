@@ -93,7 +93,7 @@ namespace BWChaos
             overlayText.text = newString;
             // Hide all hidden effects, replace them with Immortality (because its relatively hard to discover)
             //todo: replace immortality with a randomized effect name
-            wristText.text = Regex.Replace(newString, @".*\(HIDDEN\)", "Immortality", RegexOptions.Compiled | RegexOptions.ECMAScript);
+            wristText.text = Regex.Replace(newString, @".*HIDDEN", "Immortality", RegexOptions.Compiled | RegexOptions.ECMAScript);
         }
 
         [UnhollowerBaseLib.Attributes.HideFromIl2Cpp]
