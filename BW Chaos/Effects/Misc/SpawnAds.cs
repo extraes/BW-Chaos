@@ -16,7 +16,7 @@ namespace BWChaos.Effects
             {
                 var ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(ads[Random.RandomRange(0, ads.Length)]);
                 var phead = GlobalVariables.Player_PhysBody.rbHead.transform;
-                ad.transform.position = phead.position + phead.forward.normalized;
+                ad.transform.position = phead.position + phead.forward.normalized * 2;
                 ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
                 yield return new WaitForSecondsRealtime(10); // to allow enough time to read it
             }
@@ -35,7 +35,7 @@ namespace BWChaos.Effects
             "https://www.youtube.com/watch?v=AGvrDe3rKxA",
             "ur gam haxd by anoms, giv fortnit pswd 2 unhax",
             "hi :)",
-            "upvote on bonetome for free cheese wiz",
+            "upvote on thunderstore for free cheese wiz",
             "if you report a crash you better send a log file",
             "dnspy aint got shit on my shitcode",
             "shoutouts to simpleflips",
@@ -95,7 +95,7 @@ namespace BWChaos.Effects
             "*vine boom sound effect*",
             "notascam.bwchaos.tk/download.php.js.aspx?dl=download_bone_work_chaos_free_punjabi_no_viroos_safe_clean_working_2020\n\n(real)",
             "boom, bam. badabap-boom\npow. *the crowd goes wild*",
-            "this mod is an exercise in crative writing, and im winded",
+            "this mod is an exercise in creative writing, and im winded",
             "c# isnt hard, its just javascript, with different syntax, naming conventions, features, style, use cases, and tools",
             "Yeah baby. You can play like TAS. Very impressive. Back in 2004 I held the 16 star world record for several years. Holy Moly",
             "I have tainted the good code of Trevor Television with my presence and subsequent adulteration",
@@ -117,6 +117,17 @@ namespace BWChaos.Effects
             "i hate paying taxes if theres anything i hate\ni supported ron paul back in 2008\nyou might think its unfair that i dont have to pay\nbut its ok because taxation is theft anyway",
             "... do you really think im poggers..?",
             "Dick Vitale's It's Awesome Baby College Hoops",
+            "hehe rainbow text",
+            "just hit a DEVIOUS lick #hitalick #lick #stoleasecuritycamera #goingtogetexpelled #fyp #nosnitches",
+            "Ay man, you already know who it is, man, it's your boy Lil B" +
+            "\nAy man, this that Hoop Life mixtape, this that pretty boy music" +
+            "\nIf you on the streets, mane...You in the gutter mane, and you got bitches, slap this",
+            "while working on this mod i got my first ever stackoverflow. (LIKE THE WEBSITE!!!!!!!! GET IT!!!!!!!!!!)",
+            "L + Ratio + You fell off + Post real chaos + Fatherless",
+            "IM COMEU",
+            "over 100 possible signs to see! see them all!",
+            "PACKWATCH\nRIPBOZO\nREST IN PISS YOU WONT BE MISSED",
+            "https://cdn.discordapp.com/attachments/587792632986730507/886672920976453672/blur-3.png",
         };
     }
 }
