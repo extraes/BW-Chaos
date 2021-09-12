@@ -123,7 +123,9 @@
     <Compile Include="Effects\Misc\GullibleOnTheCeiling.cs" />
     <Compile Include="Effects\Misc\CaughtIn4K.cs" />
     <Compile Include="Effects\Misc\ChesmondEffect.cs" />
+    <Compile Include="Effects\Misc\PlayMusic.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
+    <Compile Include="Effects\Player\HighJump.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />
@@ -164,6 +166,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\winsounds" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\ultrakillmusic" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
