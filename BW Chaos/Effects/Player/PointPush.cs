@@ -9,6 +9,6 @@ namespace BWChaos.Effects
         public PointPush() : base("Point Push", 30) { }
 
         public override void OnEffectUpdate()
-            => GlobalVariables.Player_PhysBody.AddImpulseForce(Player.rightHand.transform.forward.normalized * 250f);
+            => GlobalVariables.Player_PhysBody.AddImpulseForce(Player.rightHand.transform.forward.normalized * 25f); // 250f is too much when this effect runs once a frame
     }
 }
