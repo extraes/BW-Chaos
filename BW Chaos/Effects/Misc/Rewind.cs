@@ -93,7 +93,8 @@ namespace BWChaos.Effects
                 if (rb != null)
                 {
                     rb.useGravity = true;
-                    rb.Sleep(); // so it doesnt jump like they tend to do
+                    // prevents objects from jumping, but freezes the fuck out of NPC's. this is janky but prevents npc freeze
+                    if (rb.GetComponent<StressLevelZero.AI.AIBrain>() == null) rb.Sleep(); 
                 }
                 
                 GameObject.Destroy(tl);
