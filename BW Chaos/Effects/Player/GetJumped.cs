@@ -16,7 +16,7 @@ namespace BWChaos.Effects
 
             for (int i = 0; i < 8; i++)
             {
-                float theta = (i / 8) * 360;
+                float theta = (i / 8f) * 360;
                 float x = (float)(Math.Cos(theta * Math.PI / 180));
                 float y = (float)(Math.Sin(theta * Math.PI / 180));
 
