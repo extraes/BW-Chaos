@@ -8,7 +8,7 @@ namespace BWChaos.Effects
 {
     internal class Rewind : EffectBase
     {
-        public Rewind() : base("Record then rewind 15 seconds", 30) { }
+        public Rewind() : base("Record then rewind 15 seconds", 30, EffectTypes.LAGGY) { }
         private GlobalClock clock = null;
         private bool isRewindAlreadyActive = false; // We don't want two rewinds at the same time. That would be bad.
         public override void OnEffectStart()
@@ -81,15 +81,14 @@ namespace BWChaos.Effects
 
         public override void OnEffectUpdate() => Time.timeScale = 1;
 
-
         public override void OnEffectEnd()
         {
             clock.timeScale = 1;
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
             isRewindAlreadyActive = false;
-            foreach (var tl in GameObject.FindObjectsOfType<Timeline>())
+            foreach (var tl in GameObject.FindObjectsOfTypeAll(Timeline.Il2CppType)) // hopefully that works?
             {
-                var rb = tl.gameObject.GetComponent<Rigidbody>();
+                var rb = tl.Cast<Timeline>().gameObject.GetComponent<Rigidbody>();
                 if (rb != null)
                 {
                     rb.useGravity = true;
