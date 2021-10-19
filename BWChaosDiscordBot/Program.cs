@@ -1,26 +1,20 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
 using WatsonWebsocket;
-using DSharpPlus;
-using DSharpPlus.Entities;
-using DSharpPlus.EventArgs;
-using Newtonsoft.Json;
+using TwitchLib;
+using TwitchLib.Api;
+using static BWChaosRemoteVoting.GlobalVariables;
 
-namespace BWChaosDiscordBot
+namespace BWChaosRemoteVoting
 {
     internal class Program
-    {
-        private static WatsonWsServer watsonServer;
-        private static string currentClientIpPort;
-
-        private static DiscordClient discordClient;
-        private static DiscordChannel discordChannel;
-        private static string discordBotToken;
-        private static string discordChannelId;
-
-        private static int[] accumulatedVotes = new int[5] { 0, 0, 0, 0, 0 };
+    {   
+        private static string botToken;
+        private static string channelIdOrName;
 
         private static void Main()
         {
@@ -47,42 +41,18 @@ namespace BWChaosDiscordBot
         private static async Task MainAsync()
         {
             // wait until we have token and channel id
-            while (string.IsNullOrEmpty(discordChannelId)) await Task.Delay(250);
+            while (string.IsNullOrEmpty(channelIdOrName)) await Task.Delay(250);
 
-            try
+            // Discord 
+            if (ulong.TryParse(channelIdOrName, out ulong idUlong)) await DiscordBot.Init(channelIdOrName, idUlong);
+            else
             {
-                discordClient = new DiscordClient(new DiscordConfiguration()
-                {
-                    Token = discordBotToken,
-                    TokenType = TokenType.Bot,
-                    Intents = DiscordIntents.AllUnprivileged
-                });
-                discordClient.MessageCreated += DiscordMessageSent;
-                await discordClient.ConnectAsync();
-                discordChannel = await discordClient.GetChannelAsync(ulong.Parse(discordChannelId));
-                await watsonServer.SendAsync(currentClientIpPort, "log:Connected to Discord and fetched the channel.");
-            }
-            catch (Exception e)
-            {
-                await watsonServer.SendAsync(currentClientIpPort, "error:" + e.ToString());
-                //Console.WriteLine(e.ToString());
+                await TwitchBot.Init(botToken, channelIdOrName);
             }
 
             await Task.Delay(-1);
         }
 
-        private static Task DiscordMessageSent(DiscordClient sender, MessageCreateEventArgs e)
-        {
-            if (e.Channel != discordChannel) return null;
-
-            if (int.TryParse(e.Message.Content, out int messageInt))
-            {
-                if (messageInt >= 1 && messageInt <= 5)
-                    accumulatedVotes[messageInt - 1]++;
-            }
-
-            return Task.CompletedTask;
-        }
 
         #region Websocket Methods
 
@@ -97,35 +67,42 @@ namespace BWChaosDiscordBot
             //Console.WriteLine("Client disconnected: " + args.IpPort);
             if (currentClientIpPort == args.IpPort)
             {
-                discordClient.DisconnectAsync().Wait();
-                discordClient.Dispose();
                 watsonServer.Stop();
                 watsonServer.Dispose();
+                TwitchBot.twitchClient?.Disconnect();
+                DiscordBot.discordClient?.DisconnectAsync()?.Wait();
+                DiscordBot.discordClient?.Dispose();
                 Environment.Exit(0);
             }
         }
 
         private static void MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            //Console.WriteLine("Message received from " + e.IpPort + ": " + Encoding.UTF8.GetString(e.Data));
-            string[] splitMessage = Encoding.UTF8.GetString(e.Data).Split(':', 2);
+            string[] splitMessage = Encoding.UTF8.GetString(e.Data).Split(':');
             string messageType = splitMessage[0];
-            string messageData = splitMessage[1] ?? string.Empty;
+            string messageData = string.Join(":", splitMessage?.Skip(1)?.ToArray()) ?? string.Empty;
             switch (messageType)
             {
                 case "token":
-                    discordBotToken = messageData;
+                    botToken = messageData;
                     break;
                 case "channel":
-                    discordChannelId = messageData;
+                    channelIdOrName = messageData;
                     break;
                 case "sendvotes":
                     watsonServer.SendAsync(currentClientIpPort, JsonConvert.SerializeObject(accumulatedVotes, Formatting.None));
                     for (int i = 0; i < accumulatedVotes.Length; i++)
                         accumulatedVotes[i] = 0;
+                    users.Clear();
+                    break;
+                case "ignorerepeatvotes":
+                    ignoreRepeats = bool.Parse(messageData);
                     break;
                 case "sendtochannel":
-                    discordClient.SendMessageAsync(discordChannel, messageData);
+                    DiscordBot.discordClient?.SendMessageAsync(DiscordBot.discordChannel, messageData);
+                    break;
+                case "flipnumbers":
+                    TwitchBot.num = int.Parse(messageData);
                     break;
                 default:
                     Console.WriteLine("UNKNOWN MESSAGE TYPE: " + messageType);
