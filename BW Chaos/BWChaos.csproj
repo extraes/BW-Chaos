@@ -103,16 +103,15 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.UIModule.dll</HintPath>
     </Reference>
-    <Reference Include="WatsonWebsocket">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\WatsonWebsocket.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EffectHandler.cs" />
     <Compile Include="Effects\EffectBase.cs" />
-    <Compile Include="Effects\Guns\LowRPM.cs" />
-    <Compile Include="Effects\Guns\HighRPM.cs" />
     <Compile Include="Effects\Guns\BarrySteakfries.cs" />
+    <Compile Include="Effects\Guns\ForceGunManual.cs" />
+    <Compile Include="Effects\Guns\GunSpeedup.cs" />
+    <Compile Include="Effects\Guns\GunSlowdown.cs" />
+    <Compile Include="Effects\Misc\SonicSpeed.cs" />
     <Compile Include="Effects\Misc\SlowmoPunch.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
     <Compile Include="Effects\Misc\SpawnDogAds.cs" />
@@ -124,8 +123,13 @@
     <Compile Include="Effects\Misc\CaughtIn4K.cs" />
     <Compile Include="Effects\Misc\ChesmondEffect.cs" />
     <Compile Include="Effects\Misc\PlayMusic.cs" />
+    <Compile Include="Effects\Misc\ShadyURL.cs" />
+    <Compile Include="Effects\Misc\GetDoxxed.cs" />
+    <Compile Include="Effects\Misc\SpawnJevil.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
+    <Compile Include="Effects\Misc\InvincibleNullbody.cs" />
+    <Compile Include="Effects\Player\InstaDeath.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />
@@ -153,9 +157,14 @@
     <Compile Include="Effects\Misc\RandomTimeScale.cs" />
     <Compile Include="Effects\World\InvertVelocity.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
+    <Compile Include="Extras\EntanglementSyncHandler.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="BoneMenu.cs" />
+    <Compile Include="WatsonWebsocket\MessageRecievedEventArgs.cs" />
+    <Compile Include="WatsonWebsocket\Statistics.cs" />
+    <Compile Include="WatsonWebsocket\WatsonWebsocket.cs" />
     <Compile Include="Utilities.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -165,10 +174,16 @@
     <EmbeddedResource Include="Resources\chaos_ui_elements" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\winsounds" />
+    <EmbeddedResource Include="Resources\EntanglementSync.dll" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\ultrakillmusic" />
+    <EmbeddedResource Include="Resources\effectresources" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="Resources\jevil" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="WatsonWebsocket\WWSLICENSE.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
