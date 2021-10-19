@@ -49,10 +49,6 @@ namespace BWChaos
 
         internal Process botProcess;
 
-        internal static MenuCategory boneMenuEntry;
-        internal static MenuCategory effectsCategory;
-        internal static MenuCategory preferencesCategory;
-
         public override void OnApplicationStart()
         {
             #region Check datapath
@@ -194,7 +190,6 @@ namespace BWChaos
                 var vertOffset = 25;
                 for (int i = 0; i < EffectHandler.AllEffects.Count; i++)
                 {
-                    //var thisE = EffectHandler.AllEffects.Values.ElementAt(i);
                     if (vertOffset + 30 > Screen.height)
                     {
                         vertOffset = 25;
