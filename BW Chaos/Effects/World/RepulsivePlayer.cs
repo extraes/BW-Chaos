@@ -1,78 +1,96 @@
 ﻿using MelonLoader;
 using StressLevelZero.VRMK;
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using UnhollowerRuntimeLib;
 using UnityEngine;
 
 namespace BWChaos.Effects
 {
     internal class RepulsivePlayer : EffectBase
     {
-        public RepulsivePlayer() : base("Repulsive player", 60, EffectTypes.LAGGY) { }
+        public RepulsivePlayer() : base("Repulsive player", 30, EffectTypes.LAGGY | EffectTypes.DONT_SYNC) { }
 
-
-        private List<Rigidbody> rigidbodies = new List<Rigidbody> { };
-        private object[] coroutineTokens = new object[2];
+        private List<RepulseBehaviour> gameObjects = new List<RepulseBehaviour>();
         public override void OnEffectStart()
         {
-            coroutineTokens[0] = MelonCoroutines.Start(refreshRigidbodies());
-            coroutineTokens[1] = MelonCoroutines.Start(ApplyForces());
+            MelonCoroutines.Start(ApplyMonoBehaviour());
         }
         public override void OnEffectEnd()
         {
-            MelonCoroutines.Stop(coroutineTokens[0]);
-            MelonCoroutines.Stop(coroutineTokens[1]);
+            foreach (var comp in GameObject.FindObjectsOfTypeAll(Il2CppType.Of<RepulseBehaviour>())) GameObject.Destroy(comp);
         }
 
-        private IEnumerator ApplyForces()
+        private IEnumerator ApplyMonoBehaviour()
         {
-            yield return new WaitForFixedUpdate();
-            if (!Active) yield break;
-            Vector3 pos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-
-            if (!Active)
+            bool stagger = false;
+            foreach (var rb in GameObject.FindObjectsOfType<Rigidbody>())
             {
-                var rbArray = rigidbodies.ToArray();
-                for (int i = 0; i < rbArray.Length; i++)
-                {
-                    var rb = rbArray[i];
-                    if (!Active || rb == null) yield break;
-                    if (i % 5 == 0) pos = GameObject.FindObjectOfType<PhysBody>().rbHead.transform.position;
-                    rb.AddExplosionForce(3f, pos, 10, 2, ForceMode.VelocityChange);
-                    if (i % 2 == 0) yield return new WaitForFixedUpdate();
-                }
-            }
-            MelonCoroutines.Start(ApplyForces());
-        }
+                // we dont want to mess with things that already have joints, are in the list, or are static
+                var go = rb.gameObject; //                V luckily passing null to contains doesnt error out
+                if (gameObjects.Contains(go.GetComponent<RepulseBehaviour>())) continue;
+#if DEBUG
+                //MelonLogger.Msg($"Gave {go.name} the script");
+#endif
 
-        private IEnumerator refreshRigidbodies()
-        {
-            if (!Active) yield break;
+                gameObjects.Add(go.AddComponent<RepulseBehaviour>());
 
-            // Don't modify the rigidbody list without marking it
-            rigidbodies.Clear();
-            // Get the position of the player's head
-            var physBody = GameObject.FindObjectOfType<PhysBody>();
-            if (physBody == null) yield break;
-            var pos = physBody.rbHead.transform.position;
-
-            // For every collider in 10 meters, make sure it isn't already in the list and make sure it's not a part of the player.
-            var cols = Physics.OverlapSphere(pos, 10);
-            for (int i = 0; i < cols.Length; i++)
-            {
-                Collider col = cols[i];
-                if (!Active || col == null) yield break;
-                if (!(rigidbodies.Contains(col.attachedRigidbody) || col.gameObject.transform.root.name == "[RigManager (Default Brett)]"))
-                {
-                    if (col.attachedRigidbody != null)
-                        rigidbodies.Add(col.attachedRigidbody);
-                }
-                if (i % 5 == 0) yield return new WaitForFixedUpdate();
+                if (stagger = !stagger) yield return new WaitForFixedUpdate();
 
             }
 
-            yield return new WaitForSecondsRealtime(1);
-            MelonCoroutines.Start(refreshRigidbodies());
         }
     }
+
+    [RegisterTypeInIl2Cpp]
+    public class RepulseBehaviour : MonoBehaviour
+    {
+        public RepulseBehaviour(IntPtr ptr) : base(ptr) { }
+
+        private static readonly float mult = 0.5f;
+        //                         optuhmuhzayshun V
+        private static readonly int framesToWait = 4;
+        private static Transform target;
+        private bool isNear = false;
+        private Rigidbody rb;
+        private object CToken;
+        public void OnEnable()
+        {
+            target = GlobalVariables.Player_PhysBody.transform;
+            rb = GetComponent<Rigidbody>();
+            CToken = MelonCoroutines.Start(CheckDist());
+        }
+
+        // shoutouts to camobiwon for suggesting i use a pd controller (and sending link)
+        public void FixedUpdate()
+        {
+            if (!isNear || (Time.frameCount % framesToWait != 0)) return;
+
+            // https://digitalopus.ca/site/pd-controllers/ lol
+            float dt = Time.fixedDeltaTime;
+            Vector3 p = transform.position; //our current position
+            Vector3 v = rb.velocity; //our current velocity
+            // subt V3.p because then rb's wont try to go into the floor    V
+            Vector3 force = rb.mass * (target.transform.position - Vector3.up - p - v * dt) / (dt);
+
+            rb.AddForce(-Vector3.ClampMagnitude(force * mult, 100 * rb.mass));
+        }
+
+        public void Destroy ()
+        {
+            MelonCoroutines.Stop(CToken);
+        }
+
+        private IEnumerator CheckDist()
+        {
+            while (true)
+            {
+                if (this?.gameObject == null || !gameObject.active) yield break;
+                isNear = ((target.position - gameObject.transform.position).sqrMagnitude < 15 * 15) && transform.root.name != "[RigManager (Default Brett)]";
+                yield return new WaitForSecondsRealtime(1);
+            }
+        }
+    }
+
 }
