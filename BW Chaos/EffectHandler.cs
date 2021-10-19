@@ -1,33 +1,39 @@
-﻿using MelonLoader;
+﻿using BWChaos.Effects;
+using MelonLoader;
+using StressLevelZero.Combat;
 using System;
 using System.Collections;
-
+using System.Linq;
+using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
-using BWChaos.Effects;
-using System.Text.RegularExpressions;
 
 namespace BWChaos
 {
     [RegisterTypeInIl2Cpp]
-    internal class EffectHandler : MonoBehaviour
+    public class EffectHandler : MonoBehaviour
     {
         public EffectHandler(IntPtr ptr) : base(ptr) { }
 
-        private bool randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
+        public static bool randomOnNoVotes = false;
 
-        public static System.Collections.Generic.List<EffectBase> AllEffects;
+        public static System.Collections.Generic.Dictionary<string, EffectBase> AllEffects = new System.Collections.Generic.Dictionary<string, EffectBase>();
         public static EffectHandler Instance;
+        public static bool advanceTimer = false;
 
         private int secondsEachEffect = 30;
         private int currentTimerValue;
+        private int numberFlip = 0;
 
         private IEnumerator timerInstance;
 
         #region Wrist and Overlay Variables
 
+        private static Canvas overlayCanvas;
         private Image overlayImage;
         private Text overlayText;
+        private Text candidateText;
+        private static Canvas wristCanvas;
         private Image wristImage;
         private Text wristText;
 
@@ -36,29 +42,41 @@ namespace BWChaos
         public void Start()
         {
             Instance = this;
+            // make sure it's up to date (real fucking moment when it becomes true JUST ONCE for no reason, idk man)
 
             // this is pretty messy looking, but in a nutshell
             // spawn overlaycanvas, move it to corner
             // spawn wristcanvas, adjust transform a bunch
-            Canvas overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
+            if (!overlayCanvas) overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
             overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
             overlayImage.fillAmount = 0;
-            overlayImage.GetComponent<RectTransform>().position =
-                new Vector3(Screen.width - 200, Screen.height - 201, 0);
-            overlayText = overlayCanvas.transform.Find("Text").GetComponent<Text>();
-            overlayText.alignment = TextAnchor.LowerCenter;
-            overlayText.GetComponent<RectTransform>().position
-                = new Vector3(Screen.width - 200, Screen.height - 80, 0);
+
+            if (BWChaos.showCandidatesOnScreen) overlayImage.rectTransform.position = new Vector3(-407.5f, -240, 0);
+            overlayText = overlayCanvas.transform.Find("PastText").GetComponent<Text>();
+            overlayText.text = "";
+            candidateText = overlayCanvas.transform.Find("CandidateText").GetComponent<Text>();
+            candidateText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            candidateText.text = "";
+
 
             Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
-            Canvas wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
+            if (!wristCanvas) wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
             wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
+            wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            wristImage.transform.localPosition = new Vector3(0, 20, 0);
             wristImage.fillAmount = 0;
+
             wristText = wristCanvas.transform.Find("Text").GetComponent<Text>();
             wristText.alignment = TextAnchor.LowerCenter;
             wristText.transform.Reset();
             wristText.transform.localRotation = Quaternion.Euler(new Vector3(0f, 0f, 180f));
-            wristText.transform.localPosition = new Vector3(0f, -0.25f, 0f);
+            wristText.transform.localPosition = new Vector3(0f, -1, 0f);
+            // Fix blurry text by making font super fucking huge and shrinking the text on canvas lol
+            wristText.fontSize = 72;
+            wristText.transform.localScale = new Vector3(0.25f, 0.25f, 0.25f);
+            wristText.horizontalOverflow = HorizontalWrapMode.Overflow;
+            wristText.verticalOverflow = VerticalWrapMode.Overflow;
+
             wristCanvas.transform.Reset();
             wristCanvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
             wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
@@ -84,9 +102,9 @@ namespace BWChaos
             foreach (EffectBase e in GlobalVariables.PreviousEffects)
             {
                 // Is this more readable than ternary operatoring in a ternary operator?
-                var activeTag = e.Types.HasFlag(EffectBase.EffectTypes.HIDDEN) ? "HIDDEN" : "ACTIVE";
+                string activeTag = e.Types.HasFlag(EffectBase.EffectTypes.HIDDEN) ? "HIDDEN" : (e.Duration - (int)(Time.realtimeSinceStartup - e.StartTime)).ToString();
                 newString += e.Active ?
-                    $"{e.Name} {activeTag}\n": 
+                    $"{e.Name} {activeTag}\n" :
                     $"{e.Name}\n";
             }
 
@@ -102,6 +120,8 @@ namespace BWChaos
             while (true)
             {
                 yield return new WaitForSecondsRealtime(1);
+                if (!advanceTimer) continue;
+
 
                 currentTimerValue += 1;
                 float fillAmount = (float)currentTimerValue / secondsEachEffect;
@@ -109,7 +129,7 @@ namespace BWChaos
                 overlayImage.fillAmount = fillAmount;
                 wristImage.fillAmount = fillAmount;
 
-                if (currentTimerValue == secondsEachEffect)
+                if (currentTimerValue >= secondsEachEffect)
                 {
                     RunVotedEffect();
                     ResetEffectCandidates();
@@ -119,30 +139,75 @@ namespace BWChaos
 
         private void RunVotedEffect()
         {
-            string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
-            int[] accumulatedVotes = Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
+            int[] accumulatedVotes = GetVotes();
 
-            MelonLogger.Msg(messageData);
-
-            (int, int) topVoted = (0, 0); // format is (arrIndex, value)
-            for (int i = 0; i < accumulatedVotes.Length; i++)
+            // Get the top voted effect
+            (int, int) voted = GetVotedEffect(accumulatedVotes); // format is (arrIndex, value)
+#if DEBUG
+            MelonLogger.Msg($"Voted effect: {GlobalVariables.CandidateEffects[voted.Item1].Name}, [{string.Join(", ", accumulatedVotes)}]");
+            if (voted.Item2 == 0) MelonLogger.Msg("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
+            MelonLogger.Msg("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
+            MelonLogger.Msg("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !randomOnNoVotes));
+#endif
+            // return if the top voted effect has no votes & modpref is set to not run on no votes
+            if (voted.Item2 == 0 && !randomOnNoVotes) return;
+            if (voted.Item1 == 4 || voted.Item2 == 0)
             {
-                if (accumulatedVotes[i] > topVoted.Item2)
-                    topVoted = (i, accumulatedVotes[i]);
-            }
-            
-            if (topVoted.Item2 == 0 && !randomOnNoVotes) return; // todo: find a better, not shit way to do this - extraes
-            if (topVoted.Item1 == 4 || topVoted.Item2 == 0)
-            {
-                EffectBase e = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
+                // Get a random effect from the dictionary
+                AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count));
+                EffectBase e = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
                 MelonLogger.Msg(e.Name + " (random) was chosen");
                 e.Run();
             }
             else
             {
-                EffectBase e = GlobalVariables.CandidateEffects[topVoted.Item1];
+                EffectBase e = GlobalVariables.CandidateEffects[voted.Item1];
                 MelonLogger.Msg(e.Name + " was chosen");
                 e.Run();
+            }
+            // Sometimes the timer/wristcanvas gets fucky with its offsets, so enforce them here
+            wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
+            wristImage.transform.localPosition = new Vector3(0, 20, 0);
+            wristText.transform.localPosition = new Vector3(0f, -1, 0);
+        }
+
+        private int[] GetVotes()
+        {
+            if (GlobalVariables.WatsonClient == null) return new int[] { 0, 0, 0, 0, 0 };
+            string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
+            return Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
+        }
+
+        private (int, int) GetVotedEffect(int[] votes)
+        {
+            if (BWChaos.proportionalVoting)
+            {
+                // My jank-ass proportional voting system that works without floats, just ints.
+                // heres a diagram in case you were confused https://discord.com/channels/563139253542846474/724595991675797554/898447182762479637 (lol)
+                int votesTotal = 0;
+                foreach (int vote in votes) votesTotal += vote;
+
+                var ran = UnityEngine.Random.RandomRange(0, votesTotal) + 1;
+                for (var index = 0; index < votes.Length; index++)
+                {
+                    if (ran - votes[index] <= 0)
+                    {
+                        return (index, votes[index]);
+                    }
+                    else ran -= votes[index];
+                }
+                return (0, 0);
+            }
+            else
+            {
+                // Traditional voting system, the one with the most votes wins.
+                (int, int) topVoted = (0, 0);
+                for (int i = 0; i < votes.Length; i++)
+                {
+                    if (votes[i] > topVoted.Item2)
+                        topVoted = (i, votes[i]);
+                }
+                return topVoted;
             }
         }
 
@@ -156,18 +221,28 @@ namespace BWChaos
             string botMesssage = "-- New Candidate Effects --";
 
             GlobalVariables.CandidateEffects.Clear();
+            if (numberFlip == 0) numberFlip = 5;
+            else numberFlip = 0;
+
             for (int i = 0; i < 4; i++)
             {
-                EffectBase effect = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
+                // Get a random effect from the list
+                EffectBase effect = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
+
+                // Make sure the effect is unique in the list
                 while (GlobalVariables.CandidateEffects.Contains(effect))
-                    effect = AllEffects[UnityEngine.Random.Range(0, AllEffects.Count)];
+                    effect = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
                 GlobalVariables.CandidateEffects.Add(effect);
-                botMesssage += $"\n{i + 1}: {effect.Name}";
-                // do we really need to do any number flipping? this aint twitch chat, you get slow mode anyway
+
+                botMesssage += $"\n{numberFlip + i + 1}: {effect.Name}";
+                // For twitch, enable number flipping
             }
 
-            botMesssage += "\n5: Random Effect";
-            GlobalVariables.WatsonClient.SendAsync("sendtochannel:" + botMesssage);
+            botMesssage += $"\n{5 + numberFlip}: Random Effect";
+            
+            if (BWChaos.sendCandidatesInChannel) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
+            if (BWChaos.isTwitch) GlobalVariables.WatsonClient?.SendAsync("flipnumbers:" + numberFlip); // is this wasteful? probably. does it ensure the two stay in sync? probably.
+            if (BWChaos.showCandidatesOnScreen && advanceTimer) candidateText.text = botMesssage.Replace("-- New Candidate Effects --\n", ""); // Skip the first line of botmessage
         }
     }
 }
