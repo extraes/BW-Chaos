@@ -10,7 +10,7 @@ namespace BWChaos.Effects
         public PointGravity() : base("Point To Go", 30, EffectTypes.AFFECT_GRAVITY) { }
 
         private Vector3 previousGrav;
-
+        
         public override void OnEffectStart() => previousGrav = Physics.gravity;
 
         public override void OnEffectUpdate() => Physics.gravity = Player.rightHand.transform.forward.normalized * 12f;

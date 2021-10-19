@@ -14,10 +14,7 @@ namespace BWChaos.Effects
             yield return null; // Wait 1 frame because otherwise the IEnum thinks Active is false. Why? Beats me!
             while (Active)
             {
-                var ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(ads[Random.RandomRange(0, ads.Length)]);
-                var phead = GlobalVariables.Player_PhysBody.rbHead.transform;
-                ad.transform.position = phead.position + phead.forward.normalized * 2;
-                ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
+                Utilities.SpawnAd(ads[Random.RandomRange(0, ads.Length)]);
                 yield return new WaitForSecondsRealtime(10); // to allow enough time to read it
             }
         }
@@ -128,6 +125,20 @@ namespace BWChaos.Effects
             "over 100 possible signs to see! see them all!",
             "PACKWATCH\nRIPBOZO\nREST IN PISS YOU WONT BE MISSED",
             "https://cdn.discordapp.com/attachments/587792632986730507/886672920976453672/blur-3.png",
+            "Hello? Based department?\nIt's for you",
+            "im this mod's dad that left for milk and came back a long time later",
+            "36 uncommitted changes, if my drive fails im quitting.",
+            "GROUSE!?!?!?",
+            "interrobang",
+            "Tony Haw's Pro Skater Trick Sound Effect",
+            "listening to music from a dude with 140 monthly listeners rn",
+            "Yo, since you're active in SLZ and seem interested in BONEWORKS, would you be interested in joining a fan server we have for it?",
+            "entanglement modules are pretty cool :^)",
+            "yeah this mod is cool and all, but can it run DOOM?",
+            "Clearly,\nYou don't own an air fryer",
+            "Clearly,\nYou don't have a father figure",
+            "82 uncommitted changes",
+            "change tha world\nmy final message\ngoodbye",
         };
     }
 }

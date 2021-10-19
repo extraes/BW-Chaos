@@ -7,7 +7,7 @@ namespace BWChaos.Effects
     internal class ChangeSteamName: EffectBase
     {
         // Shortened to 2m to avoid the effect running twice
-        public ChangeSteamName() : base("Change Steam name for 2m", 120, EffectTypes.USE_STEAM | EffectTypes.AFFECT_STEAM_PROFILE) { }
+        public ChangeSteamName() : base("Change Steam name for 2m", 120, EffectTypes.USE_STEAM | EffectTypes.AFFECT_STEAM_PROFILE | EffectTypes.DONT_SYNC) { }
 
         private string[] names = new string[] {
             "Chester Chucklenuts",
@@ -27,6 +27,9 @@ namespace BWChaos.Effects
             "Hack Dudes 69",
             "Lawrence Albert Connor",
             "Big. Black. River balls.", // i dont have the pass :woeis:
+            "The Holy Thighble",
+            "#CryptoPunks TAP IN!!!",
+            "astolfo enjoyer",
         };
 
         private string steamName = "helo :)";
