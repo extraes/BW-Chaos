@@ -21,6 +21,7 @@ namespace BWChaos.Effects
 
         private void OnPostGunFire(Gun obj)
         {
+            // avoid conflicting coroutines
             if (coroutine != null) MelonCoroutines.Stop(coroutine);
             coroutine = (IEnumerator)MelonCoroutines.Start(BringBackTime());
         }

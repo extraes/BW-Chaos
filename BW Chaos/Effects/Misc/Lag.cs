@@ -22,7 +22,7 @@ namespace BWChaos.Effects
             {
                 // there should be intermittent stuttering, and the time between stutters should be longer than the stutters themselves
                 yield return new WaitForSeconds(UnityEngine.Random.Range(1, 1.5f));
-                Time.timeScale = 0; // setting to 0 doesn't break anything, but float.Epsilon certainly does
+                Time.timeScale = 0.0625f; // setting to 0 doesn't break anything, but float.Epsilon certainly does
                 yield return new WaitForSeconds(UnityEngine.Random.Range(0.25f, 0.5f));
                 Time.timeScale = 1;
             }

@@ -15,8 +15,8 @@ namespace BWChaos.Effects
         public IEnumerator CoRun ()
         {
             int[] arr = new int[] { -1, 1 };
-            Physics.gravity = new Vector3(9.8f * 4 * arr[Random.RandomRange(0, 2)], 9.8f * 8, 9.8f * 4 * arr[Random.RandomRange(0, 2)]);
-            yield return new WaitForSecondsRealtime(1);
+            Physics.gravity = new Vector3(9.8f * 3 * arr[Random.RandomRange(0, 2)], 9.8f * 6, 9.8f * 3 * arr[Random.RandomRange(0, 2)]);
+            yield return new WaitForSecondsRealtime(2);
             Physics.gravity = new Vector3(0, -9.8f, 0);
 
         }

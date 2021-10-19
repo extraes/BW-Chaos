@@ -9,8 +9,8 @@ namespace BWChaos.Effects
 
         public override void OnEffectUpdate()
         {
-            Rigidbody handRb = Random.Range(0, 2) == 0 ? Player.rightHand.rb : Player.leftHand.rb;
-            handRb.AddRelativeTorque(10 * new Vector3(Random.value - 0.5f, 10 * Random.value - 0.5f, 10 * Random.value - 0.5f));
+            Rigidbody handRb = Utilities.GetRandomPlayerHand().rb;
+            handRb.AddRelativeTorque(20 * new Vector3(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f));
         }
     }
 }

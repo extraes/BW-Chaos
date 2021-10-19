@@ -5,7 +5,7 @@
         public InvertPlayerVelocity() : base("Invert player velocity") { }
 
         public override void OnEffectStart() => 
-            GlobalVariables.Player_PhysBody.AddVelocityChange(-2 * GlobalVariables.Player_PhysBody.rbHead.velocity);
+            GlobalVariables.Player_PhysBody.AddVelocityChange(-2 * GlobalVariables.Player_PhysBody.rbPelvis.velocity);
         
     }
 }

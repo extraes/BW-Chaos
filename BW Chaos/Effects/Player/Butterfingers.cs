@@ -15,11 +15,10 @@ namespace BWChaos.Effects
 
         private IEnumerator CoRun()
         {
+            yield return null;
             while (Active)
             {
-                Interactable interactable = UnityEngine.Random.Range(0, 2) == 1
-                ? Player.leftHand.attachedInteractable
-                : Player.rightHand.attachedInteractable;
+                Interactable interactable = Utilities.GetRandomPlayerHand().attachedInteractable;
 
                 InteractableHost interactableHost = interactable?.GetComponentInParent<InteractableHost>();
                 interactableHost?.Drop();

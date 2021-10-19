@@ -4,6 +4,7 @@ using MelonLoader;
 using ModThatIsNotMod;
 using StressLevelZero.Data;
 using StressLevelZero.Props.Weapons;
+using System.Collections;
 
 namespace BWChaos.Effects
 {
@@ -25,6 +26,7 @@ namespace BWChaos.Effects
             Rigidbody rb = gravObject.gameObject.AddComponent<Rigidbody>();
             rb.angularDrag = 0.05f;
             rb.drag = 0.05f;
+            MelonCoroutines.Start(KeepItSpicy());
         }
 
         public override void OnEffectUpdate() => Physics.gravity = -gravObject.up * 12f;
@@ -33,6 +35,19 @@ namespace BWChaos.Effects
         {
             Physics.gravity = previousGrav;
             GameObject.Destroy(gravObject);
+        }
+
+        // make sure its not fucking BORING!!!!
+        private IEnumerator KeepItSpicy ()
+        {
+            yield return null;
+            Vector3 oldGrav = Physics.gravity;
+            while (Active)
+            {
+                yield return new WaitForSecondsRealtime(5);
+                if (Physics.gravity == oldGrav) gravObject.rotation = UnityEngine.Random.rotation;
+                oldGrav = Physics.gravity;
+            }
         }
     }
 }

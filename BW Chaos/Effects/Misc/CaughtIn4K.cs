@@ -10,12 +10,12 @@ namespace BWChaos.Effects
 {
     internal class CaughtIn4K : EffectBase
     {
-        public CaughtIn4K() : base("Caught in 4K UHD Dolby HDR10 H.265 HEVC With Dolby Atmos Surround Sound for Headphones", 120) { }
+        // used to be "Caught in 4K UHD Dolby HDR10 H.265 HEVC With Dolby Atmos Surround Sound for Headphones" but that was stupidly long
+        public CaughtIn4K() : base("Caught in 4K", 120) { }
 
         public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
 
         bool wasCaught = false;
-        CSteamID userID;
         private IEnumerator CoRun()
         {
             yield return null;
@@ -37,19 +37,35 @@ namespace BWChaos.Effects
             // Get entries from User's start menu
             var files =
                 (from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "*.lnk", SearchOption.AllDirectories)
-                 select Path.GetFileName(file)).ToList(); //TOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLIST
+                 select Path.GetFileName(file)).ToList();
 
             // In case it's a shared computer, get entries from the System's start menu too
-            files = files.Concat(
-                (from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu), "*.lnk", SearchOption.AllDirectories)
+            files.AddRange(
+                from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu), "*.lnk", SearchOption.AllDirectories)
                  where !files.Contains(Path.GetFileName(file))
-                 select Path.GetFileName(file)).ToList() //TOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLIST
-                 ).ToList(); //TOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLISTTOLIST
-                             // ToList() actually prevents a StackOverflowException, because well, otherwise an IEnumerable is looping over itself, and ToList() static-izes it or something
+                 select Path.GetFileName(file));
 
             #endregion
 
             #region Check shortcuts list
+
+            if (files.FirstOrDefault(f => f.Contains("Cura")) != null) 
+            {
+                spawnAd("oh shit you use cura?");
+                yield return new WaitForSecondsRealtime(4f);
+                spawnAd("what printer?");
+                yield return new WaitForSecondsRealtime(2f);
+                spawnAd("what filament?");
+                yield return new WaitForSecondsRealtime(2f);
+                spawnAd("what nozzle size?");
+                yield return new WaitForSecondsRealtime(2f);
+                spawnAd("what print speed?");
+                yield return new WaitForSecondsRealtime(2f);
+                spawnAd("send a benchy pic?");
+                yield return new WaitForSecondsRealtime(6f);
+                spawnAd("please actually send a benchy pic, im extraes on the bw server", false); //set wascaught to false because all sins are forgiven if you have cura :^)
+                yield return new WaitForSecondsRealtime(8f);
+            }
 
             if (files.Contains("Roblox Player.lnk"))
             {
@@ -141,24 +157,6 @@ namespace BWChaos.Effects
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("Ultimaker Cura 4.10.0.lnk")) // fuck, i need to update this when it updates, WHY ULTIMAKER WHY
-            {
-                spawnAd("oh shit you use cura?");
-                yield return new WaitForSecondsRealtime(4f);
-                spawnAd("what printer?");
-                yield return new WaitForSecondsRealtime(2f);
-                spawnAd("what filament?");
-                yield return new WaitForSecondsRealtime(2f);
-                spawnAd("what nozzle size?");
-                yield return new WaitForSecondsRealtime(2f);
-                spawnAd("what print speed?");
-                yield return new WaitForSecondsRealtime(2f);
-                spawnAd("send a benchy pic?");
-                yield return new WaitForSecondsRealtime(6f);
-                spawnAd("please actually send a benchy pic, im extraes on the bw server", false); //set wascaught to false because all sins are forgiven if you have cura :^)
-                yield return new WaitForSecondsRealtime(8f);
-            }
-
             #endregion
             
             #region Check for things in game
@@ -188,7 +186,9 @@ namespace BWChaos.Effects
                 spawnAd("alright im done");
                 yield break; // Stop here if this isn't the steam version.
             }
-            userID = SteamUser.GetSteamID();
+            CSteamID userID = SteamUser.GetSteamID();
+            
+            
             bool ownsHuniePop = false;
             bool ownsAmorous = false;
 

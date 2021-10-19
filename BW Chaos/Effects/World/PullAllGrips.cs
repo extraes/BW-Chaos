@@ -15,11 +15,12 @@ namespace BWChaos.Effects
 
         public IEnumerator ActivateGrips()
         {
+            yield return null;
             ForcePullGrip[] grips = GameObject.FindObjectsOfType<ForcePullGrip>();
             while (Active)
             {
                 foreach (ForcePullGrip grip in grips)
-                    grip.Pull(Utilities.GetRandomPlayerHand());
+                    grip?.Pull(Utilities.GetRandomPlayerHand());
                 yield return new WaitForEndOfFrame();
             }
         }

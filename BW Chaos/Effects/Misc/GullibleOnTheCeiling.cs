@@ -25,7 +25,7 @@ namespace BWChaos.Effects
         {
             if (sign == null) return; // In case something goes wrong
             sign.transform.position = pHead.position + Vector3.up * 2;
-            sign.transform.up = Vector3.down;
+            sign.transform.rotation = Quaternion.LookRotation(Vector3.up);
         }
         public override void OnEffectEnd() => GameObject.Destroy(sign);
     }

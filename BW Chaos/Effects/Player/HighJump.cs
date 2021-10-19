@@ -1,9 +1,8 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using HarmonyLib;
+﻿using HarmonyLib;
 using StressLevelZero.Rig;
 using StressLevelZero.VRMK;
+using System;
+using UnityEngine;
 
 /* 
  * THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE
@@ -18,40 +17,44 @@ namespace BWChaos.Effects
 {
     internal class HighJump : EffectBase
     {
-        public HighJump() : base("High jump") { }
+        public HighJump() : base("High jump", 90) { }
 
-        public static bool isJumpEnabled = false;
         public static float FwJumpMult = 5f;
         public static float UpJumpMult = 20f;
-        public override void OnEffectStart() => isJumpEnabled = true;
-        public override void OnEffectEnd() => isJumpEnabled = false;
+        private static Action OnJump;
+        public override void OnEffectStart() => OnJump += HiJump;
+        public override void OnEffectEnd() => OnJump -= HiJump;
 
-
-    }
-
-    [HarmonyPatch(typeof(ControllerRig), "Jump")]
-    class ControllerRigJumpPatch
-    {
-        public static void Prefix(ControllerRig __instance)
+        private void HiJump ()
         {
-            if (!HighJump.isJumpEnabled) return;
+            PhysicsRig rig = GlobalVariables.Player_RigManager.physicsRig;
 
-            var physGrounder = GameObject.FindObjectOfType<PhysGrounder>();
+            // Compute velocity vectors for jumping (up) and leaping (forward)
+            float walkSpeed = new Vector3(rig.pelvisVelocity.x, 0, rig.pelvisVelocity.z).magnitude;
+            Vector3 forwardJump = GlobalVariables.Player_RigManager.ControllerRig.m_head.forward * walkSpeed * FwJumpMult;
+            Vector3 verticalJump = Vector3.up * HighJump.UpJumpMult;
 
-            // Only jump when on the ground
-            if (physGrounder.isGrounded)
-            {
-                PhysicsRig rig = GameObject.FindObjectOfType<PhysicsRig>();
-
-                // Compute velocity vectors for jumping (up) and leaping (forward)
-                float walkSpeed = new Vector3(rig.pelvisVelocity.x, 0, rig.pelvisVelocity.z).magnitude;
-                Vector3 forwardJump = __instance.m_head.forward * walkSpeed * HighJump.FwJumpMult;
-                Vector3 verticalJump = Vector3.up * HighJump.UpJumpMult;
-
-                // Apply jump velocity to the player
-                rig.physBody.AddVelocityChange(verticalJump + forwardJump);
-            }
+            // Apply jump velocity to the player
+            rig.physBody.AddVelocityChange(verticalJump + forwardJump);
         }
+
+
+        [HarmonyPatch(typeof(ControllerRig), "Jump")]
+        public class ControllerRigJumpPatch
+        {
+            public static void Postfix(ControllerRig __instance)
+            {
+                var physGrounder = GameObject.FindObjectOfType<PhysGrounder>();
+
+                // Only jump when on the ground
+                if (physGrounder.isGrounded)
+                {
+                    OnJump?.Invoke();
+                }
+            }
+
+        }
+
     }
 }
 

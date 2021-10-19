@@ -6,7 +6,7 @@ namespace BWChaos.Effects
 {
     internal class FourTimesSpeed : EffectBase
     {
-        public FourTimesSpeed() : base("4x Speed", 60) { }
+        public FourTimesSpeed() : base("4x Speed", 30) { }
 
         public override void OnEffectStart() => GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
 

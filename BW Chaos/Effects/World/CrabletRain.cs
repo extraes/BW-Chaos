@@ -6,6 +6,7 @@ using UnityEngine;
 using MelonLoader;
 using StressLevelZero.Pool;
 using ModThatIsNotMod;
+using System.Linq;
 
 namespace BWChaos.Effects
 {
@@ -24,10 +25,8 @@ namespace BWChaos.Effects
         {
             yield return null;
 
-            Pool pool = null;
-            foreach (var p in GameObject.FindObjectsOfType<Pool>()) if (p.name == "pool - Crablet") pool = p;
-
-            // todo: test
+            Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
+            
             while (Active)
             {
                 yield return new WaitForSeconds(5 * UnityEngine.Random.value);

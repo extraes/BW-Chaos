@@ -10,30 +10,25 @@ namespace BWChaos.Effects
 
     internal class SlowmoPunch : EffectBase
     {
-        public SlowmoPunch() : base("SlowMo Punch") { }
+        public SlowmoPunch() : base("SlowMo Punch", 60) { }
 
         //todo: this is probably bad lole -extraes
         //not the patch, that's fine, but my implementation/adulteration of it. (cause ive 
-        public override void OnEffectStart()
-        {
-            OnPunch += RunSlowmo;
-        }
-        public override void OnEffectEnd()
-        {
-            OnPunch -= RunSlowmo;
-        }
+        public override void OnEffectStart() => OnPunch += RunSlowmo;
 
-        public void RunSlowmo(Collision arg1, float arg2, float arg3) => MelonCoroutines.Start(Slowmo_OnPunch(arg1, arg2, arg3));
+        public override void OnEffectEnd() => OnPunch -= RunSlowmo;
 
-        public static event Action<Collision, float, float> OnPunch;
+        public void RunSlowmo() => MelonCoroutines.Start(Slowmo_OnPunch());
+
+        public static event Action OnPunch;
         [HarmonyPatch(typeof(HandSFX), "PunchAttack")]
         public static class PunchPatch
         {
             // Hopefully prevent this from throwing nullrefs
-            public static void Prefix(Collision c, float impulse = 0.5f, float relVelSqr = 0.5f) => OnPunch(c, impulse, relVelSqr);
+            public static void Postfix() => OnPunch?.Invoke();
         }
 
-        private IEnumerator Slowmo_OnPunch(Collision arg1, float arg2 = 0.5f, float arg3 = 0.5f)
+        private IEnumerator Slowmo_OnPunch()
         {
             Time.timeScale = 0.05f;
             while (Time.timeScale < 1f && !Active)

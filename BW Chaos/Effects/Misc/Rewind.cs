@@ -2,6 +2,7 @@
 using MelonLoader;
 using StressLevelZero.Rig;
 using System.Collections;
+using System.Linq;
 using UnityEngine;
 
 namespace BWChaos.Effects
@@ -20,20 +21,27 @@ namespace BWChaos.Effects
 
             isRewindAlreadyActive = true;
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
+
             #region Set up Chronos & clock
+
             GameObject chronos = new GameObject("ChronosController");
             if (clock == null) clock = chronos.AddComponent<GlobalClock>();
             clock.key = "Root";
+            //                  V can't do ?., so we try catch.
             try { if (Timekeeper.instance == null) chronos.AddComponent<Timekeeper>(); }
             catch (System.Exception err)
             {
+#if DEBUG
                 MelonLogger.Warning("Caught Singleton exception, adding Timekeeper now. In case you wanted the error, here:");
                 MelonLogger.Warning(err);
+#endif
                 chronos.AddComponent<Timekeeper>();
             }
+
             #endregion
 
             #region Register Rb's into clock
+
             foreach (Rigidbody rb in Resources.FindObjectsOfTypeAll<Rigidbody>())
             {
                 if (rb.GetComponentInParent<RigManager>() /*|| rb.IsSleeping()*/ || rb.isKinematic) continue;
@@ -53,9 +61,11 @@ namespace BWChaos.Effects
                 timeline._recordingInterval = 0.25f;
                 clock.Register(timeline);
             }
+
             #endregion
 
             #region Register animators into clock
+
             foreach (Animator anim in Resources.FindObjectsOfTypeAll<Animator>())
             {
                 // Ignore animators that are a part of the body
@@ -71,12 +81,13 @@ namespace BWChaos.Effects
                 timeline.rewindable = true;
                 clock.Register(timeline);
             }
+
             #endregion
 
             MelonCoroutines.Start(CoRun());
 
             // Force stop 4xSpeed if it's running
-            foreach (var e in GlobalVariables.ActiveEffects) if (e.Name == "4x Speed") e.ForceEnd();
+            GlobalVariables.ActiveEffects.FirstOrDefault(e => e.Name == "4x speed")?.ForceEnd();
         }
 
         public override void OnEffectUpdate() => Time.timeScale = 1;
@@ -86,7 +97,7 @@ namespace BWChaos.Effects
             clock.timeScale = 1;
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
             isRewindAlreadyActive = false;
-            foreach (var tl in GameObject.FindObjectsOfTypeAll(Timeline.Il2CppType)) // hopefully that works?
+            foreach (var tl in GameObject.FindObjectsOfTypeAll(UnhollowerRuntimeLib.Il2CppType.Of<Timeline>())) // hopefully that works?
             {
                 var rb = tl.Cast<Timeline>().gameObject.GetComponent<Rigidbody>();
                 if (rb != null)

@@ -5,6 +5,8 @@ using VLB;
 
 namespace BWChaos.Effects
 {
+    // this was originally going to stop itself after ~90s but unity refused to stop executing the code. why? i dont know
+    // did i try destroying the component? yes. did i try adding a boolean check? you bet your ass i did. did anything regarding stoppping it work? FUCK no!
     internal class RGBLights : EffectBase
     {
         // Because instead of making RGBLights open source, I decided to do this. - extraes
