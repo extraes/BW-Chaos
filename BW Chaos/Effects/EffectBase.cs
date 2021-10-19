@@ -5,18 +5,18 @@ using UnityEngine;
 namespace BWChaos.Effects
 {
     // todo: maybe add a "conflicting effects" list variable in case of something such as 2 effects modifying gravity
-    internal class EffectBase
+    public class EffectBase
     {
-        //todo: enum
         [System.Flags]
         public enum EffectTypes
         {
-            NONE = 0, //todo: find out smarter way to do this
+            NONE = 0,
             AFFECT_GRAVITY = 1 << 0,
             AFFECT_STEAM_PROFILE = 1 << 1,
             USE_STEAM = 1 << 2,
             LAGGY = 1 << 3,
             HIDDEN = 1 << 4,
+            DONT_SYNC = 1 << 5,
         }
 
         public string Name { get; }
@@ -24,6 +24,7 @@ namespace BWChaos.Effects
         public EffectTypes Types { get; }
 
         public bool Active { get; private set; }
+        public float StartTime { get; private set; }
 
         private IEnumerator CoRunEnumerator;
         private bool hasFinished;
@@ -48,6 +49,10 @@ namespace BWChaos.Effects
 
         public void Run()
         {
+#if DEBUG
+            MelonLogger.Msg("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : ""));
+#endif
+            BWChaos.OnEffectRan?.Invoke(this);
             if (Duration == 0) OnEffectStart();
             else CoRunEnumerator = (IEnumerator)MelonCoroutines.Start(CoRun());
 
@@ -69,6 +74,7 @@ namespace BWChaos.Effects
             OnEffectStart();
 
             Active = true;
+            StartTime = Time.realtimeSinceStartup;
             GlobalVariables.ActiveEffects.Add(this);
 
             yield return new WaitForSecondsRealtime(Duration);
@@ -78,6 +84,9 @@ namespace BWChaos.Effects
 
             OnEffectEnd();
             hasFinished = true;
+#if DEBUG
+            MelonLogger.Msg(Name + " has finished running");
+#endif
         }
 
         private void AddToPrevEffects()
