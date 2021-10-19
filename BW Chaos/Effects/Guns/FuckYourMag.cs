@@ -16,11 +16,10 @@ namespace BWChaos.Effects
 
         private IEnumerator CoRun()
         {
+            yield return null;
             while (Active)
             {
-                Gun gun = UnityEngine.Random.Range(0, 2) == 1
-                ? Player.GetGunInHand(Player.leftHand)
-                : Player.GetGunInHand(Player.rightHand);
+                Gun gun = Player.GetGunInHand(Utilities.GetRandomPlayerHand());
 
                 gun?.magazineSocket?.MagazineRelease();
 
