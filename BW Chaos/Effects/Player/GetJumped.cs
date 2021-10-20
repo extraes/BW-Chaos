@@ -1,5 +1,6 @@
 ﻿using StressLevelZero.Pool;
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace BWChaos.Effects
@@ -10,8 +11,8 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            Pool pool = null;
-            foreach (var p in GameObject.FindObjectsOfType<Pool>()) if (p.name == "pool - Null Body") pool = p;
+            Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
+            if (!pool) return;
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
 
             for (int i = 0; i < 8; i++)

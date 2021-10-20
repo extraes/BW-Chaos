@@ -2,6 +2,7 @@
 using StressLevelZero.Interaction;
 using System.Collections;
 using UnityEngine;
+using ModThatIsNotMod;
 
 namespace BWChaos.Effects
 {
@@ -11,7 +12,15 @@ namespace BWChaos.Effects
 
         private object CToken = null;
         public override void OnEffectStart() => CToken = MelonCoroutines.Start(ActivateGrips());
-        public override void OnEffectEnd() => MelonCoroutines.Stop(CToken);
+        public override void OnEffectEnd()
+        {
+            MelonCoroutines.Stop(CToken);
+            foreach (var grip in GameObject.FindObjectsOfType<ForcePullGrip>())
+            {
+                grip?.CancelPull(Player.leftHand);
+                grip?.CancelPull(Player.rightHand);
+            }
+        }
 
         public IEnumerator ActivateGrips()
         {
@@ -20,8 +29,10 @@ namespace BWChaos.Effects
             while (Active)
             {
                 foreach (ForcePullGrip grip in grips)
-                    grip?.Pull(Utilities.GetRandomPlayerHand());
-                yield return new WaitForEndOfFrame();
+                {
+                    grip.Pull(Utilities.GetRandomPlayerHand());
+                    yield return new WaitForSecondsRealtime(0.1f);
+                }
             }
         }
 

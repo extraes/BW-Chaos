@@ -8,17 +8,8 @@ namespace BWChaos.Effects
     {
         public InvertGravity() : base("Invert Gravity", 45, EffectTypes.AFFECT_GRAVITY) { }
 
-        private Vector3 previousGrav;
-        private Vector3 invertedGrav = new Vector3(0f, 0.01f, 0f);
+        public override void OnEffectStart() => Physics.gravity = new Vector3(0, 9.81f, 0);
 
-        public override void OnEffectStart()
-        {
-            previousGrav = Physics.gravity;
-            invertedGrav = previousGrav;
-            invertedGrav.y = Mathf.Abs(invertedGrav.y);
-            Physics.gravity = invertedGrav;
-        }
-
-        public override void OnEffectEnd() => Physics.gravity = previousGrav;
+        public override void OnEffectEnd() => Physics.gravity = new Vector3(0, -9.81f, 0);
     }
 }
