@@ -78,8 +78,6 @@ namespace BWChaos.Sync
             else
             {
                 BWChaos.GetMelonPreferences();
-                //if (UpdateMelonPref != null) UpdateMelonPref.Invoke(null, null);
-                //else ModuleLogger.Error("GetMelonPreferences in the BWChaos class isn't found! Did I misuse reflection or is the module being loaded standalone!");
             }
         }
     }
