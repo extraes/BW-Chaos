@@ -48,7 +48,7 @@ namespace BWChaos
                         effect.ForceEnd();
                         EffectHandler.AllEffects.Remove(effect.Name);
                     }
-                        (ecat.elements[1] as BoolElement).SetValue(EffectHandler.AllEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
+                    (ecat.elements[1] as BoolElement).SetValue(EffectHandler.AllEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
                 });
 
             }
@@ -64,7 +64,7 @@ namespace BWChaos
             {
                 MelonPreferences.SetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes", b);
                 MelonPreferences.Save();
-                LiveUpdateEffects();
+                GetMelonPreferences();
             });
 
             if (enableRemoteVoting) preferencesCategory.CreateBoolElement("Proportional voting", Color.white, proportionalVoting, b =>
@@ -72,6 +72,13 @@ namespace BWChaos
                 MelonPreferences.SetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser", b);
                 GlobalVariables.WatsonClient.SendAsync(Encoding.UTF8.GetBytes("ignorerepeatvotes:" + b)).GetAwaiter().GetResult();
                 MelonPreferences.Save();
+            });
+
+            preferencesCategory.CreateBoolElement("Show candidate effects on screen", Color.white, showCandidatesOnScreen, b =>
+            {
+                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "showCandidatesOnScreen", b);
+                MelonPreferences.Save();
+                GetMelonPreferences(); // this doesn't necessitate reloading effects
             });
 
             preferencesCategory.CreateBoolElement("Use gravity effects", Color.white, useGravityEffects, b =>
