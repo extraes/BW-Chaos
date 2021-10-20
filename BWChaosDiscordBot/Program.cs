@@ -91,6 +91,8 @@ namespace BWChaosRemoteVoting
                     break;
                 case "sendvotes":
                     watsonServer.SendAsync(currentClientIpPort, JsonConvert.SerializeObject(accumulatedVotes, Formatting.None));
+                    break;
+                case "clearvotes":
                     for (int i = 0; i < accumulatedVotes.Length; i++)
                         accumulatedVotes[i] = 0;
                     users.Clear();

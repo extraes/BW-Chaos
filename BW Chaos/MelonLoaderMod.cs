@@ -1,6 +1,5 @@
 ﻿using BWChaos.Effects;
 using MelonLoader;
-using ModThatIsNotMod.BoneMenu;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -114,12 +113,12 @@ namespace BWChaos
                 }
                 GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
 
-#if DEBUG
-                MelonLogger.Msg("Loaded effect resources; All resource paths:");
-                foreach (var path in GlobalVariables.EffectResources.GetAllAssetNames())
-                    MelonLogger.Msg(path);
-#endif
             }
+#if DEBUG
+            MelonLogger.Msg("Loaded effect resources; All resource paths:");
+            foreach (var path in GlobalVariables.EffectResources.GetAllAssetNames())
+                MelonLogger.Msg(path);
+#endif
 
             {
                 using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.jevil"))
@@ -165,10 +164,14 @@ namespace BWChaos
                 GameObject.FindObjectOfType<Player_Health>();
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
+            GlobalVariables.MusicMixer = 
+                GameObject.FindObjectsOfType<UnityEngine.Audio.AudioMixerGroup>().FirstOrDefault(g => g.name == "Music");
 
             new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
             EffectHandler.advanceTimer = sceneName != "scene_mainMenu";
 
+            GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil").Prefab.GetComponent<AudioSource>().outputAudioMixerGroup =
+                GlobalVariables.MusicMixer;
         }
 
         public override void OnUpdate()
@@ -177,7 +180,7 @@ namespace BWChaos
                 effect.OnEffectUpdate();
         }
 
-        public override void OnPreferencesLoaded () => LiveUpdateEffects();
+        public override void OnPreferencesLoaded() => LiveUpdateEffects();
 
 #if DEBUG
         // IMGUI for flatscreen debugging (when the vr no workie :woeis:)
@@ -207,7 +210,7 @@ namespace BWChaos
 
         private async void ClientConnectedToServer(object sender, EventArgs e)
         {
-            MelonLogger.Msg("Connected to the Discord bot!");
+            MelonLogger.Msg("Connected to the bot!");
             await GlobalVariables.WatsonClient.SendAsync("ignorerepeatvotes:" + ignoreRepeatVotes);
             // Send data for startup then clear it out so that there's less of an opportunity for reflection to steal shit (i think)
             await GlobalVariables.WatsonClient.SendAsync("token:" + botToken);

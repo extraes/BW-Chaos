@@ -4,6 +4,7 @@ using WatsonWebsocket;
 using BWChaos.Effects;
 using StressLevelZero.Rig;
 using StressLevelZero.VRMK;
+using UnityEngine.Audio;
 
 namespace BWChaos
 {
@@ -22,6 +23,8 @@ namespace BWChaos
         public static RigManager Player_RigManager;
         public static Player_Health Player_Health;
         public static PhysBody Player_PhysBody;
+
+        public static AudioMixerGroup MusicMixer;
 
         public static AssetBundle EffectResources;
     }

@@ -24,6 +24,8 @@ namespace BWChaosRemoteVoting
             {
                 twitchClient = new TwitchClient();
                 twitchClient.Initialize(new ConnectionCredentials(channelName, token), channelName);
+                twitchClient.Connect();
+                twitchClient.JoinChannel(channelName);
 
                 twitchClient.OnChatCommandReceived += TwitchClient_OnChatCommandReceived;
                 for (int i=0; i<9; i++) 
