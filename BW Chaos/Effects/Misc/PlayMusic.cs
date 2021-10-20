@@ -13,6 +13,7 @@ namespace BWChaos.Effects
         public PlayMusic() : base("Play Ultrakill music", 90) { }
 
         private AudioSource soundPlayer = null;
+        private object CToken;
         public override void OnEffectStart()
         { // lol
             // Load sound asset and play it
@@ -26,8 +27,14 @@ namespace BWChaos.Effects
             soundPlayer.ignoreListenerVolume = true;
             soundPlayer.ignoreListenerPause = true;
             soundPlayer.volume = 0.2f;
+            soundPlayer.outputAudioMixerGroup = GlobalVariables.MusicMixer;
             soundPlayer.Play();
-            MelonCoroutines.Start(CoRun());
+            CToken = MelonCoroutines.Start(CoRun());
+        }
+
+        public override void OnEffectEnd()
+        {
+            MelonCoroutines.Stop(CToken);
         }
 
         private IEnumerator CoRun()

@@ -30,6 +30,7 @@ namespace BWChaos.Effects
             jevil.transform.position = head.position + head.forward;
             jevil.transform.rotation = Quaternion.LookRotation(-Vector3.ProjectOnPlane(head.forward, Vector3.up));
             jevil.SetActive(true);
+            //jevil.GetComponent<AudioSource>().outputAudioMixerGroup = GlobalVariables.MusicMixer; // in case changing it on the pool prefab didn't fix it :shrump:
             soundSource.Play();
         }
 
