@@ -12,8 +12,6 @@ namespace BWChaos.Effects
     {
         public SlowmoPunch() : base("SlowMo Punch", 60) { }
 
-        //todo: this is probably bad lole -extraes
-        //not the patch, that's fine, but my implementation/adulteration of it. (cause ive 
         public override void OnEffectStart() => OnPunch += RunSlowmo;
 
         public override void OnEffectEnd() => OnPunch -= RunSlowmo;
