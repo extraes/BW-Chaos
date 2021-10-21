@@ -281,8 +281,7 @@ namespace BWChaos
             showCandidatesOnScreen = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "showCandidatesOnScreen");
             sendCandidatesInChannel = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "sendCandidatesInChannel");
             ignoreRepeatVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser");
-            ignoreRepeatVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser");
-            ignoreRepeatVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "proportionalVoting");
+            proportionalVoting = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "proportionalVoting");
             enableRemoteVoting = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableRemoteVoting");
             // yeah what that comment said
             syncEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "syncEffectsViaEntanglement");
