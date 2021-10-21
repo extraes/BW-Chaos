@@ -106,39 +106,3 @@ namespace BWChaos
         }
     }
 }
-/*
-public bool randomOnNoVotes = false;
-internal static bool useLaggyEffects = false;
-internal static bool useGravityEffects = false;
-internal static bool useSteamProfileEffects = false;
-internal static bool ignoreRepeatVotes = false;
-internal static bool proportionalVoting = true;
-internal static bool enableDiscordVoting = false;
-internal static bool syncEffects = false;
-
-MelonPreferences.CreateEntry("BW_Chaos", "randomEffectOnNoVotes", randomOnNoVotes, "randomEffectOnNoVotes");
-randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
-
-MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", useGravityEffects, "useGravityEffects");
-useGravityEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useGravityEffects");
-
-MelonPreferences.CreateEntry("BW_Chaos", "useSteamProfileEffects", useSteamProfileEffects, "useSteamProfileEffects");
-useSteamProfileEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useSteamProfileEffects");
-
-MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects");
-useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
-
-// Voting preferences
-MelonPreferences.CreateEntry("BW_Chaos", "ignoreRepeatVotesFromSameUser", ignoreRepeatVotes, "ignoreRepeatVotesFromSameUser");
-ignoreRepeatVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser");
-
-MelonPreferences.CreateEntry("BW_Chaos", "proportionalVoting", proportionalVoting, "proportionalVoting");
-ignoreRepeatVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "proportionalVoting");
-
-MelonPreferences.CreateEntry("BW_Chaos", "enableDiscordVoting", enableDiscordVoting, "enableDiscordVoting");
-enableDiscordVoting = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableDiscordVoting");
-// yeah what that comment said
-
-MelonPreferences.CreateEntry("BW_Chaos", "syncEffectsViaEntanglement", syncEffects, "syncEffectsViaEntanglement");
-syncEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "syncEffectsViaEntanglement");
-*/
