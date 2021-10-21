@@ -2,10 +2,7 @@
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
 using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using WatsonWebsocket;
 using static BWChaosRemoteVoting.GlobalVariables;
 
 namespace BWChaosRemoteVoting
@@ -35,18 +32,19 @@ namespace BWChaosRemoteVoting
                 await watsonServer.SendAsync(currentClientIpPort, "error:" + e.ToString());
                 //Console.WriteLine(e.ToString());
             }
-            
+
             await Task.Delay(-1);
         }
 
         private static Task DiscordMessageSent(DiscordClient sender, MessageCreateEventArgs e)
         {
             if (e.Channel != discordChannel) return null;
-            if (ignoreRepeats &&  users.Contains(e.Author.Id.ToString())) return null;
+            if (ignoreRepeats && users.Contains(e.Author.Id.ToString())) return null;
             users.Add(e.Author.Id.ToString());
 
             if (int.TryParse(e.Message.Content, out int messageInt))
             {
+                messageInt -= num;
                 if (messageInt >= 1 && messageInt <= 5)
                     accumulatedVotes[messageInt - 1]++;
             }

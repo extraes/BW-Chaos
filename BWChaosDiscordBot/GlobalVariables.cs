@@ -12,5 +12,6 @@ namespace BWChaosRemoteVoting
         public static WatsonWsServer watsonServer;
         public static string currentClientIpPort;
         public static List<string> users = new List<string>();
+        public static int num = 0;
     }
 }

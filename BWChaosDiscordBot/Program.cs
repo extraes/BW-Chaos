@@ -44,11 +44,8 @@ namespace BWChaosRemoteVoting
             while (string.IsNullOrEmpty(channelIdOrName)) await Task.Delay(250);
 
             // Discord 
-            if (ulong.TryParse(channelIdOrName, out ulong idUlong)) await DiscordBot.Init(channelIdOrName, idUlong);
-            else
-            {
-                await TwitchBot.Init(botToken, channelIdOrName);
-            }
+            if (ulong.TryParse(channelIdOrName, out ulong idUlong)) await DiscordBot.Init(botToken, idUlong);
+            else await TwitchBot.Init(botToken, channelIdOrName);
 
             await Task.Delay(-1);
         }
@@ -98,13 +95,14 @@ namespace BWChaosRemoteVoting
                     users.Clear();
                     break;
                 case "ignorerepeatvotes":
+                    Console.WriteLine(messageData);
                     ignoreRepeats = bool.Parse(messageData);
                     break;
                 case "sendtochannel":
                     DiscordBot.discordClient?.SendMessageAsync(DiscordBot.discordChannel, messageData);
                     break;
                 case "flipnumbers":
-                    TwitchBot.num = int.Parse(messageData);
+                    num = int.Parse(messageData);
                     break;
                 default:
                     Console.WriteLine("UNKNOWN MESSAGE TYPE: " + messageType);

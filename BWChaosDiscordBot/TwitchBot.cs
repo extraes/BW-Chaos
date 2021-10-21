@@ -16,7 +16,6 @@ namespace BWChaosRemoteVoting
     static class TwitchBot
     {
         public static TwitchClient twitchClient;
-        public static int num = 0;
 
         public static async Task Init(string token, string channelName)
         {
