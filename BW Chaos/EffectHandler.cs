@@ -1,6 +1,5 @@
 ﻿using BWChaos.Effects;
 using MelonLoader;
-using StressLevelZero.Combat;
 using System;
 using System.Collections;
 using System.Linq;
@@ -33,34 +32,42 @@ namespace BWChaos
         private Image overlayImage;
         private Text overlayText;
         private Text candidateText;
+        private Text voteText;
         private static Canvas wristCanvas;
         private Image wristImage;
         private Text wristText;
+
+        private readonly Vector2 overlayImagePos_Candidates = new Vector2(-437.5f, -240);
+        private readonly Vector2 overlayImagePos_NoCandidates = new Vector2(-300f, -240);
+
+        private Image[] voteBars = new Image[5];
 
         #endregion
 
         public void Start()
         {
             Instance = this;
-            // make sure it's up to date (real fucking moment when it becomes true JUST ONCE for no reason, idk man)
-
             // this is pretty messy looking, but in a nutshell
             // spawn overlaycanvas, move it to corner
             // spawn wristcanvas, adjust transform a bunch
-            if (!overlayCanvas) overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
+            overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
             overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
             overlayImage.fillAmount = 0;
+            if (BWChaos.showCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
 
-            if (BWChaos.showCandidatesOnScreen) overlayImage.rectTransform.position = new Vector3(-407.5f, -240, 0);
             overlayText = overlayCanvas.transform.Find("PastText").GetComponent<Text>();
-            overlayText.text = "";
+            overlayText.text = string.Empty;
             candidateText = overlayCanvas.transform.Find("CandidateText").GetComponent<Text>();
             candidateText.horizontalOverflow = HorizontalWrapMode.Overflow;
-            candidateText.text = "";
-
+            candidateText.text = string.Empty;
+            var cEx = overlayCanvas.transform.Find("CandidateExtras");
+            voteText = cEx.Find("VoteText").GetComponent<Text>();
+            voteText.text = string.Empty;
+            for (int i = 0; i < 5; i++)
+                voteBars[i] = cEx.Find("VoteBar" + (i + 1)).GetComponent<Image>();
 
             Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
-            if (!wristCanvas) wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
+            wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
             wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
             wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             wristImage.transform.localPosition = new Vector3(0, 20, 0);
@@ -122,6 +129,22 @@ namespace BWChaos
                 yield return new WaitForSecondsRealtime(1);
                 if (!advanceTimer) continue;
 
+                #region Set vote UI elements
+
+                voteText.text = string.Empty;
+                if (BWChaos.showCandidatesOnScreen && BWChaos.enableRemoteVoting)
+                {
+                    voteBars[0].transform.parent.gameObject.SetActiveRecursively(true);
+
+                    int[] votes = GetVotes(); // to show effect votes live on the overlay
+                    UpdateVoteBars(votes);
+#if DEBUG
+                    MelonLogger.Msg($"Recieved incomplete votes: [{string.Join(", ", votes)}]; Total: {votes.Sum()}");
+#endif
+                }
+                else voteBars[0].transform.parent.gameObject.SetActiveRecursively(false);
+                
+                #endregion
 
                 currentTimerValue += 1;
                 float fillAmount = (float)currentTimerValue / secondsEachEffect;
@@ -133,20 +156,33 @@ namespace BWChaos
                 {
                     RunVotedEffect();
                     ResetEffectCandidates();
+                    voteText.text = string.Empty;
                 }
+            }
+        }
+
+        private IEnumerator SlerpVoteBar(Transform transform, Vector3 to)
+        {
+            yield return null;
+            Vector3 from = transform.localScale;
+            for (float i = 0; i < 1; i += 0.05f)
+            {
+                if (!transform) yield break; // null check because i dont want to do ondestroy shit
+                transform.localScale = Vector3.Slerp(from, to, i);
+                yield return new WaitForFixedUpdate();
             }
         }
 
         private void RunVotedEffect()
         {
             int[] accumulatedVotes = GetVotes();
+            GlobalVariables.WatsonClient?.SendAsync("clearvotes:"); // Clear votes now that the time has come
 
             // Get the top voted effect
             (int, int) voted = GetVotedEffect(accumulatedVotes); // format is (arrIndex, value)
 #if DEBUG
             MelonLogger.Msg($"Voted effect: {GlobalVariables.CandidateEffects[voted.Item1].Name}, [{string.Join(", ", accumulatedVotes)}]");
             if (voted.Item2 == 0) MelonLogger.Msg("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
-            MelonLogger.Msg("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
             MelonLogger.Msg("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !randomOnNoVotes));
 #endif
             // return if the top voted effect has no votes & modpref is set to not run on no votes
@@ -211,18 +247,35 @@ namespace BWChaos
             }
         }
 
+        private void UpdateVoteBars(int[] votes)
+        {
+            float total = votes[0] + votes[1] + votes[2] + votes[3] + votes[4]; // sum immediately as float for float division for votebarproportion
+
+            for (int i = 0; i < 5; i++)
+            {
+                float voteBarProportion = total == 0 ? 0.5f : (votes[i] / total); // Avoid divide by zero error
+                MelonCoroutines.Start(SlerpVoteBar(voteBars[i].transform, new Vector3(0.5f + (voteBarProportion / 2), 1, 0))); // scale the bars proportionaltely, depending on what percentage of votes they have.
+                voteText.text += votes[i] + "\n";
+            }
+            voteText.text += "Total: " + total;
+        }
+
         private void ResetEffectCandidates()
         {
-            // todo: add candidates text in overlay ui
+            // reset GUI values to default
             currentTimerValue = 0;
             overlayImage.fillAmount = 0;
             wristImage.fillAmount = 0;
+            UpdateVoteBars(new int[] { 0, 0, 0, 0, 0 });
 
             string botMesssage = "-- New Candidate Effects --";
 
             GlobalVariables.CandidateEffects.Clear();
+
+            // Flip numbers to avoid confusion due to latency.
             if (numberFlip == 0) numberFlip = 5;
             else numberFlip = 0;
+            GlobalVariables.WatsonClient?.SendAsync("flipnumbers:" + numberFlip); // is this wasteful? probably. does it ensure the two stay in sync? probably.
 
             for (int i = 0; i < 4; i++)
             {
@@ -239,10 +292,19 @@ namespace BWChaos
             }
 
             botMesssage += $"\n{5 + numberFlip}: Random Effect";
-            
-            if (BWChaos.sendCandidatesInChannel) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
-            if (BWChaos.isTwitch) GlobalVariables.WatsonClient?.SendAsync("flipnumbers:" + numberFlip); // is this wasteful? probably. does it ensure the two stay in sync? probably.
-            if (BWChaos.showCandidatesOnScreen && advanceTimer) candidateText.text = botMesssage.Replace("-- New Candidate Effects --\n", ""); // Skip the first line of botmessage
+
+            if (BWChaos.sendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
+
+            if (BWChaos.showCandidatesOnScreen && advanceTimer)
+            {
+                candidateText.text = botMesssage.Replace("-- New Candidate Effects --\n", ""); // Skip the first line of botmessage
+                overlayImage.rectTransform.anchoredPosition = overlayImagePos_Candidates;
+            }
+            else
+            {
+                candidateText.text = string.Empty;
+                if (!advanceTimer) overlayImage.rectTransform.anchoredPosition = overlayImagePos_NoCandidates;
+            }
         }
     }
 }
