@@ -37,9 +37,9 @@ To enable this, set **enableRemoteVoting** to **true** in MelonPreferences
 
 - Go back into the General Information tab and copy the Application ID
 
-- Paste it into this format, replacing `<APPLICATION_ID>` with your application ID: `https://discord.com/oauth2/authorize?client_id=<APPLICATION_ID>&scope=bot&permissions=1024`
+- Paste it into this "template", replacing `<APPLICATION_ID>` with your application ID: `https://discord.com/oauth2/authorize?client_id=<APPLICATION_ID>&scope=bot&permissions=1024`
 
-- Open that link and select the server you want to add the bot to
+- Open that link and select the server you want to add the bot to, and add it
 
 - The hard part's over. Now open your Discord app
 
@@ -67,13 +67,13 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 - channel: The name of the Twitch channel or Discord channel for the bot to listen to, assuming enableRemoteVoting is true
 
-- - The mod will automatically determine if this is a Twitch or Discord channel and will start the proper bot accordingly. It will fail if your Twitch name is a bunch of numbers though.
+  - The mod will automatically determine if this is a Twitch or Discord channel and will start the proper bot accordingly. It will fail if your Twitch name is a bunch of numbers though.
 
 - randomEffectOnNoVotes: Determines if the mod will run effects when there were no votes.
 
-- useGravityEffects: Enables or disables effects that change the game's gravity value.
+- useGravityEffects: Enables or disables effects that change the game's gravity value. Effects that change gravity are likely to crash the game on campaign levels.
 
-- useLaggyEffects: Enables or disabled the more processing intensive effects, intended for people that can stomach low framerates, because there wasn't a year spent of optimizing it.
+- useLaggyEffects: Enables or disabled the more processing intensive effects, intended for people that can stomach low framerates, because there wasn't a year spent on optimizing it.
 
 - useSteamProfileEffects: Determines if effects changing your Steam profile will run, like "Change Steam name for 5m"
 
@@ -81,17 +81,21 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 - - When enabled, if you're the host, any effects that you run will attempt to be ran on the other clients.
 
-- - If you're a client, then any effect the host runs will attempt to be ran. If you have that effect disabled, it will inform you what was going to run.
+  - If you're a client, then any effect the host runs will attempt to be ran. If you have that effect disabled, it will inform you what was going to run.
 
 - ignoreRepeatVotesFromSameUser: Determines whether spamming is an effective method of bumping up vote counts.
 
 - proportionalVoting: Determines if proportional voting is enabled or not. If yes, an effect with 60% of votes has a 60% chance of winning, otherwise the top voted effect wins.
 
-- enableRemoteVoting: Enables taking votes from Discord/Twitch
+- enableRemoteVoting: Enables taking votes from Discord/Twitch.
 
-- showCandidatesOnScreen: Shows the candidate effects on screen, with the numbers that need to be voted for each one
+- showCandidatesOnScreen: Shows the candidate effects on screen, with the numbers that need to be voted for each one.
 
 - sendCandidatesInChannel: Only available to Discord remote voting. It will send a list of the effects that users can vote for into the specified channel.
+
+- forceEnabledEffects: A list of effects that will be in the effect pool, regardless of whether or not they adhere to the other preferences.
+
+- forceDisabledEffects: A list of effects that will *never* be in the effect pool, regardless of whether or not they adhere to the other preferences.
 
 ## Questions
 
@@ -107,4 +111,28 @@ If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEW
 
 - Errors appearing in the console on a scene transition (changing level)
 
-- - This is harmless. It just means that an effect failed to properly stop. It will automatically reset the effect.
+  - This is harmless. It just means that an effect failed to properly stop. The effect should automatically stop.
+
+  - This shows up as something along the lines of "Exception in coroutine of type BWChaos.EffectHandler+<Timer>" and usually contains the term "System.NullreferenceException"
+
+  - Even though I know *why* this happens, it is very tedious to hunt down every instance by myself, so if you told me which effect caused it, I would be grateful.
+
+    - You can find this information by either giving me your **log file** or telling me the first few lines of the error (e.g. where it says "[ERROR]" and the first few "at BWChaos.Effects...")
+
+- BWChaos does not work for some people on certain configurations of the Steam version, specifically the "ChaosModStartupException" error
+
+  - What is the square root of a fish? Now I'm sad.
+
+- The timer is too jerky!
+
+  - Yeah maybe I'll make it smoother, make it interpolate or something. It's not really a priority though.
+
+- 
+
+### Contributing
+
+If you want to add another effect, by all means feel free to do so. Make a Pull Request on the GitHub repo and add a new effect.
+
+If you want to change the UI, you can make a PR for that too, since the Unity project I use for building the UI is in the git repo too.
+
+I don't have a code of coduct or anything, so feel free to evade taxes and stuff after making a PR.

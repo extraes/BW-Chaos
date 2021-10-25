@@ -41,12 +41,16 @@ namespace BWChaos
                     if (addEffect)
                     {
                         if (!EffectHandler.AllEffects.ContainsKey(effect.Name))
+                        {
                             EffectHandler.AllEffects.Add(effect.Name, effect);
+                            if(!IsEffectViable(effect.Types)) forceEnabledEffects.Add(effect.Name);
+                        }
                     }
                     else
                     {
                         effect.ForceEnd();
                         EffectHandler.AllEffects.Remove(effect.Name);
+                        if(IsEffectViable(effect.Types)) forceDisabledEffects.Add(effect.Name);
                     }
                     (ecat.elements[1] as BoolElement).SetValue(EffectHandler.AllEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
                 });
@@ -58,6 +62,9 @@ namespace BWChaos
             {
                 preferencesCategory.elements.Remove(preferencesCategory.elements.FirstOrDefault(e => e.displayText == "Start entanglement module"));
                 Extras.EntanglementSyncHandler.Init();
+                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "syncEffectsViaEntanglement", !syncEffects);
+                MelonPreferences.Save();
+                LiveUpdateEffects();
             });
 
             preferencesCategory.CreateBoolElement("Random on no votes", Color.white, EffectHandler.randomOnNoVotes, b =>

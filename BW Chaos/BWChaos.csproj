@@ -130,6 +130,7 @@
     <Compile Include="Effects\Player\HighJump.cs" />
     <Compile Include="Effects\Misc\InvincibleNullbody.cs" />
     <Compile Include="Effects\Player\InstaDeath.cs" />
+    <Compile Include="Effects\Player\Nearsighted.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
     <Compile Include="Effects\Player\FuckYourItem.cs" />

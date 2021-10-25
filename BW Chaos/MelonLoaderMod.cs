@@ -38,6 +38,8 @@ namespace BWChaos
         internal static bool proportionalVoting = true;
         internal static bool enableRemoteVoting = false;
         internal static bool syncEffects = false;
+        internal static List<string> forceEnabledEffects = new List<string>();
+        internal static List<string> forceDisabledEffects = new List<string>();
         internal static List<EffectBase> asmEffects = new List<EffectBase>();
 #if DEBUG
         internal static bool enableIMGUI = false;
@@ -138,7 +140,7 @@ namespace BWChaos
 
 
 #if DEBUG
-            MelonLogger.Msg($"Of {Assembly.GetTypes().Where(t => t.BaseType == typeof(EffectBase)).ToArray().Length - 1} total effects, {EffectHandler.AllEffects.Count} are present.");
+            MelonLogger.Msg($"Of {asmEffects.Count} total effects, {EffectHandler.AllEffects.Count} are present.");
 #endif
 
             RegisterBoneMenu();
@@ -164,8 +166,10 @@ namespace BWChaos
                 GameObject.FindObjectOfType<Player_Health>();
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
-            GlobalVariables.MusicMixer = 
+            GlobalVariables.MusicMixer =
                 GameObject.FindObjectsOfType<UnityEngine.Audio.AudioMixerGroup>().FirstOrDefault(g => g.name == "Music");
+            GlobalVariables.Cameras =
+                GameObject.FindObjectsOfType<Camera>().Where(c => c.name.StartsWith("Camera (")).ToArray();
 
             new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
             EffectHandler.advanceTimer = sceneName != "scene_mainMenu";
@@ -183,24 +187,29 @@ namespace BWChaos
         public override void OnPreferencesLoaded() => LiveUpdateEffects();
 
 #if DEBUG
+        private readonly int horizStart = 5;
+        private readonly int vertStart = 25;
+        private readonly int width = 200;
+        private readonly int height = 25;
+        private readonly int gap = 5;
         // IMGUI for flatscreen debugging (when the vr no workie :woeis:)
         public override void OnGUI()
         {
             if (enableIMGUI)
             {
-                var horizOffset = 5;
+                var horizOffset = horizStart;
                 // because otherwise, it clips into unityexplorers top bar lol
-                var vertOffset = 25;
+                var vertOffset = vertStart;
                 for (int i = 0; i < EffectHandler.AllEffects.Count; i++)
                 {
-                    if (vertOffset + 30 > Screen.height)
+                    if (vertOffset + height + gap > Screen.height)
                     {
-                        vertOffset = 25;
-                        horizOffset += 255;
+                        vertOffset = vertStart;
+                        horizOffset += width + gap;
                     }
                     var e = EffectHandler.AllEffects.Values.ElementAt(i);
-                    if (GUI.Button(new Rect(horizOffset, vertOffset, 250, 25), e.Name)) e.Run();
-                    vertOffset += 30;
+                    if (GUI.Button(new Rect(horizOffset, vertOffset, width, height), e.Name)) e.Run();
+                    vertOffset += height + gap;
                 }
             }
         }
@@ -265,12 +274,14 @@ namespace BWChaos
             MelonPreferences.CreateEntry("BW_Chaos", "enableRemoteVoting", enableRemoteVoting, "enableRemoteVoting");
             // yeah
             MelonPreferences.CreateEntry("BW_Chaos", "syncEffectsViaEntanglement", syncEffects, "syncEffectsViaEntanglement");
+            MelonPreferences.CreateEntry("BW_Chaos", "forceEnabledEffects", forceEnabledEffects.ToArray(), "forceEnabledEffects");
+            MelonPreferences.CreateEntry("BW_Chaos", "forceDisabledEffects", forceDisabledEffects.ToArray(), "forceDisabledEffects");
 #if DEBUG
             MelonPreferences.CreateEntry("BW_Chaos", "enableIMGUI", enableIMGUI, "enableIMGUI");
 #endif
         }
 
-        // Make public because there's no harm in it (and because reflection was being a bitch to learn and I didn't want to deal with it
+        // Make public because there's no harm in it (and because reflection was being a bitch to learn and I didn't want to deal with it)
         public static void GetMelonPreferences()
         {
             EffectHandler.randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
@@ -285,6 +296,8 @@ namespace BWChaos
             enableRemoteVoting = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableRemoteVoting");
             // yeah what that comment said
             syncEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "syncEffectsViaEntanglement");
+            forceEnabledEffects = MelonPreferences.GetEntryValue<string[]>("BW_Chaos", "forceEnabledEffects").ToList();
+            forceDisabledEffects = MelonPreferences.GetEntryValue<string[]>("BW_Chaos", "forceDisabledEffects").ToList();
 #if DEBUG
             enableIMGUI = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableIMGUI");
 #endif
@@ -363,25 +376,56 @@ namespace BWChaos
                 EffectHandler.AllEffects.Add(e.Name, e);
             }
 
-            #region Local functions because fuck you
 
-            IEnumerable<EffectBase> FilterEffects(List<EffectBase> effects)
+            foreach (var str in forceEnabledEffects)
+            {
+#if DEBUG
+                MelonLogger.Msg("Force enabling effect '" + str + "' because it was in the melonprefs array");
+#endif
+
+                if (EffectHandler.AllEffects.Keys.Contains(str)) continue; // we dont want it in the list twice
+
+                EffectBase effect = asmEffects.FirstOrDefault(e => e.Name == str); // firstordefault my beloved
+
+                // If the effect name doesn't exist, "throw" an error
+                if (effect == null)
+                {
+                    MelonLogger.Error(new EffectNotFoundException($"Force enabled effect '{str}' wasn't found! Check MelonPreferences, are you sure that's the right name for the effect?"));
+                    continue;
+                }
+
+                // don't allow oculus players to try and crash my shit
+                if (effect.Types.HasFlag(EffectTypes.USE_STEAM) && !isSteamVer)
+                {
+                    MelonLogger.Warning("This is the Oculus version, however you attempted to use a Steam effect! This is not allowed! Are you trying to crash your game???");
+                    continue;
+                }
+
+                EffectHandler.AllEffects.Add(str, effect);
+
+
+            }
+
+            #region Local function because fuck you
+
+            IEnumerable<EffectBase> FilterEffects(IEnumerable<EffectBase> effects)
             {
                 return from e in effects
                        where e.Types == EffectTypes.NONE || // is this optimization?
-                       IsEffectViable(e.Types)
+                       (IsEffectViable(e.Types) &&
+                       !forceDisabledEffects.Contains(e.Name))
                        select e;
             }
 
-            bool IsEffectViable(EffectTypes eTypes)
-            {
-                foreach (var tuple in eTypesToPrefs)
-                    if (eTypes.HasFlag(tuple.Item1) && !tuple.Item2) return false; //todid: this fucking works?????
-
-                return true;
-            }
-
             #endregion
+        }
+
+        private bool IsEffectViable(EffectTypes eTypes)
+        {
+            foreach (var tuple in eTypesToPrefs)
+                if (eTypes.HasFlag(tuple.Item1) && !tuple.Item2) return false; //todid: this fucking works?????
+
+            return true;
         }
 
         private void LiveUpdateEffects()
@@ -389,6 +433,7 @@ namespace BWChaos
             // I'm not sure what this would do, but it probably doesn't hurt...
             EffectHandler.Instance.gameObject.SetActive(false);
             PopulateEffects();
+            foreach (var e in GlobalVariables.ActiveEffects.Where(e => !IsEffectViable(e.Types))) e.ForceEnd();
             EffectHandler.Instance.gameObject.SetActive(true);
         }
 
@@ -397,6 +442,11 @@ namespace BWChaos
 
     internal class ChaosModStartupException : Exception
     {
-        public ChaosModStartupException() : base("Illegal environment path", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
+        public ChaosModStartupException() : base($"Illegal environment path '{MelonUtils.GameDirectory}'", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
+    }
+
+    internal class EffectNotFoundException : Exception
+    {
+        public EffectNotFoundException(string message) : base(message) { }
     }
 }
