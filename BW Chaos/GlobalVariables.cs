@@ -23,6 +23,8 @@ namespace BWChaos
         public static RigManager Player_RigManager;
         public static Player_Health Player_Health;
         public static PhysBody Player_PhysBody;
+        
+        public static Camera[] Cameras; // because oculusvr loves COCK i cant have a single camera reference, zuck please get the schlong out ya mouf if you please (nc = 0.001; fc = 10000;)
 
         public static AudioMixerGroup MusicMixer;
 
