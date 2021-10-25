@@ -23,6 +23,8 @@ namespace BWChaosRemoteVoting
                     Intents = DiscordIntents.AllUnprivileged
                 });
                 discordClient.MessageCreated += DiscordMessageSent;
+                discordClient.ClientErrored += ClientErrored;
+                discordClient.SocketErrored += SocketErrored;
                 await discordClient.ConnectAsync();
                 discordChannel = await discordClient.GetChannelAsync(channelId);
                 await watsonServer.SendAsync(currentClientIpPort, "log:Connected to Discord and fetched the channel.");
@@ -34,6 +36,18 @@ namespace BWChaosRemoteVoting
             }
 
             await Task.Delay(-1);
+        }
+
+        private static Task SocketErrored(DiscordClient sender, SocketErrorEventArgs e)
+        {
+            watsonServer.SendAsync(currentClientIpPort, e.Exception.ToString());
+            return null;
+        }
+
+        private static Task ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
+        {
+            watsonServer.SendAsync(currentClientIpPort, e.Exception.ToString());
+            return null;
         }
 
         private static Task DiscordMessageSent(DiscordClient sender, MessageCreateEventArgs e)
