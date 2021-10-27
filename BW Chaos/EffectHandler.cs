@@ -164,11 +164,11 @@ namespace BWChaos
         private IEnumerator SlerpVoteBar(Transform transform, Vector3 to)
         {
             yield return null;
-            Vector3 from = transform.localScale;
+            Vector3? from = transform?.localScale;
             for (float i = 0; i < 1; i += 0.05f)
             {
                 if (!transform) yield break; // null check because i dont want to do ondestroy shit
-                transform.localScale = Vector3.Slerp(from, to, i);
+                transform.localScale = Vector3.Slerp((Vector3)from, to, i);
                 yield return new WaitForFixedUpdate();
             }
         }
