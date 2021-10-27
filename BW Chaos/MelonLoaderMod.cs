@@ -167,13 +167,15 @@ namespace BWChaos
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
             GlobalVariables.MusicMixer =
-                GameObject.FindObjectsOfType<UnityEngine.Audio.AudioMixerGroup>().FirstOrDefault(g => g.name == "Music");
+                GameObject.FindObjectOfType<Data_Manager>().audioManager.audioMixer.FindMatchingGroups("Music").FirstOrDefault(m => m.name == "Music");
+            GlobalVariables.SpectatorCam =
+                GameObject.Find("[RigManager (Default Brett)]/[SkeletonRig (GameWorld Brett)]/Head/FollowCamera").GetComponent<Camera>();
             GlobalVariables.Cameras =
                 GameObject.FindObjectsOfType<Camera>().Where(c => c.name.StartsWith("Camera (")).ToArray();
 
             new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
-            EffectHandler.advanceTimer = sceneName != "scene_mainMenu";
-
+            EffectHandler.advanceTimer = sceneName != "scene_mainMenu" && sceneName != "scene_introStart";
+            
             GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil").Prefab.GetComponent<AudioSource>().outputAudioMixerGroup =
                 GlobalVariables.MusicMixer;
         }
@@ -390,7 +392,7 @@ namespace BWChaos
                 // If the effect name doesn't exist, "throw" an error
                 if (effect == null)
                 {
-                    MelonLogger.Error(new EffectNotFoundException($"Force enabled effect '{str}' wasn't found! Check MelonPreferences, are you sure that's the right name for the effect?"));
+                    MelonLogger.Error($"Force enabled effect '{str}' wasn't found! Check MelonPreferences, are you sure that's the right name for the effect?");
                     continue;
                 }
 
@@ -443,10 +445,5 @@ namespace BWChaos
     internal class ChaosModStartupException : Exception
     {
         public ChaosModStartupException() : base($"Illegal environment path '{MelonUtils.GameDirectory}'", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
-    }
-
-    internal class EffectNotFoundException : Exception
-    {
-        public EffectNotFoundException(string message) : base(message) { }
     }
 }
