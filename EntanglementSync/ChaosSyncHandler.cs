@@ -37,13 +37,7 @@ namespace BWChaos.Sync
 
         private void OnEffectRan(EffectBase effect)
         {
-            if (Node.activeNode == null || Node.activeNode.connectedUsers.Count == 0) return;
-            if (!Node.isServer)
-            {
-                Extras.SyncHandlerUtils.SetRandomPreferenceWhileConnected();
-                return; // Don't let clients dictate shit to the server, very bad idea
-            }
-            else Extras.SyncHandlerUtils.SetRandomPreferenceWhileConnected(true);
+            if (Node.activeNode.connectedUsers.Count == 0) return;
 
             if (!IsEffectSyncable(effect.Types))
             {
