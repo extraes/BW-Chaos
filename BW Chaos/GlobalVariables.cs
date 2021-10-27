@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
-using UnityEngine;
-using WatsonWebsocket;
-using BWChaos.Effects;
+﻿using BWChaos.Effects;
 using StressLevelZero.Rig;
 using StressLevelZero.VRMK;
+using System.Collections.Generic;
+using UnityEngine;
 using UnityEngine.Audio;
+using WatsonWebsocket;
 
 namespace BWChaos
 {
@@ -23,8 +23,9 @@ namespace BWChaos
         public static RigManager Player_RigManager;
         public static Player_Health Player_Health;
         public static PhysBody Player_PhysBody;
-        
-        public static Camera[] Cameras; // because oculusvr loves COCK i cant have a single camera reference, zuck please get the schlong out ya mouf if you please (nc = 0.001; fc = 10000;)
+
+        public static Camera SpectatorCam;
+        public static Camera[] Cameras;
 
         public static AudioMixerGroup MusicMixer;
 
