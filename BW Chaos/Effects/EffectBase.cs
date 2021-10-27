@@ -82,7 +82,7 @@ namespace BWChaos.Effects
 
         private IEnumerator CoRun()
         {
-            AutoCoroutine = AutoCRMethod?.Invoke(this, null);
+            AutoCoroutine = MelonCoroutines.Start((IEnumerator)AutoCRMethod?.Invoke(this, null));
             OnEffectStart();
 
             Active = true;
