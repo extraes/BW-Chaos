@@ -53,7 +53,7 @@ namespace BWChaos
             overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
             overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
             overlayImage.fillAmount = 0;
-            if (BWChaos.showCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
+            if (Chaos.showCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
 
             overlayText = overlayCanvas.transform.Find("PastText").GetComponent<Text>();
             overlayText.text = string.Empty;
@@ -132,7 +132,7 @@ namespace BWChaos
                 #region Set vote UI elements
 
                 voteText.text = string.Empty;
-                if (BWChaos.showCandidatesOnScreen && BWChaos.enableRemoteVoting)
+                if (Chaos.showCandidatesOnScreen && Chaos.enableRemoteVoting)
                 {
                     voteBars[0].transform.parent.gameObject.SetActiveRecursively(true);
 
@@ -216,7 +216,7 @@ namespace BWChaos
 
         private (int, int) GetVotedEffect(int[] votes)
         {
-            if (BWChaos.proportionalVoting)
+            if (Chaos.proportionalVoting)
             {
                 // My jank-ass proportional voting system that works without floats, just ints.
                 // heres a diagram in case you were confused https://discord.com/channels/563139253542846474/724595991675797554/898447182762479637 (lol)
@@ -293,9 +293,9 @@ namespace BWChaos
 
             botMesssage += $"\n{5 + numberFlip}: Random Effect";
 
-            if (BWChaos.sendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
+            if (Chaos.sendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
 
-            if (BWChaos.showCandidatesOnScreen && advanceTimer)
+            if (Chaos.showCandidatesOnScreen && advanceTimer)
             {
                 candidateText.text = botMesssage.Replace("-- New Candidate Effects --\n", ""); // Skip the first line of botmessage
                 overlayImage.rectTransform.anchoredPosition = overlayImagePos_Candidates;

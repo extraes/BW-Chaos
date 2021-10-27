@@ -9,7 +9,7 @@ using static BWChaos.Effects.EffectBase;
 namespace BWChaos
 {
     // Use partial to stay in scope, because leaving it is a BITCH to deal with.
-    public partial class BWChaos : MelonMod
+    public partial class Chaos : MelonMod
     {
         internal static MenuCategory boneMenuEntry;
         internal static MenuCategory effectsCategory;

@@ -158,6 +158,7 @@
     <Compile Include="Effects\Misc\RandomTimeScale.cs" />
     <Compile Include="Effects\World\InvertVelocity.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
+    <Compile Include="Extras\Attributes.cs" />
     <Compile Include="Extras\EntanglementSyncHandler.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />

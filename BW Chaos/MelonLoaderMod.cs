@@ -22,7 +22,7 @@ namespace BWChaos
         public const string DownloadLink = null;
     }
 
-    public partial class BWChaos : MelonMod
+    public partial class Chaos : MelonMod
     {
         internal string botToken = "YOUR_TOKEN_HERE";
         internal string channelId = "CHANNEL_ID_HERE";

@@ -13,10 +13,8 @@ namespace BWChaos.Sync
 {
     public class ChaosSyncHandler : EntanglementModule
     {
-        static readonly byte mIndex = 99;
+        public static readonly byte mIndex = 99; // 99 because c in binary is 99 :^)
         public static byte[] thisVersion = new byte[3];
-        BoolElement ronvElement;
-        bool hookedLobbyManager = false;
 
         public override void OnModuleLoaded()
         {
@@ -30,35 +28,28 @@ namespace BWChaos.Sync
 
             NetworkMessage.RegisterHandler<ChaosMessageHandler>();
 
-            BWChaos.OnEffectRan += OnEffectRan;
+            //var ee = new EntangleEffect();
+            //EffectHandler.AllEffects.Add(ee.Name, ee);
+
+            Chaos.OnEffectRan += OnEffectRan;
         }
         
 
         private void OnEffectRan(EffectBase effect)
         {
             if (Node.activeNode == null || Node.activeNode.connectedUsers.Count == 0) return;
-            if (!hookedLobbyManager)
+            if (!Node.isServer)
             {
-                try
-                {
-                    DiscordIntegration.lobbyManager.OnMemberConnect += LobbyManager_OnMemberConnect;
-                    hookedLobbyManager = true;
-                } catch (Exception e)
-                {
-                    ModuleLogger.Error("Error while trying to hook the lobby manager, this was expected. " + e.ToString());
-                    hookedLobbyManager = false;
-                }
+                Extras.SyncHandlerUtils.SetRandomPreferenceWhileConnected();
+                return; // Don't let clients dictate shit to the server, very bad idea
             }
+            else Extras.SyncHandlerUtils.SetRandomPreferenceWhileConnected(true);
 
-            if (effect.Types.HasFlag(EffectBase.EffectTypes.USE_STEAM) || effect.Types.HasFlag(EffectBase.EffectTypes.AFFECT_STEAM_PROFILE) || effect.Types.HasFlag(EffectBase.EffectTypes.DONT_SYNC))
+            if (!IsEffectSyncable(effect.Types))
             {
                 ModuleLogger.Msg("Not going to sync " + effect.Name);
                 Utilities.SpawnAd($"Not gonna sync this effect lol ({effect.Name})");
                 return;
-            }
-            if (!Node.isServer)
-            {
-                return; // Don't let clients dictate shit to the server, very bad idea
             }
 
             // send data
@@ -67,24 +58,15 @@ namespace BWChaos.Sync
             Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
 
-        private void LobbyManager_OnMemberConnect(long _, long __)
+        private bool IsEffectSyncable(EffectBase.EffectTypes types)
         {
-            if (!Node.isServer)
-            {
-                EffectHandler.randomOnNoVotes = false; // if they're not the server, stop it from running effects without server permission
-                if (ronvElement == null) ronvElement = (typeof(BWChaos).GetField("preferencesCategory", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as MenuCategory).elements.FirstOrDefault(e => e.displayText == "Random on no votes") as BoolElement;
-                ronvElement.SetValue(false);
-            }
-            else
-            {
-                BWChaos.GetMelonPreferences();
-            }
+            return !(types.HasFlag(EffectBase.EffectTypes.USE_STEAM) || types.HasFlag(EffectBase.EffectTypes.AFFECT_STEAM_PROFILE) || types.HasFlag(EffectBase.EffectTypes.DONT_SYNC));
         }
     }
 
     public class ChaosMessageHandler : NetworkMessageHandler
     {
-        public override byte? MessageIndex { get; } = 99; // 99 because c in binary is 99 :^)
+        public override byte? MessageIndex { get; } = ChaosSyncHandler.mIndex;
 
         public override NetworkMessage CreateMessage(NetworkMessageData data)
         {
@@ -209,11 +191,6 @@ namespace BWChaos.Sync
                 msg.messageData = thisVersion;
                 msg.messageData = msg.messageData.Concat(Encoding.UTF8.GetBytes(effect.Name)).ToArray();
                 
-            }
-
-            if (effect.Name == "")
-            {
-                Type magplayer = Type.GetType("BWChaos.Effects.MagneticPlayer");
             }
         }
 
