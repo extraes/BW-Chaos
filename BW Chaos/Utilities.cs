@@ -4,6 +4,7 @@ using UnityEngine;
 using StressLevelZero.Pool;
 using StressLevelZero.Interaction;
 using ModThatIsNotMod;
+using System;
 
 namespace BWChaos
 {
@@ -12,7 +13,7 @@ namespace BWChaos
         public static string RemoveFirstLines(this string s, int n)
         {
             string[] lines = s
-                .Split(System.Environment.NewLine.ToCharArray())
+                .Split(Environment.NewLine.ToCharArray())
                 .Skip(n)
                 .ToArray();
 
@@ -33,7 +34,7 @@ namespace BWChaos
 
         public static Hand GetRandomPlayerHand()
         {
-            int randomNum = Random.Range(0, 2);
+            int randomNum = UnityEngine.Random.Range(0, 2);
             if (randomNum == 1)
                 return Player.leftHand;
             else
@@ -57,6 +58,11 @@ namespace BWChaos
             ad.transform.position = phead.position + phead.forward.normalized * 2;
             ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
             return ad;
+        }
+
+        public static void ForEach<T>(this IEnumerable<T> ienum, Action<T> fun) 
+        {
+            foreach (T item in ienum) fun(item);
         }
     }
 }
