@@ -12,9 +12,8 @@ namespace BWChaos.Effects
     {
         public FuckYourMag() : base("Fuck Your Magazine", 90, EffectTypes.HIDDEN) { }
 
-        public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
-
-        private IEnumerator CoRun()
+        [Extras.AutoCoroutine]
+        public IEnumerator CoRun()
         {
             yield return null;
             while (Active)

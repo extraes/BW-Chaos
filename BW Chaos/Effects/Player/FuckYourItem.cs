@@ -10,13 +10,8 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            Interactable interactable = Player.leftHand.attachedInteractable;
-            InteractableHost host = interactable?.GetComponentInParent<InteractableHost>();
-            host?.gameObject?.SetActive(false);
-
-            interactable = Player.rightHand.attachedInteractable;
-            host = interactable?.GetComponentInParent<InteractableHost>();
-            host?.gameObject?.SetActive(false);
+            Player.GetObjectInHand(Player.leftHand)?.SetActive(false);
+            Player.GetObjectInHand(Player.rightHand)?.SetActive(false);
         }
     }
 }

@@ -10,17 +10,14 @@ namespace BWChaos.Effects
     {
         public RandomTimeScale() : base("Random slowmo", 90) { }
 
-        public override void OnEffectStart()
-        {
-            MelonCoroutines.Start(ChangeTime());
-        }
         
         public override void OnEffectEnd()
         {
             Time.timeScale = 1;
         }
 
-        private IEnumerator ChangeTime()
+        [Extras.AutoCoroutine]
+        public IEnumerator ChangeTime()
         {
             yield return new WaitForSecondsRealtime(Random.RandomRange(6, 10));
             if (!Active) yield break;
@@ -31,7 +28,7 @@ namespace BWChaos.Effects
             yield return new WaitForSecondsRealtime(3);
             Time.timeScale = 1;
 
-            _ = MelonCoroutines.Start(ChangeTime());
+            MelonCoroutines.Start(ChangeTime());
         }
     }
 }

@@ -7,9 +7,8 @@ namespace BWChaos.Effects
     {
         public SpawnAds() : base("Spawn Ads", 120) { }
 
-        public override void OnEffectStart() => MelonLoader.MelonCoroutines.Start(CoRun());
-
-        private IEnumerator CoRun()
+        [Extras.AutoCoroutine]
+        public IEnumerator CoRun()
         {
             yield return null; // Wait 1 frame because otherwise the IEnum thinks Active is false. Why? Beats me!
             while (Active)

@@ -11,9 +11,9 @@ namespace BWChaos.Effects
     {
         public Butterfingers() : base("Butterfingers", 75, EffectTypes.HIDDEN) { }
 
-        public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
 
-        private IEnumerator CoRun()
+        [Extras.AutoCoroutine]
+        public IEnumerator CoRun()
         {
             yield return null;
             while (Active)

@@ -13,10 +13,9 @@ namespace BWChaos.Effects
         // used to be "Caught in 4K UHD Dolby HDR10 H.265 HEVC With Dolby Atmos Surround Sound for Headphones" but that was stupidly long
         public CaughtIn4K() : base("Caught in 4K", 120) { }
 
-        public override void OnEffectStart() => MelonCoroutines.Start(CoRun());
-
         bool wasCaught = false;
-        private IEnumerator CoRun()
+        [Extras.AutoCoroutine]
+        public IEnumerator CoRun()
         {
             yield return null;
             spawnAd("let's see here...", false);
@@ -181,9 +180,10 @@ namespace BWChaos.Effects
             }
             #endregion
 
-            if (!BWChaos.isSteamVer)
+            if (!Chaos.isSteamVer)
             {
                 spawnAd("alright im done");
+                ForceEnd();
                 yield break; // Stop here if this isn't the steam version.
             }
             CSteamID userID = SteamUser.GetSteamID();
@@ -315,22 +315,12 @@ namespace BWChaos.Effects
 
             if (!wasCaught)
             {
-                spawnAd("wait...");
-                yield return new WaitForSecondsRealtime(5f);
-                spawnAd("WHAT THE FUCK?????? YOU'RE ACTUALLY NOT A DEGENERATE??????\nHOW????");
-                yield return new WaitForSecondsRealtime(5f);
-                spawnAd("I PUT LIKE 20 CHECKS FOR PORN GAMES AND SHIT, AND YOU DODGED THEM ALL");
-                yield return new WaitForSecondsRealtime(5f);
-                spawnAd("EVEN SHIT LIKE GENSHIN IMPACT AND OSU");
-                yield return new WaitForSecondsRealtime(5f);
-                spawnAd("YOU MADE THIS EFFECT LOOK LIKE A BITCH");
-                yield return new WaitForSecondsRealtime(5f);
-                spawnAd("GOD DAMN!!!!!!");
-                yield return new WaitForSecondsRealtime(5f);
-                spawnAd("IM HOLDING THIS L IN HONOR OF YOUR SUBSTANTIAL W!!!");
+                spawnAd("I put a bunch of checks for porn games and stuff in this, and you managed to dodge them all.");
+                yield return new WaitForSecondsRealtime(8f);
+                spawnAd("Frankly, I'm surprised. Unless you're on a quest 2, in which case come back when you're 13, but im surprised otherwise.");
             }
             else spawnAd("alright im done");
-
+            ForceEnd();
         }
 
         private GameObject spawnAd(string text, bool caught_pleaseignore = true)

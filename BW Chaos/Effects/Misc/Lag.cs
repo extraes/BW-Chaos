@@ -9,14 +9,18 @@ namespace BWChaos.Effects
     internal class Lag : EffectBase
     {
         public Lag() : base("Lag", 60, EffectTypes.LAGGY) { }
-
         public override void OnEffectStart()
         {
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
-            MelonCoroutines.Start(DoLag());
         }
 
-        private IEnumerator DoLag()
+        public override void OnEffectEnd()
+        {
+            GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
+        }
+
+        [Extras.AutoCoroutine]
+        public IEnumerator DoLag()
         {
             while (Active)
             {
@@ -27,8 +31,5 @@ namespace BWChaos.Effects
                 Time.timeScale = 1;
             }
         }
-
-        public override void OnEffectEnd()
-            => GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
     }
 }

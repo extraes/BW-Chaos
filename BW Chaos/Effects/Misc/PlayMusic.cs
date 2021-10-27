@@ -40,7 +40,7 @@ namespace BWChaos.Effects
         private IEnumerator CoRun()
         {
             yield return null;
-            int entangleChange = BWChaos.syncEffects ? 2 : 1;
+            int entangleChange = Chaos.syncEffects ? 2 : 1;
             Pool nbPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
             Pool crabPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
 

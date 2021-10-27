@@ -1,6 +1,9 @@
 using MelonLoader;
 using System.Collections;
 using UnityEngine;
+using System.Reflection;
+using System.Linq;
+using BWChaos.Extras;
 
 namespace BWChaos.Effects
 {
@@ -25,6 +28,8 @@ namespace BWChaos.Effects
 
         public bool Active { get; private set; }
         public float StartTime { get; private set; }
+        public object AutoCoroutine;
+        private MethodInfo AutoCRMethod;
 
         private IEnumerator CoRunEnumerator;
         private bool hasFinished;
@@ -34,6 +39,11 @@ namespace BWChaos.Effects
             Name = eName;
             Duration = eDuration;
             Types = eTypes;
+            // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
+            AutoCRMethod = (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                           where method.ReturnType == typeof(IEnumerator) &&
+                                 method.GetCustomAttribute<AutoCoroutine>() != null
+                           select method).FirstOrDefault();
         }
 
         public EffectBase(string eName, EffectTypes eTypes = EffectTypes.NONE)
@@ -50,9 +60,9 @@ namespace BWChaos.Effects
         public void Run()
         {
 #if DEBUG
-            MelonLogger.Msg("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : ""));
+            MelonLogger.Msg("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : "") + (AutoCRMethod != null ? ", it has an AutoCoroutine named " + AutoCRMethod.Name : ""));
 #endif
-            BWChaos.OnEffectRan?.Invoke(this);
+            Chaos.OnEffectRan?.Invoke(this);
             if (Duration == 0) OnEffectStart();
             else CoRunEnumerator = (IEnumerator)MelonCoroutines.Start(CoRun());
 
@@ -63,6 +73,7 @@ namespace BWChaos.Effects
         {
             if (!hasFinished)
             {
+                if (AutoCoroutine != null) MelonCoroutines.Stop(AutoCoroutine);
                 MelonCoroutines.Stop(CoRunEnumerator);
                 try { GlobalVariables.ActiveEffects.Remove(this); } catch { }
                 Active = false;
@@ -71,6 +82,7 @@ namespace BWChaos.Effects
 
         private IEnumerator CoRun()
         {
+            AutoCoroutine = AutoCRMethod?.Invoke(this, null);
             OnEffectStart();
 
             Active = true;
@@ -82,6 +94,7 @@ namespace BWChaos.Effects
             GlobalVariables.ActiveEffects.Remove(this);
             Active = false;
 
+            if (AutoCoroutine != null) MelonCoroutines.Stop(AutoCoroutine);
             OnEffectEnd();
             hasFinished = true;
 #if DEBUG
