@@ -2,6 +2,7 @@
 using UnityEngine;
 using MelonLoader;
 using ModThatIsNotMod;
+using System.Collections;
 
 namespace BWChaos.Effects
 {

@@ -1,8 +1,8 @@
 ﻿using MelonLoader;
+using ModThatIsNotMod;
 using StressLevelZero.Interaction;
 using System.Collections;
 using UnityEngine;
-using ModThatIsNotMod;
 
 namespace BWChaos.Effects
 {
@@ -25,16 +25,12 @@ namespace BWChaos.Effects
         public IEnumerator ActivateGrips()
         {
             yield return null;
-            ForcePullGrip[] grips = GameObject.FindObjectsOfType<ForcePullGrip>();
-            while (Active)
+
+            foreach (ForcePullGrip grip in GameObject.FindObjectsOfType<ForcePullGrip>())
             {
-                foreach (ForcePullGrip grip in grips)
-                {
-                    grip.Pull(Utilities.GetRandomPlayerHand());
-                    yield return new WaitForSecondsRealtime(0.1f);
-                }
+                grip.Pull(Utilities.GetRandomPlayerHand());
+                yield return new WaitForSecondsRealtime(0.1f);
             }
         }
-
     }
 }

@@ -26,7 +26,6 @@ namespace BWChaos.Effects
             Rigidbody rb = gravObject.gameObject.AddComponent<Rigidbody>();
             rb.angularDrag = 0.05f;
             rb.drag = 0.05f;
-            MelonCoroutines.Start(KeepItSpicy());
         }
 
         public override void OnEffectUpdate() => Physics.gravity = -gravObject.up * 12f;
@@ -38,7 +37,8 @@ namespace BWChaos.Effects
         }
 
         // make sure its not fucking BORING!!!!
-        private IEnumerator KeepItSpicy ()
+        [Extras.AutoCoroutine]
+        public IEnumerator KeepItSpicy ()
         {
             yield return null;
             Vector3 oldGrav = Physics.gravity;

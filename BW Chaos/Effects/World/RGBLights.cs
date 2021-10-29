@@ -32,13 +32,13 @@ namespace BWChaos.Effects
         Light light = null;
         bool foundBeamGeo = false;
         float cycleTime = 1f;
-        void Start()
+        public void Start()
         {
             light = this.gameObject.GetComponent<Light>();
             light.color = Color.cyan;
         }
 
-        void Update()
+        public void Update()
         {
             if (light.color == Color.white || light.color == Color.black) light.color = Color.cyan;
 
@@ -69,14 +69,14 @@ namespace BWChaos.Effects
         BeamGeometry beamGeometry = null;
         float alpha = 0f;
         float cycleTime = 1f;
-        void Start()
+        public void Start()
         {
             beamGeometry = this.gameObject.GetComponent<BeamGeometry>();
             alpha = beamGeometry.material.color.a;
             beamGeometry.material.color = Color.cyan;
         }
 
-        void Update()
+        public void Update()
         {
             var c = beamGeometry.material.color;
             c.a = 1;

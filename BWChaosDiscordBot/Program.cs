@@ -95,7 +95,6 @@ namespace BWChaosRemoteVoting
                     users.Clear();
                     break;
                 case "ignorerepeatvotes":
-                    Console.WriteLine(messageData);
                     ignoreRepeats = bool.Parse(messageData);
                     break;
                 case "sendtochannel":
