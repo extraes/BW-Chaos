@@ -4,10 +4,6 @@ using Entanglement.Network;
 using System;
 using System.Linq;
 using System.Text;
-using System.Reflection;
-using ModThatIsNotMod;
-using System.Collections.Generic;
-using ModThatIsNotMod.BoneMenu;
 
 namespace BWChaos.Sync
 {
