@@ -126,6 +126,7 @@
     <Compile Include="Effects\Misc\ShadyURL.cs" />
     <Compile Include="Effects\Misc\GetDoxxed.cs" />
     <Compile Include="Effects\Misc\SpawnJevil.cs" />
+    <Compile Include="Effects\Misc\JevilStorm.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
     <Compile Include="Effects\Misc\InvincibleNullbody.cs" />
