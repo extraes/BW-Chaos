@@ -138,6 +138,19 @@ namespace BWChaos.Effects
             "Clearly,\nYou don't have a father figure",
             "82 uncommitted changes",
             "change tha world\nmy final message\ngoodbye",
+            #region https://www.youtube.com/watch?v=y_mXCUP-AXI
+            "i pop a perc while watchin euphoria",
+            "i nut in her eyes broke both of her corneas",
+            "i just beat stevie wonder in a staring contest",
+            "showed her my yugioh cards and she got undressed",
+            "my plug named esteban julio ricardo montoya de la rosa ramirez",
+            "i call my choppa stanley yelnats the way it be leaving holes in mfs",
+            "im with a bad bitch watching shrek 2\nim like baby girl what are you tryna do\n" +
+            "she said shes just trying to watch the movie shes not trying to fuck im like thats cool\n" + 
+            "SIKE i kicked that bitch out my house\nhow dare you come here to not give me mouth\n" + 
+            "sike again we actually had a great time\nspent all night watching vines",
+            #endregion  
+            "in development hell since july 2021",
         };
     }
 }
