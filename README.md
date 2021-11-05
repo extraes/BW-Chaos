@@ -25,7 +25,7 @@ To enable this, set **enableRemoteVoting** to **true** in MelonPreferences
 
 ### Discord
 
-#### This requires that you have the Manage Server permission in the server you wish to use this in.
+#### This requires that you have the Manage Server permission in the server you wish to use this in, because you need to add a bot that listens for numbers.
 
 - Go to the [Discord developer portal](https://discord.com/developers/applications)
 
@@ -59,7 +59,7 @@ To enable this, set **enableRemoteVoting** to **true** in MelonPreferences
 
 This version, unlike the Legacy version, has sensible defaults, meaning the game's main campaign is playable from first install.
 
-There are "crazier" effects, like the notable 'Change Steam name for 5m', but that is behind a MelonPreferences entry
+There are "crazier" effects, like the legendary 'Change Steam name for 2m', but that is behind a MelonPreferences entry
 
 Here is a brief overview of the configurable values in MelonPreferences:
 
@@ -105,7 +105,7 @@ Odds are it's in either the Misc or Player folders.
 
 ## Crashes/errors
 
-If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEWORKS fan server! Preferably in the #mod-general channel, but my username and tag are extraes#2048
+If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEWORKS fan server! Preferably in the #mod-general channel, my username and tag are extraes#2048!
 
 ### Known issues
 
@@ -113,7 +113,7 @@ If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEW
 
   - This is harmless. It just means that an effect failed to properly stop. The effect should automatically stop.
 
-  - This shows up as something along the lines of "Exception in coroutine of type BWChaos.EffectHandler+<Timer>" and usually contains the term "System.NullreferenceException"
+  - This shows up as something along the lines of "Exception in coroutine of type BWChaos.EffectHandler+<Timer>" and usually contains the term "System.NullReferenceException"
 
   - Even though I know *why* this happens, it is very tedious to hunt down every instance by myself, so if you told me which effect caused it, I would be grateful.
 
@@ -126,8 +126,6 @@ If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEW
 - The timer is too jerky!
 
   - Yeah maybe I'll make it smoother, make it interpolate or something. It's not really a priority though.
-
-- 
 
 ### Contributing
 
