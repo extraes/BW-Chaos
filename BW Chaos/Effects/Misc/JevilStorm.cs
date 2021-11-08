@@ -12,7 +12,7 @@ namespace BWChaos.Effects
     {
         public JevilStorm() : base("JEVILING", 30) { }
         private const float FTAU = (float)(Math.PI * 2);
-        private const int JEVIL_AMOUNT = 16;
+        private const int JEVIL_AMOUNT = 8;
         private static float offset = 0;
         private List<GameObject> jevils = new List<GameObject>();
         
@@ -27,6 +27,7 @@ namespace BWChaos.Effects
                 poolee.SetActive(true);
                 // dont assault ears (too much)
                 poolee.GetComponent<AudioSource>().Stop();
+                poolee.GetComponent<Rigidbody>().detectCollisions = false;
                 jevils.Add(poolee);
             }
             jevils[0].GetComponent<AudioSource>().Play();
@@ -55,6 +56,7 @@ namespace BWChaos.Effects
             {
                 jevil.SetActive(false);
                 jevil.GetComponent<Poolee>().isReadyForSpawn = true;
+                jevil.GetComponent<Rigidbody>().detectCollisions = true;
             }
             jevils.Clear();
         }

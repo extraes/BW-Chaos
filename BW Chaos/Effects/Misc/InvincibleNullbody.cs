@@ -14,6 +14,11 @@ namespace BWChaos.Effects
         public override void OnEffectStart()
         {
             Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
+            if (pool == null)
+            {
+                MelonLogger.Warning("Nullbody pool not found! Why?");
+                return;
+            }
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
             Vector3 spawnPos = playerPos + GlobalVariables.Player_PhysBody.rbHead.transform.forward;
             var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));

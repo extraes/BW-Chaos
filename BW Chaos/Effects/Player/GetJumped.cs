@@ -22,9 +22,10 @@ namespace BWChaos.Effects
                 float y = (float)(Math.Sin(theta * Math.PI / 180));
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
-                var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
+                var spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
                 var spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
                 spawnedNB.gameObject.SetActive(true);
+                spawnedNB.GetComponent<PuppetMasta.PuppetMaster>().DisabledToActive();
             }
         }
     }

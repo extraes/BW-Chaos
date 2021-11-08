@@ -2,6 +2,7 @@
 using UnityEngine;
 using MelonLoader;
 using System.Net;
+using ModThatIsNotMod;
 
 namespace BWChaos.Effects
 {
@@ -12,11 +13,22 @@ namespace BWChaos.Effects
         private readonly float FPI = (float)Math.PI;
         private GameObject sign;
         private Transform headT;
+        private AudioSource soundSource;
         private float dist = 50;
         private float x = 0;
         private float y = 0;
         public override void OnEffectStart()
         {
+            if (soundSource == null)
+            {
+                soundSource = Player.GetPlayerHead().AddComponent<AudioSource>();
+                soundSource.bypassEffects = true;
+                soundSource.bypassListenerEffects = true;
+                soundSource.bypassReverbZones = true;
+                soundSource.volume = 0.4f;
+            }
+            soundSource.clip = GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/vineboom.mp3");
+
             dist = 50;
 
             byte[] ipParts = new byte[]
@@ -36,6 +48,7 @@ namespace BWChaos.Effects
             GameObject.Destroy(sign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
             GameObject.Destroy(sign.GetComponent<StressLevelZero.Interaction.InteractableHost>());
         }
+        private bool wasFarLastFrame; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 
         public override void OnEffectUpdate()
         {
             // move it closer over a period of 5 seconds
@@ -47,7 +60,12 @@ namespace BWChaos.Effects
 
             sign.transform.position = headT.position + Vector3.ProjectOnPlane(headT.forward, Vector3.up).normalized * dist;
             if (dist > FPI) sign.transform.rotation = Quaternion.Euler(new Vector3(x * 360, y * 360, 0));
-            else sign.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(headT.forward, Vector3.up));
+            else
+            {
+                if (wasFarLastFrame) soundSource.Play();
+                sign.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(headT.forward, Vector3.up));
+            }
+            wasFarLastFrame = dist > FPI; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 
         }
         public override void OnEffectEnd()
         {

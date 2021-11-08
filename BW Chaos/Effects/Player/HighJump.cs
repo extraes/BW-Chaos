@@ -21,12 +21,13 @@ namespace BWChaos.Effects
 
         public static float FwJumpMult = 5f;
         public static float UpJumpMult = 20f;
-        private static Action OnJump;
+        public static Action OnJump;
         public override void OnEffectStart() => OnJump += HiJump;
         public override void OnEffectEnd() => OnJump -= HiJump;
 
         private void HiJump ()
         {
+            if (!Active) return;
             PhysicsRig rig = GlobalVariables.Player_RigManager.physicsRig;
 
             // Compute velocity vectors for jumping (up) and leaping (forward)
