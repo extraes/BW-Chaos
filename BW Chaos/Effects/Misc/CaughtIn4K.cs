@@ -14,7 +14,7 @@ namespace BWChaos.Effects
         public CaughtIn4K() : base("Caught in 4K", 120) { }
 
         bool wasCaught = false;
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator CoRun()
         {
             yield return null;

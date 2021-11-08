@@ -12,7 +12,7 @@ namespace BWChaos.Effects
         public Butterfingers() : base("Butterfingers", 75, EffectTypes.HIDDEN) { }
 
 
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator CoRun()
         {
             yield return null;

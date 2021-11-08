@@ -18,10 +18,9 @@ namespace BWChaos.Effects
             "http://www.5z8.info/hack-outlook_b9r3vo_boobs",                            // http://corndog.io/ a bunch of corndogs floating in space
         };
 
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public System.Collections.IEnumerator CoRun ()
         {
-            yield return null;
             var pickedURL = shadyURLs[UnityEngine.Random.RandomRange(0, shadyURLs.Length)];
             SpawnAd("Hey wanna see one of my favorite websites");
             yield return new WaitForSeconds(5f);

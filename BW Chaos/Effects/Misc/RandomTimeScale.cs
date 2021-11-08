@@ -16,7 +16,7 @@ namespace BWChaos.Effects
             Time.timeScale = 1;
         }
 
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator ChangeTime()
         {
             yield return new WaitForSecondsRealtime(Random.RandomRange(6, 10));

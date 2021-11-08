@@ -7,7 +7,7 @@ namespace BWChaos.Effects
     {
         public SpawnAds() : base("Spawn Ads", 120) { }
 
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator CoRun()
         {
             yield return null; // Wait 1 frame because otherwise the IEnum thinks Active is false. Why? Beats me!
@@ -18,7 +18,7 @@ namespace BWChaos.Effects
             }
         }
 
-        private string[] ads = new string[] {
+        private static string[] ads = new string[] {
             "my balls lol!!!!!!!!",
             "deez what sir",
             "hey mods... ni-",

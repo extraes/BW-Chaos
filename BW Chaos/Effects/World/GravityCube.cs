@@ -37,7 +37,7 @@ namespace BWChaos.Effects
         }
 
         // make sure its not fucking BORING!!!!
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator KeepItSpicy ()
         {
             yield return null;

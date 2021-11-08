@@ -38,7 +38,7 @@ namespace BWChaos.Sync
             hasAllUsers = true;
         }
 
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator CoRun()
         {
             yield return null;

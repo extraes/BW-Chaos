@@ -19,7 +19,7 @@ namespace BWChaos.Effects
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
         }
 
-        [Extras.AutoCoroutine]
+        [AutoCoroutine]
         public IEnumerator DoLag()
         {
             while (Active)

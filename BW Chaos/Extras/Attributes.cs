@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BWChaos.Extras
+namespace BWChaos
 {
     // Attribute that EffectBase uses to get IEnumerators to run at the start of an effect and end at the end.
     [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]
