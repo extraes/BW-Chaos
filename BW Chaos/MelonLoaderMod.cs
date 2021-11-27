@@ -1,5 +1,7 @@
 ﻿using BWChaos.Effects;
 using MelonLoader;
+using MelonLoader.ICSharpCode.SharpZipLib.Core;
+using MelonLoader.ICSharpCode.SharpZipLib.Zip;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -24,27 +26,9 @@ namespace BWChaos
 
     public partial class Chaos : MelonMod
     {
-        internal string botToken = "YOUR_TOKEN_HERE";
-        internal string channelId = "CHANNEL_ID_HERE";
-
         internal static bool isSteamVer = !File.Exists(Path.Combine(Application.dataPath, "..", "Boneworks_Oculus_Windows64.exe"));
-        internal static bool isTwitch = false;
-        internal static bool useLaggyEffects = false;
-        internal static bool useGravityEffects = false;
-        internal static bool useSteamProfileEffects = false;
-        internal static bool showCandidatesOnScreen = true;
-        internal static bool sendCandidatesInChannel = true;
-        internal static bool ignoreRepeatVotes = false;
-        internal static bool proportionalVoting = true;
-        internal static bool enableRemoteVoting = false;
-        internal static bool syncEffects = false;
-        internal static List<string> forceEnabledEffects = new List<string>();
-        internal static List<string> forceDisabledEffects = new List<string>();
+        readonly static new Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
         internal static List<EffectBase> asmEffects = new List<EffectBase>();
-#if DEBUG
-        internal static bool enableIMGUI = false;
-#endif
-
         internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)>();
         public static Action<EffectBase> OnEffectRan;
 
@@ -52,8 +36,11 @@ namespace BWChaos
 
         public override void OnApplicationStart()
         {
+            GlobalVariables.thisChaos = this; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
+
             #region Check datapath
 
+            // Mathf.Sqrt(fish);
             if (isSteamVer && !(Path.GetFullPath(Path.Combine(Application.dataPath, "..")).EndsWith(@"BONEWORKS\BONEWORKS") || Application.dataPath.Contains("steamapps")))
                 throw new ChaosModStartupException();
 
@@ -62,29 +49,15 @@ namespace BWChaos
             #region MelonPref Setup
 
             MelonPreferences.CreateCategory("BW_Chaos", "BW_Chaos");
-            CreateMelonPreferences();
-            GetMelonPreferences();
-            MelonPreferences.Save();
-
-            #endregion
-
-            #region Initialize things based off MelonPrefs
-
-            PopulateEffects();
-            if (syncEffects) Extras.EntanglementSyncHandler.Init();
-            if (enableRemoteVoting)
-            {
-                // why load them otherwise? theyre just gonna get cleared either way
-                botToken = MelonPreferences.GetEntryValue<string>("BW_Chaos", "token");
-                channelId = MelonPreferences.GetEntryValue<string>("BW_Chaos", "channel");
-                isTwitch = !ulong.TryParse(channelId, out ulong _);
-                StartBot();
-            }
+            // If MP's are gotten before they're registered in ML, an error is thrown.
+            Prefs.Init();
+            Prefs.Get();
 
             #endregion
 
             #region Load Timer
 
+            // Load the Chaos UI elements. Don't change scope in case it may screw something up. idk why it would, but we're dontunloadunusedasset'ing it.
             MemoryStream memoryStream;
             using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.chaos_ui_elements"))
             {
@@ -103,51 +76,49 @@ namespace BWChaos
             #region Load effect resources
 
             MelonLogger.Msg("Loading effect resources, please wait...");
-            {
-                using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.effectresources"))
-                {
-                    memoryStream = new MemoryStream((int)stream.Length);
-                    using (MemoryStream mStream = new MemoryStream((int)stream.Length))
-                    {
-                        stream.CopyTo(mStream);
-                        GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(mStream.ToArray());
-                    }
-                }
-                GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
+            // Load the AssetBundle straight from memory to avoid copying unnecessary files to disk
+            Assembly.UseEmbeddedResource("BWChaos.Resources.effectresources", bytes => GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(bytes));
+            GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
 
-            }
-#if DEBUG
             MelonLogger.Msg("Loaded effect resources; All resource paths:");
-            foreach (var path in GlobalVariables.EffectResources.GetAllAssetNames())
+            // Unity doesn't like executing the same method on an assetbundle more than once, so I need to cache the paths here in my own readonly list, because for
+            // whatever reason, other IEnumerables seemed to get nulled in IL2's shitfuck domain. s/o to oBjEcT wAs GaRbAgE cOlLeCtEd In ThE iL2CpP dOmAiN
+            GlobalVariables.ResourcePaths = GlobalVariables.EffectResources.GetAllAssetNames().ToList().AsReadOnly(); // use linq to cast lol
+#if DEBUG
+            foreach (var path in GlobalVariables.ResourcePaths)
                 MelonLogger.Msg(path);
 #endif
 
-            {
-                using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.jevil"))
-                {
-                    memoryStream = new MemoryStream((int)stream.Length);
-                    using (MemoryStream mStream = new MemoryStream((int)stream.Length))
-                    {
-                        stream.CopyTo(mStream);
-                        ModThatIsNotMod.CustomItems.LoadItemsFromBundle(AssetBundle.LoadFromMemory(mStream.ToArray()));
-                    }
-                }
-            }
+            MelonLogger.Msg("Loading him");
+            Assembly.UseEmbeddedResource("BWChaos.Resources.jevil", bytes => ModThatIsNotMod.CustomItems.LoadItemsFromBundle(AssetBundle.LoadFromMemory(bytes)));
+
             MelonLogger.Msg("Done loading effect resources");
 
             #endregion
 
+            #region Initialize from MelonPrefs & init effects
 
+            PopulateEffects();
+            if (Prefs.SyncEffects) Extras.EntanglementSyncHandler.Init();
+            if (Prefs.EnableRemoteVoting)
+            {
+                // Discord IDs are ulongs, twitch IDs are strings, so if it fails to parse, then its not a discord channel
+                //Prefs.isTwitch = !ulong.TryParse(Prefs.channelId, out ulong _); commented cause nothing fucking uses it
+                StartBot();
+            }
+
+            #endregion
 
 #if DEBUG
             MelonLogger.Msg($"Of {asmEffects.Count} total effects, {EffectHandler.AllEffects.Count} are present.");
 #endif
 
-            RegisterBoneMenu();
+            BoneMenu.Register();
         }
 
         public override void OnApplicationQuit()
         {
+            // If they were started, stop the clients and their processes.
             GlobalVariables.WatsonClient?.Stop();
             botProcess?.Kill();
             botProcess?.Dispose();
@@ -158,6 +129,7 @@ namespace BWChaos
             // you already know what the fuck goin on
             if (EffectHandler.AllEffects.Count < 1) while (true) { }
 
+            // Grab the necessary references when the scene starts. 
             GlobalVariables.Player_BodyVitals =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.BodyVitals>();
             GlobalVariables.Player_RigManager =
@@ -168,6 +140,7 @@ namespace BWChaos
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
             GlobalVariables.MusicMixer =
                 GameObject.FindObjectOfType<Data_Manager>().audioManager.audioMixer.FindMatchingGroups("Music").FirstOrDefault(m => m.name == "Music");
+            // Separate cameras because it's better this way, I think. It's more distinguishable even if it requires two lines to keep the two "in sync"
             GlobalVariables.SpectatorCam =
                 GameObject.Find("[RigManager (Default Brett)]/[SkeletonRig (GameWorld Brett)]/Head/FollowCamera").GetComponent<Camera>();
             GlobalVariables.Cameras =
@@ -175,7 +148,7 @@ namespace BWChaos
 
             new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
             EffectHandler.advanceTimer = sceneName != "scene_mainMenu" && sceneName != "scene_introStart";
-            
+
             GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil").Prefab.GetComponent<AudioSource>().outputAudioMixerGroup =
                 GlobalVariables.MusicMixer;
         }
@@ -186,6 +159,7 @@ namespace BWChaos
                 effect.OnEffectUpdate();
         }
 
+        // If MelonPreferences.cfg is saved while the game is open, make sure the changes are reflected in real time.
         public override void OnPreferencesLoaded() => LiveUpdateEffects();
 
 #if DEBUG
@@ -194,10 +168,10 @@ namespace BWChaos
         private readonly int width = 200;
         private readonly int height = 25;
         private readonly int gap = 5;
-        // IMGUI for flatscreen debugging (when the vr no workie :woeis:)
+        // IMGUI for flatscreen debugging (for smoke testing new effects)
         public override void OnGUI()
         {
-            if (enableIMGUI)
+            if (Prefs.enableIMGUI)
             {
                 var horizOffset = horizStart;
                 // because otherwise, it clips into unityexplorers top bar lol
@@ -222,13 +196,9 @@ namespace BWChaos
         private async void ClientConnectedToServer(object sender, EventArgs e)
         {
             MelonLogger.Msg("Connected to the bot!");
-            await GlobalVariables.WatsonClient.SendAsync("ignorerepeatvotes:" + ignoreRepeatVotes);
+            await GlobalVariables.WatsonClient.SendAsync("ignorerepeatvotes:" + Prefs.IgnoreRepeatVotes);
             // Send data for startup then clear it out so that there's less of an opportunity for reflection to steal shit (i think)
-            await GlobalVariables.WatsonClient.SendAsync("token:" + botToken);
-            botToken = string.Empty;
-            await GlobalVariables.WatsonClient.SendAsync("channel:" + channelId);
-            channelId = string.Empty;
-
+            Prefs.SendBotInitalValues(); // doesnt really matter if we await this
         }
 
         private void ClientDisconnectedFromServer(object sender, EventArgs e)
@@ -260,65 +230,9 @@ namespace BWChaos
 
         #region Startup Methods
 
-        private void CreateMelonPreferences()
-        {
-            MelonPreferences.CreateEntry("BW_Chaos", "token", botToken, "token");
-            MelonPreferences.CreateEntry("BW_Chaos", "channel", channelId, "channel");
-            MelonPreferences.CreateEntry("BW_Chaos", "randomEffectOnNoVotes", EffectHandler.randomOnNoVotes, "randomEffectOnNoVotes");
-            MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", useGravityEffects, "useGravityEffects");
-            MelonPreferences.CreateEntry("BW_Chaos", "useSteamProfileEffects", useSteamProfileEffects, "useSteamProfileEffects");
-            MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", useLaggyEffects, "useLaggyEffects");
-            // voteprefs
-            MelonPreferences.CreateEntry("BW_Chaos", "showCandidatesOnScreen", showCandidatesOnScreen, "showCandidatesOnScreen");
-            MelonPreferences.CreateEntry("BW_Chaos", "sendCandidatesInChannel", sendCandidatesInChannel, "sendCandidatesInChannel");
-            MelonPreferences.CreateEntry("BW_Chaos", "ignoreRepeatVotesFromSameUser", ignoreRepeatVotes, "ignoreRepeatVotesFromSameUser");
-            MelonPreferences.CreateEntry("BW_Chaos", "proportionalVoting", proportionalVoting, "proportionalVoting");
-            MelonPreferences.CreateEntry("BW_Chaos", "enableRemoteVoting", enableRemoteVoting, "enableRemoteVoting");
-            // yeah
-            MelonPreferences.CreateEntry("BW_Chaos", "syncEffectsViaEntanglement", syncEffects, "syncEffectsViaEntanglement");
-            MelonPreferences.CreateEntry("BW_Chaos", "forceEnabledEffects", forceEnabledEffects.ToArray(), "forceEnabledEffects");
-            MelonPreferences.CreateEntry("BW_Chaos", "forceDisabledEffects", forceDisabledEffects.ToArray(), "forceDisabledEffects");
-#if DEBUG
-            MelonPreferences.CreateEntry("BW_Chaos", "enableIMGUI", enableIMGUI, "enableIMGUI");
-#endif
-        }
-
-        // Make public because there's no harm in it (and because reflection was being a bitch to learn and I didn't want to deal with it)
-        public static void GetMelonPreferences()
-        {
-            EffectHandler.randomOnNoVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes");
-            useGravityEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useGravityEffects");
-            useSteamProfileEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useSteamProfileEffects");
-            useLaggyEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "useLaggyEffects");
-            // Voting preferences
-            showCandidatesOnScreen = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "showCandidatesOnScreen");
-            sendCandidatesInChannel = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "sendCandidatesInChannel");
-            ignoreRepeatVotes = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser");
-            proportionalVoting = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "proportionalVoting");
-            enableRemoteVoting = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableRemoteVoting");
-            // yeah what that comment said
-            syncEffects = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "syncEffectsViaEntanglement");
-            forceEnabledEffects = MelonPreferences.GetEntryValue<string[]>("BW_Chaos", "forceEnabledEffects").ToList();
-            forceDisabledEffects = MelonPreferences.GetEntryValue<string[]>("BW_Chaos", "forceDisabledEffects").ToList();
-#if DEBUG
-            enableIMGUI = MelonPreferences.GetEntryValue<bool>("BW_Chaos", "enableIMGUI");
-#endif
-
-            eTypesToPrefs.Clear();
-            // populate eTypesToPrefs now
-            eTypesToPrefs.AddRange(new (EffectTypes, bool)[] {
-                (EffectTypes.AFFECT_GRAVITY, useGravityEffects),
-                (EffectTypes.AFFECT_STEAM_PROFILE, useSteamProfileEffects),
-                (EffectTypes.USE_STEAM, isSteamVer),
-                (EffectTypes.LAGGY, useLaggyEffects),
-                (EffectTypes.HIDDEN, true),
-                (EffectTypes.DONT_SYNC, !syncEffects)
-            });
-        }
-
         private void StartBot()
         {
-            MelonLogger.Msg("Unpacking and starting discord bot...");
+            MelonLogger.Msg("Unpacking and starting remote voting process...");
 
             #region Extract Bot
 
@@ -326,15 +240,16 @@ namespace BWChaos
             string exePath = Path.Combine(saveFolder, "BWChaosDiscordBot.exe");
 
             if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
-            using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.BWChaosDiscordBot.exe"))
+            if (File.Exists(exePath)) File.Delete(exePath);
+            
+            using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.BWChaosDiscordBot.zip"))
             {
-                byte[] data;
-                using (var ms = new MemoryStream())
-                {
-                    stream.CopyTo(ms);
-                    data = ms.ToArray();
-                }
-                File.WriteAllBytes(exePath, data);
+                var buffer = new byte[4096];
+
+                using (var zipFile = new ZipFile(stream))
+                using (var zipStream = zipFile.GetInputStream(zipFile[0]))
+                using (Stream fsOut = File.Create(exePath))
+                    StreamUtils.Copy(zipStream, fsOut, buffer);
             }
 
             #endregion
@@ -357,7 +272,7 @@ namespace BWChaos
             #endregion
         }
 
-        private void PopulateEffects()
+        private static void PopulateEffects()
         {
             if (EffectHandler.AllEffects.Count == 0)
             {
@@ -369,7 +284,7 @@ namespace BWChaos
             else
             {
                 EffectHandler.AllEffects.Clear();
-                GetMelonPreferences();
+                Prefs.Get();
             }
 
             // Actually populate the effects list
@@ -379,7 +294,7 @@ namespace BWChaos
             }
 
 
-            foreach (var str in forceEnabledEffects)
+            foreach (var str in Prefs.ForceEnabledEffects)
             {
 #if DEBUG
                 MelonLogger.Msg("Force enabling effect '" + str + "' because it was in the melonprefs array");
@@ -415,14 +330,14 @@ namespace BWChaos
                 return from e in effects
                        where e.Types == EffectTypes.NONE || // is this optimization?
                        (IsEffectViable(e.Types) &&
-                       !forceDisabledEffects.Contains(e.Name))
+                       !Prefs.ForceDisabledEffects.Contains(e.Name))
                        select e;
             }
 
             #endregion
         }
 
-        private bool IsEffectViable(EffectTypes eTypes)
+        internal static bool IsEffectViable(EffectTypes eTypes)
         {
             foreach (var tuple in eTypesToPrefs)
                 if (eTypes.HasFlag(tuple.Item1) && !tuple.Item2) return false; //todid: this fucking works?????
@@ -430,7 +345,7 @@ namespace BWChaos
             return true;
         }
 
-        private void LiveUpdateEffects()
+        internal static void LiveUpdateEffects()
         {
             // I'm not sure what this would do, but it probably doesn't hurt...
             EffectHandler.Instance.gameObject.SetActive(false);
@@ -445,5 +360,10 @@ namespace BWChaos
     internal class ChaosModStartupException : Exception
     {
         public ChaosModStartupException() : base($"Illegal environment path '{MelonUtils.GameDirectory}'", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
+    }
+
+    internal class ChaosModRuntimeException : ChaosModStartupException
+    {
+        public ChaosModRuntimeException() : base() { }
     }
 }
