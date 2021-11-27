@@ -1,4 +1,5 @@
 ﻿using MelonLoader;
+using StressLevelZero.AI;
 using StressLevelZero.Pool;
 using System;
 using System.Collections;
@@ -8,14 +9,13 @@ using UnityEngine;
 // maybe try adding shit from ultrakill?
 namespace BWChaos.Effects
 {
-    internal class PlayMusic : EffectBase
+    internal class EnemyGauntlet : EffectBase
     {
-        public PlayMusic() : base("Play Ultrakill music", 90) { }
+        public EnemyGauntlet() : base("Enemy gauntlet", 90) { }
 
         private AudioSource soundPlayer = null;
-        private object CToken;
         public override void OnEffectStart()
-        { // lol
+        {
             // Load sound asset and play it
             if (soundPlayer == null) soundPlayer = GlobalVariables.Player_PhysBody.rbHead.gameObject.AddComponent<AudioSource>();
 
@@ -26,27 +26,23 @@ namespace BWChaos.Effects
             soundPlayer.bypassReverbZones = true;
             soundPlayer.ignoreListenerVolume = true;
             soundPlayer.ignoreListenerPause = true;
-            soundPlayer.volume = 0.2f;
+            soundPlayer.volume = 0.3f;
             soundPlayer.outputAudioMixerGroup = GlobalVariables.MusicMixer;
             soundPlayer.Play();
-            CToken = MelonCoroutines.Start(CoRun());
         }
 
-        public override void OnEffectEnd()
-        {
-            MelonCoroutines.Stop(CToken);
-        }
-
-        private IEnumerator CoRun()
+        [AutoCoroutine]
+        public IEnumerator CoRun()
         {
             yield return null;
-            int entangleChange = Chaos.syncEffects ? 2 : 1;
+            int entangleChange = Prefs.SyncEffects ? 2 : 1;
             Pool nbPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
+            Pool eePool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Ford EarlyExit");
             Pool crabPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
 
 
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
@@ -63,7 +59,7 @@ namespace BWChaos.Effects
 
             yield return new WaitForSeconds(10f);
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
@@ -80,7 +76,7 @@ namespace BWChaos.Effects
 
             yield return new WaitForSeconds(10f);
 
-            for (int i = 0; i < 8; i++)
+            for (int i = 0; i < 4; i++)
             {
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
@@ -90,8 +86,9 @@ namespace BWChaos.Effects
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-                var spawnedCrab = crabPool.InstantiatePoolee(spawnPos, spawnRot); //todo: change to earlyexit
-                spawnedCrab.gameObject.SetActive(true);
+                var spawnedEE = eePool.InstantiatePoolee(spawnPos, spawnRot); //todo: change to earlyexit that can throw stuff
+                //spawnedEE.GetComponent<AIBrain>().behaviour.enableThrowAttack = true;
+                spawnedEE.gameObject.SetActive(true);
                 yield return new WaitForSeconds(5f);
             }
 
