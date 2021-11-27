@@ -1,8 +1,6 @@
-﻿using System;
+﻿using ModThatIsNotMod;
+using System;
 using UnityEngine;
-using MelonLoader;
-using System.Net;
-using ModThatIsNotMod;
 
 namespace BWChaos.Effects
 {
@@ -52,7 +50,7 @@ namespace BWChaos.Effects
         public override void OnEffectUpdate()
         {
             // move it closer over a period of 5 seconds
-            if (dist > FPI) dist -= Time.deltaTime * 5; 
+            if (dist > FPI) dist -= Time.deltaTime * 5;
             else dist = FPI; // god forbid if someone lag spikes on the exact frame that this happens
 
             x = (float)Math.Cos(dist / 3.125f);
@@ -69,7 +67,7 @@ namespace BWChaos.Effects
         }
         public override void OnEffectEnd()
         {
-            
+
         }
     }
 }
