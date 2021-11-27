@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-
-using UnityEngine;
-using MelonLoader;
+﻿using ModThatIsNotMod;
 using StressLevelZero.Pool;
-using ModThatIsNotMod;
+using System.Collections;
 using System.Linq;
+using UnityEngine;
 
 namespace BWChaos.Effects
 {
@@ -14,37 +10,20 @@ namespace BWChaos.Effects
     {
         public CrabletRain() : base("Crablet Rain", 30) { }
 
-        private List<Poolee> spawnedCrablets = new List<Poolee>();
-
-        public override void OnEffectStart()
-        {
-            MelonCoroutines.Start(SpawnCrablets());
-        }
-
-        private IEnumerator SpawnCrablets()
+        [AutoCoroutine]
+        public IEnumerator SpawnCrablets()
         {
             yield return null;
 
             Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
-            
-            while (Active)
-            {
-                yield return new WaitForSeconds(5 * UnityEngine.Random.value);
-                var spawnPos =
-                    Player.GetPlayerHead().transform.position +
-                    new Vector3((UnityEngine.Random.value - 0.5f) * 5, 10, (UnityEngine.Random.value - 0.5f) * 5);
 
-                var c = pool.InstantiatePoolee(spawnPos, Quaternion.identity);
-                c.gameObject.SetActive(true);
-                spawnedCrablets.Add(c);
-            }
-        }
+            yield return new WaitForSeconds(5 * Random.value);
+            var spawnPos =
+                Player.GetPlayerHead().transform.position +
+                new Vector3((Random.value - 0.5f) * 5, 10, (Random.value - 0.5f) * 5);
 
-        public override void OnEffectEnd()
-        {
-            foreach (Poolee p in spawnedCrablets)
-                p.gameObject.SetActive(false);
-            spawnedCrablets.Clear();
+            var c = pool.InstantiatePoolee(spawnPos, Quaternion.identity);
+            c.gameObject.SetActive(true);
         }
     }
 }
