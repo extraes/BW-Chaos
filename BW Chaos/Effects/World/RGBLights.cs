@@ -14,7 +14,7 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            foreach (var light in GameObject.FindObjectsOfType<Light>())
+            foreach (var light in Utilities.FindAll<Light>())
             {
                 //if (light.bakingOutput.isBaked) continue; commented because baked lights can have volumetrics
                 light.gameObject.AddComponent<UnityLightRGB>();
