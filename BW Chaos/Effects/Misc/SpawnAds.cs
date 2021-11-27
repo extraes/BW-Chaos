@@ -68,7 +68,7 @@ namespace BWChaos.Effects
             "have you, perchance considered getting good?",
             "ur dogwater",
             "python has shit bytecode and even worse syntax",
-            "fresh water is a privilege, not a right",
+            "fresh water is a privilege, not a right\n\n-Nestle",
             "i will pee your pants",
             "YOUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUUU soulja boy tell em",
             "you already know what it is homebolio",
@@ -151,6 +151,20 @@ namespace BWChaos.Effects
             "sike again we actually had a great time\nspent all night watching vines",
             #endregion  
             "in development hell since july 2021",
+            "Why you hatin when you don’t even be relatin, get yo money up not yo funny up *man growl*",
+            "You should...\n...NOW!",
+            "funk it !",
+            "b&\nband? no, bampersand",
+            "MK Ultra.",
+            "They glow in the dark...",
+            "i think i got my swows",
+            "no YOU hang up!",
+            "omg no dont uninstall this mod ur so cute haha",
+            "i shouldve tested the laggy/gravity effects more",
+            "qwertyuiopasdfghjklzxcvbnm",
+            "profound.\namateurdiscovered.",
+            "saw a pregnant woman\ncalled her melon belly",
+            "im gonna give you whats called round these parts a left right goodnight",
         };
     }
 }
