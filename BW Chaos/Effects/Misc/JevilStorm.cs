@@ -27,7 +27,9 @@ namespace BWChaos.Effects
                 poolee.SetActive(true);
                 // dont assault ears (too much)
                 poolee.GetComponent<AudioSource>().Stop();
-                poolee.GetComponent<Rigidbody>().detectCollisions = false;
+                var rb = poolee.GetComponent<Rigidbody>();
+                rb.detectCollisions = false;
+                rb.isKinematic = true;
                 jevils.Add(poolee);
             }
             jevils[0].GetComponent<AudioSource>().Play();
@@ -36,7 +38,7 @@ namespace BWChaos.Effects
 
         public override void OnEffectUpdate()
         {
-            offset += Time.deltaTime * 3;
+            offset += Time.deltaTime;
             Vector3 pos = GlobalVariables.Player_PhysBody.rbPelvis.transform.position;
             for (int i = 0; i < JEVIL_AMOUNT; i++)
             {
@@ -56,7 +58,9 @@ namespace BWChaos.Effects
             {
                 jevil.SetActive(false);
                 jevil.GetComponent<Poolee>().isReadyForSpawn = true;
-                jevil.GetComponent<Rigidbody>().detectCollisions = true;
+                var rb = jevil.GetComponent<Rigidbody>();
+                rb.detectCollisions = true;
+                rb.isKinematic = false;
             }
             jevils.Clear();
         }
