@@ -10,7 +10,7 @@ namespace BWChaos.Effects
         public override void OnEffectUpdate()
         {
             Rigidbody handRb = Utilities.GetRandomPlayerHand().rb;
-            handRb.AddRelativeTorque(25 * new Vector3(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f));
+            handRb.AddRelativeTorque(50 * new Vector3(Random.value - 0.5f, Random.value - 0.5f, Random.value - 0.5f));
         }
     }
 }
