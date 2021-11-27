@@ -1,25 +1,17 @@
-﻿using System.Linq;
-using System.Collections.Generic;
-using UnityEngine;
-using StressLevelZero.Pool;
+﻿using ModThatIsNotMod;
 using StressLevelZero.Interaction;
-using ModThatIsNotMod;
+using StressLevelZero.Pool;
 using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+using UnityEngine;
 
 namespace BWChaos
 {
     public static class Utilities
     {
-        public static string RemoveFirstLines(this string s, int n)
-        {
-            string[] lines = s
-                .Split(Environment.NewLine.ToCharArray())
-                .Skip(n)
-                .ToArray();
-
-            string output = string.Join(System.Environment.NewLine, lines);
-            return output;
-        }
+        
 
         public static GameObject GetPrefabOfPool(string objectName)
         {
@@ -41,16 +33,6 @@ namespace BWChaos
                 return Player.rightHand;
         }
 
-        public static void Reset(this Transform transform)
-        {
-            transform.position = Vector3.zero;
-            transform.rotation = Quaternion.identity;
-
-            transform.localScale = Vector3.one;
-            transform.localPosition = Vector3.zero;
-            transform.localRotation = Quaternion.identity;
-        }
-
         public static GameObject SpawnAd(string str)
         {
             var ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(str);
@@ -60,9 +42,9 @@ namespace BWChaos
             return ad;
         }
 
-        public static void ForEach<T>(this IEnumerable<T> ienum, Action<T> fun) 
+        public static IEnumerable<T> FindAll<T>() where T : UnityEngine.Object
         {
-            foreach (T item in ienum) fun(item);
+            return GameObject.FindObjectsOfTypeAll(UnhollowerRuntimeLib.Il2CppType.Of<T>()).Select(obj => obj.Cast<T>());
         }
     }
 }
