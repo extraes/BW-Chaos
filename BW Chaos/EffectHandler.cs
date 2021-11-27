@@ -53,7 +53,7 @@ namespace BWChaos
             overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
             overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
             overlayImage.fillAmount = 0;
-            if (Chaos.showCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
+            if (Prefs.ShowCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
 
             overlayText = overlayCanvas.transform.Find("PastText").GetComponent<Text>();
             overlayText.text = string.Empty;
@@ -88,6 +88,7 @@ namespace BWChaos
             wristCanvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
             wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
 
+            // Start the timer immediately
             timerInstance = (IEnumerator)MelonCoroutines.Start(Timer());
             ResetEffectCandidates();
         }
@@ -95,7 +96,17 @@ namespace BWChaos
         public void OnDestroy()
         {
             MelonCoroutines.Stop(timerInstance);
-            foreach (EffectBase e in GlobalVariables.ActiveEffects) e.ForceEnd();
+            // foreach throws "System.InvalidOperationException: Collection was modified; enumeration operation may not execute."
+            // maybe this will fix?
+            
+            for (int i = 0;  GlobalVariables.ActiveEffects.Count > 0; i++)
+            {
+#if DEBUG
+                MelonLogger.Msg($"Iteration: {i}, Ending effect {GlobalVariables.ActiveEffects[0]?.Name ?? "null (wha?)"}");
+#endif
+                GlobalVariables.ActiveEffects[0].ForceEnd();
+                if (i < 100) break; // fuck em we ball
+            }
 
             GlobalVariables.ActiveEffects.Clear();
             GlobalVariables.CandidateEffects.Clear();
@@ -121,18 +132,31 @@ namespace BWChaos
             wristText.text = Regex.Replace(newString, @".*HIDDEN", "Immortality", RegexOptions.Compiled | RegexOptions.ECMAScript);
         }
 
+        public void OnTriggerEnter(Collider col)
+        {
+            // The load zone triggers are named TRIGGER_EXIT; If this fails, change to the Fizzlers instead.
+            if (col.name == "TRIGGER_EXIT")
+            {
+#if DEBUG
+                MelonLogger.Msg("Caught Trigger Exit before this gameobject was actually destroyed, cool!");
+#endif
+                GameObject.Destroy(this);
+            }
+        }
+
         [UnhollowerBaseLib.Attributes.HideFromIl2Cpp]
         public IEnumerator Timer()
         {
             while (true)
             {
                 yield return new WaitForSecondsRealtime(1);
-                if (!advanceTimer) continue;
+                // Timescale being 0 usually means the player is in the steamvr menu, we dont want anything happening then.
+                if (!advanceTimer || Time.timeScale == 0 || Time.deltaTime > 0.1f) continue;
 
                 #region Set vote UI elements
 
                 voteText.text = string.Empty;
-                if (Chaos.showCandidatesOnScreen && Chaos.enableRemoteVoting)
+                if (Prefs.ShowCandidatesOnScreen && Prefs.EnableRemoteVoting)
                 {
                     voteBars[0].transform.parent.gameObject.SetActiveRecursively(true);
 
@@ -143,8 +167,10 @@ namespace BWChaos
 #endif
                 }
                 else voteBars[0].transform.parent.gameObject.SetActiveRecursively(false);
-                
+
                 #endregion
+
+                wristCanvas.gameObject.SetActive(Prefs.ShowWristUI);
 
                 currentTimerValue += 1;
                 float fillAmount = (float)currentTimerValue / secondsEachEffect;
@@ -161,13 +187,14 @@ namespace BWChaos
             }
         }
 
+        // Slep the vote bars according to how many votes each one has, an animation makes it look pretty!
         private IEnumerator SlerpVoteBar(Transform transform, Vector3 to)
         {
             yield return null;
             Vector3? from = transform?.localScale;
             for (float i = 0; i < 1; i += 0.05f)
             {
-                if (!transform) yield break; // null check because i dont want to do ondestroy shit
+                if (transform == null) yield break; // null check because i dont want to do ondestroy shit
                 transform.localScale = Vector3.Slerp((Vector3)from, to, i);
                 yield return new WaitForFixedUpdate();
             }
@@ -181,7 +208,7 @@ namespace BWChaos
             // Get the top voted effect
             (int, int) voted = GetVotedEffect(accumulatedVotes); // format is (arrIndex, value)
 #if DEBUG
-            MelonLogger.Msg($"Voted effect: {GlobalVariables.CandidateEffects[voted.Item1].Name}, [{string.Join(", ", accumulatedVotes)}]");
+            MelonLogger.Msg($"Voted effect: {(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].Name)}, [{string.Join(", ", accumulatedVotes)}]");
             if (voted.Item2 == 0) MelonLogger.Msg("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
             MelonLogger.Msg("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !randomOnNoVotes));
 #endif
@@ -190,8 +217,7 @@ namespace BWChaos
             if (voted.Item1 == 4 || voted.Item2 == 0)
             {
                 // Get a random effect from the dictionary
-                AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count));
-                EffectBase e = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
+                EffectBase e = AllEffects.Random().Value;
                 MelonLogger.Msg(e.Name + " (random) was chosen");
                 e.Run();
             }
@@ -201,7 +227,8 @@ namespace BWChaos
                 MelonLogger.Msg(e.Name + " was chosen");
                 e.Run();
             }
-            // Sometimes the timer/wristcanvas gets fucky with its offsets, so enforce them here
+
+            // Sometimes the timer/wristcanvas gets fucky with its offsets, so reinforce them here
             wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
             wristImage.transform.localPosition = new Vector3(0, 20, 0);
             wristText.transform.localPosition = new Vector3(0f, -1, 0);
@@ -209,6 +236,7 @@ namespace BWChaos
 
         private int[] GetVotes()
         {
+            // Perform a null check to make sure 
             if (GlobalVariables.WatsonClient == null) return new int[] { 0, 0, 0, 0, 0 };
             string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
             return Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
@@ -216,22 +244,28 @@ namespace BWChaos
 
         private (int, int) GetVotedEffect(int[] votes)
         {
-            if (Chaos.proportionalVoting)
+            if (Prefs.ProportionalVoting)
             {
-                // My jank-ass proportional voting system that works without floats, just ints.
+                // My gigabrain proportional voting system that works without floats, just ints.
                 // heres a diagram in case you were confused https://discord.com/channels/563139253542846474/724595991675797554/898447182762479637 (lol)
-                int votesTotal = 0;
-                foreach (int vote in votes) votesTotal += vote;
+                // Check out ChaosModV's version, apparently i had the same idea as they did, but i did mine by adding instead of subtracting or something
+                
+                // First order of business: sum the votes
+                int votesTotal = votes.Sum();
 
+                // Get a random number between 0 and the total, inclusive
                 var ran = UnityEngine.Random.RandomRange(0, votesTotal) + 1;
                 for (var index = 0; index < votes.Length; index++)
                 {
+                    // If the remainder of ran is within this index's vote count, that means this effect wins
                     if (ran - votes[index] <= 0)
                     {
                         return (index, votes[index]);
                     }
+                    // Otherwise, subtract it and keep going
                     else ran -= votes[index];
                 }
+                // Fallback in case there were no votes or my code fucked up.
                 return (0, 0);
             }
             else
@@ -240,6 +274,7 @@ namespace BWChaos
                 (int, int) topVoted = (0, 0);
                 for (int i = 0; i < votes.Length; i++)
                 {
+                    // Standard "if this vote is bigger than what we already have, set the voted to it instead" approach
                     if (votes[i] > topVoted.Item2)
                         topVoted = (i, votes[i]);
                 }
@@ -249,12 +284,13 @@ namespace BWChaos
 
         private void UpdateVoteBars(int[] votes)
         {
-            float total = votes[0] + votes[1] + votes[2] + votes[3] + votes[4]; // sum immediately as float for float division for votebarproportion
+            float total = votes.Sum(); // sum immediately as float for float division for votebarproportion
 
-            for (int i = 0; i < 5; i++)
+            for (int i = 0; i < votes.Length; i++)
             {
                 float voteBarProportion = total == 0 ? 0.5f : (votes[i] / total); // Avoid divide by zero error
-                MelonCoroutines.Start(SlerpVoteBar(voteBars[i].transform, new Vector3(0.5f + (voteBarProportion / 2), 1, 0))); // scale the bars proportionaltely, depending on what percentage of votes they have.
+                // scale the bars proportionaltely, depending on what percentage of votes they have, but keep it from going to zero, cause that doesn't look as cool lol
+                MelonCoroutines.Start(SlerpVoteBar(voteBars[i].transform, new Vector3(0.5f + (voteBarProportion / 2), 1, 0)));
                 voteText.text += votes[i] + "\n";
             }
             voteText.text += "Total: " + total;
@@ -287,17 +323,17 @@ namespace BWChaos
                     effect = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
                 GlobalVariables.CandidateEffects.Add(effect);
 
+                // Add 1 because humans don't like zero based indices (FUCK LUA)
                 botMesssage += $"\n{numberFlip + i + 1}: {effect.Name}";
-                // For twitch, enable number flipping
             }
 
             botMesssage += $"\n{5 + numberFlip}: Random Effect";
 
-            if (Chaos.sendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
+            if (Prefs.SendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
 
-            if (Chaos.showCandidatesOnScreen && advanceTimer)
+            if (Prefs.ShowCandidatesOnScreen && advanceTimer)
             {
-                candidateText.text = botMesssage.Replace("-- New Candidate Effects --\n", ""); // Skip the first line of botmessage
+                candidateText.text = string.Join("\n", botMesssage.Split('\n').Skip(1)); // Skip the first line of botmessage
                 overlayImage.rectTransform.anchoredPosition = overlayImagePos_Candidates;
             }
             else
