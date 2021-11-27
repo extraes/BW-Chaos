@@ -31,7 +31,7 @@ namespace BWChaosRemoteVoting
                     twitchClient.AddChatCommandIdentifier((char)(i + 49));
 
 
-                await watsonServer.SendAsync(currentClientIpPort, "log:Connected to Twitch.");
+                await watsonServer.SendAsync(currentClientIpPort, "log:Connected to Twitch, Channel - " + twitchClient.JoinedChannels[0]);
             }
             catch (Exception e)
             {
