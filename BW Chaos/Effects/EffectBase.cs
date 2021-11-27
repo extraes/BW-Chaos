@@ -25,6 +25,7 @@ namespace BWChaos.Effects
         public string Name { get; }
         public int Duration { get; }
         public EffectTypes Types { get; }
+        public ModThatIsNotMod.BoneMenu.MenuElement MenuElement { get; set; } // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
 
         public bool Active { get; private set; }
         public float StartTime { get; private set; }
@@ -61,7 +62,10 @@ namespace BWChaos.Effects
         {
 #if DEBUG
             MelonLogger.Msg("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : "") + (AutoCRMethod != null ? ", it has an AutoCoroutine named " + AutoCRMethod.Name : ""));
+            if (GetType().GetMethod(nameof(OnEffectEnd), BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) != null && Duration == 0)
+                MelonLogger.Warning("Effect " + Name + " is SUPPOSED to be a one off, yet it has an OnEffectEnd! What gives?");
 #endif
+            if (AutoCoroutine != null) MelonCoroutines.Stop(AutoCoroutine); // there can only be one autocr at a time
             Chaos.OnEffectRan?.Invoke(this);
             if (Duration == 0) OnEffectStart();
             else CoRunEnumerator = (IEnumerator)MelonCoroutines.Start(CoRun());
