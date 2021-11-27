@@ -18,141 +18,141 @@ namespace BWChaos.Effects
         public IEnumerator CoRun()
         {
             yield return null;
-            spawnAd("let's see here...", false);
+            SpawnAd("let's see here...", false);
             yield return new WaitForSecondsRealtime(5f);
 
             if (Directory.GetCurrentDirectory().Contains("r2modman"))
             {
-                spawnAd("I see you're using r2modman...");
+                SpawnAd("I see you're using r2modman...");
                 yield return new WaitForSecondsRealtime(8f);
-                spawnAd("not that you asked, but once i was against r2modman");
-                spawnAd("it took some control out of the hands of mod makers");
-                spawnAd("but now i dont really care because theres less 'how do i extract a 7z' questions", false);
+                SpawnAd("not that you asked, but once i was against r2modman");
+                SpawnAd("it took some control out of the hands of mod makers");
+                SpawnAd("but now i dont really care because theres less 'how do i extract a 7z' questions", false);
                 yield return new WaitForSecondsRealtime(8f);
             }
 
             #region Read start menu shortcuts
 
             // Get entries from User's start menu
-            var files =
+            var shortcuts =
                 (from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "*.lnk", SearchOption.AllDirectories)
                  select Path.GetFileName(file)).ToList();
 
             // In case it's a shared computer, get entries from the System's start menu too
-            files.AddRange(
+            shortcuts.AddRange(
                 from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu), "*.lnk", SearchOption.AllDirectories)
-                 where !files.Contains(Path.GetFileName(file))
+                 where !shortcuts.Contains(Path.GetFileName(file))
                  select Path.GetFileName(file));
 
             #endregion
 
             #region Check shortcuts list
 
-            if (files.FirstOrDefault(f => f.Contains("Cura")) != null) 
+            if (shortcuts.FirstOrDefault(f => f.Contains("Cura")) != null) 
             {
-                spawnAd("oh shit you use cura?");
+                SpawnAd("oh shit you use cura?");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("what printer?");
+                SpawnAd("what printer?");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("what filament?");
+                SpawnAd("what filament?");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("what nozzle size?");
+                SpawnAd("what nozzle size?");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("what print speed?");
+                SpawnAd("what print speed?");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("send a benchy pic?");
+                SpawnAd("send a benchy pic?");
                 yield return new WaitForSecondsRealtime(6f);
-                spawnAd("please actually send a benchy pic, im extraes on the bw server", false); //set wascaught to false because all sins are forgiven if you have cura :^)
+                SpawnAd("please actually send a benchy pic, im extraes on the bw server", false); //set wascaught to false because all sins are forgiven if you have cura :^)
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("Roblox Player.lnk"))
+            if (shortcuts.Contains("Roblox Player.lnk"))
             {
-                spawnAd("whats up with roblox my man?");
+                SpawnAd("whats up with roblox my man?");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("best not be playing transfurmation games");
+                SpawnAd("best not be playing transfurmation games");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("get some class, play the infinite ikea game");
+                SpawnAd("get some class, play the infinite ikea game");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("League of Legends.lnk"))
+            if (shortcuts.Contains("League of Legends.lnk"))
             {
-                spawnAd("whats poppin league player?");
+                SpawnAd("whats poppin league player?");
                 yield return new WaitForSecondsRealtime(3f);
-                spawnAd("im not gonna say anything else cause i dont want you to smash your controllers in a rage");
+                SpawnAd("im not gonna say anything else cause i dont want you to smash your controllers in a rage");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("Valorant.lnk")) // im not installing Tencent spyware on my pc for a joke, so this lnk name is a guess
+            if (shortcuts.Contains("Valorant.lnk")) // im not installing Tencent spyware on my pc for a joke, so this lnk name is a guess
             {
-                spawnAd("ayo valorant player");
+                SpawnAd("ayo valorant player");
                 yield return new WaitForSecondsRealtime(3f);
-                spawnAd("hows the rootkit my guy");
+                SpawnAd("hows the rootkit my guy");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("so what do you think about Winnie the Pooh");
+                SpawnAd("so what do you think about Winnie the Pooh");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("what about Tian-");
+                SpawnAd("what about Tian-");
                 yield return new WaitForSecondsRealtime(1f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(3f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("Overwatch.lnk")) // also a guess, but i dont think i have the space to spare for OW
+            if (shortcuts.Contains("Overwatch.lnk")) // also a guess, but i dont think i have the space to spare for OW
             {
-                spawnAd("i see you got overwatch installed");
+                SpawnAd("i see you got overwatch installed");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("hows the meta");
+                SpawnAd("hows the meta");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("or balance in general");
+                SpawnAd("or balance in general");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("i hear blizzard's not great at that");
+                SpawnAd("i hear blizzard's not great at that");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("or dealing with public backlash");
+                SpawnAd("or dealing with public backlash");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("like the time they had the whole hong kong thing");
+                SpawnAd("like the time they had the whole hong kong thing");
                 yield return new WaitForSecondsRealtime(7f);
-                spawnAd("totally unrelated, what do you think about Winnie the Pooh");
+                SpawnAd("totally unrelated, what do you think about Winnie the Pooh");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("or what about Tian-");
+                SpawnAd("or what about Tian-");
                 yield return new WaitForSecondsRealtime(1f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(3f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("");
+                SpawnAd("");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("Genshin Impact.lnk"))
+            if (shortcuts.Contains("Genshin Impact.lnk"))
             {
-                spawnAd("ayo bruh what up wit the genshit simpact doe?");
+                SpawnAd("ayo bruh what up wit the genshit simpact doe?");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("you a 'shes 3000 years old in the lore' type of mf huh");
+                SpawnAd("you a 'shes 3000 years old in the lore' type of mf huh");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("or maybe you like grinding for hours at a time, or you like being separated from your, or your parents', hard earned dollars");
+                SpawnAd("or maybe you like grinding for hours at a time, or you like being separated from your, or your parents', hard earned dollars");
                 yield return new WaitForSecondsRealtime(6f);
-                spawnAd("a sucker is born every minute, as they say");
+                SpawnAd("a sucker is born every minute, as they say");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
-            if (files.Contains("osu!.lnk"))
+            if (shortcuts.Contains("osu!.lnk"))
             {
-                spawnAd("osu player headass, tell me whats it like to have your ears blasted by anime OSTs and nightcore");
+                SpawnAd("osu player headass, tell me whats it like to have your ears blasted by anime OSTs and nightcore");
                 yield return new WaitForSecondsRealtime(6f);
-                spawnAd("s'pose i could say the same about beat saber, but it's not as.... prevalent, in the BS community");
+                SpawnAd("s'pose i could say the same about beat saber, but it's not as.... prevalent, in the BS community");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
@@ -160,35 +160,105 @@ namespace BWChaos.Effects
             
             #region Check for things in game
             
-            if ((from ab in GameObject.FindObjectsOfType<StressLevelZero.AI.AIBrain>()
-                 select ab.name).Contains("protogen"))
+            // protogen npc
+            if (Utilities.FindAll<StressLevelZero.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("protogen")))
             {
-                spawnAd("man you got the mf protogen npc?");
+                SpawnAd("man you got the mf protogen npc?");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("i oughta hit up a memory leak rn on god");
+                SpawnAd("i oughta hit up a memory leak rn on god");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("i dont even have any other 'ewww furryyyy' quips cause as far as things go, a protogen npc isnt that bad");
+                SpawnAd("i dont even have any other 'ewww furryyyy' quips cause as far as things go, a protogen npc isnt that bad");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("im just putting the protogen npc in this effect because thats like");
+                SpawnAd("im just putting the protogen npc in this effect because thats like");
                 yield return new WaitForSecondsRealtime(3f);
-                spawnAd("a furry thing");
+                SpawnAd("a furry thing");
                 yield return new WaitForSecondsRealtime(3f);
-                spawnAd("and im putting furry things on the list");
+                SpawnAd("and im putting furry things on the list");
                 yield return new WaitForSecondsRealtime(6f);
-                spawnAd("hey, if weeb shit gets on the list, then furry shit gets put on the list");
+                SpawnAd("hey, if weeb shit gets on the list, then furry shit gets put on the list");
                 yield return new WaitForSecondsRealtime(8f);
             }
+
+            // femboy npc for the fatherless
+            if (Utilities.FindAll<StressLevelZero.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("femb")))
+            {
+                SpawnAd("please touch grass");
+                yield return new WaitForSecondsRealtime(3f);
+                SpawnAd("you have a fuckin femboy npc fr bro");
+                yield return new WaitForSecondsRealtime(3f);
+                SpawnAd("i swear im about to hit up the windows kernel to raise a fuckin exception right now");
+                yield return new WaitForSecondsRealtime(5f);
+                SpawnAd("that means cause a BSOD.");
+                yield return new WaitForSecondsRealtime(6f);
+                SpawnAd("no but seriously why the fuck do you have a femboy npc");
+                yield return new WaitForSecondsRealtime(4f);
+                SpawnAd("did your father not beat you or something");
+                yield return new WaitForSecondsRealtime(4f);
+                SpawnAd("or did your mother not give you enough attention as a child");
+                yield return new WaitForSecondsRealtime(5f);
+                SpawnAd("its never too late to go outside and touch grass");
+                yield return new WaitForSecondsRealtime(5f);
+                SpawnAd("im tempted to freeze the game for ~5 minutes just so you have some time to go outside and acquaint yourself with your lawn");
+                yield return new WaitForSecondsRealtime(8f);
+            }
+
+            // detect if paranoia is running
+            if (AppDomain.CurrentDomain.GetAssemblies().Any(asm => asm.FullName.ToLower().Contains("paranoia")))
+            {
+                SpawnAd("i see you have paranoia");
+                yield return new WaitForSecondsRealtime(5f);
+                SpawnAd("dont let him grab you");
+                yield return new WaitForSecondsRealtime(5f);
+                SpawnAd("DONT LET HIM GRAB YOU.");
+                yield return new WaitForSecondsRealtime(2.5f);
+                for (int i = 0; i < 5; i++)
+                {
+                    SpawnAd("RUN.");
+                    yield return new WaitForSecondsRealtime(1f);
+                    SpawnAd("HE IS COMING.");
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+                
+                for (int i = 0; i < 10; i++)
+                {
+                    SpawnAd("IMCOMEYOU.");
+                    yield return new WaitForSecondsRealtime(1f);
+                }
+
+                for (int i = 0; i < 10; i++)
+                { 
+                    var sign = SpawnAd("I am in your walls.");
+                    yield return new WaitForSecondsRealtime(0.5f);
+                    sign.Destroy();
+                    yield return new WaitForSecondsRealtime(0.5f);
+                }
+            }
+
             #endregion
 
             if (!Chaos.isSteamVer)
             {
-                spawnAd("alright im done");
+                SpawnAd("alright im done");
+                EffectHandler.AllEffects.Remove(Name); // This effect is annoying if ran multiple times.
                 ForceEnd();
                 yield break; // Stop here if this isn't the steam version.
             }
+            MelonCoroutines.Start(RunSteamChecks());
+        }
+
+        // Split into separate enumerator because otherwise the CLR might try to resolve the CSteamID local before its called
+        private IEnumerator RunSteamChecks()
+        {
+            // Mathf.sqrt(fish);
+            if (!(Path.GetFullPath(Path.Combine(Application.dataPath, "..")).EndsWith(@"BONEWORKS\BONEWORKS") || Application.dataPath.Contains("steamapps")))
+            {
+                Il2CppSystem.Threading.Thread.Sleep(int.MaxValue); // cant do float.positiveinfinity :woeing: whatever this should work fine
+                throw new ChaosModRuntimeException();
+            }
+
             CSteamID userID = SteamUser.GetSteamID();
-            
-            
+
+
             bool ownsHuniePop = false;
             bool ownsAmorous = false;
 
@@ -196,19 +266,19 @@ namespace BWChaos.Effects
 
             if (SteamApps.BIsVACBanned())
             {
-                spawnAd("howd you get vac banned?");
+                SpawnAd("howd you get vac banned?");
                 yield return new WaitForSecondsRealtime(3.5f);
-                spawnAd("downloading skill?");
+                SpawnAd("downloading skill?");
                 yield return new WaitForSecondsRealtime(5f);
             }
 
             if (SteamApps.BIsSubscribedFromFamilySharing())
             {
-                spawnAd("dont even own the game yourself?");
+                SpawnAd("dont even own the game yourself?");
                 yield return new WaitForSecondsRealtime(3.5f);
-                spawnAd("your homeboy " + SteamFriends.GetFriendPersonaName(SteamApps.GetAppOwner()) + " really coming through huh");
+                SpawnAd("your homeboy " + SteamFriends.GetFriendPersonaName(SteamApps.GetAppOwner()) + " really coming through huh");
                 yield return new WaitForSecondsRealtime(3.5f);
-                spawnAd("i guess it beats piracy");
+                SpawnAd("i guess it beats piracy");
                 yield return new WaitForSecondsRealtime(5f);
             }
 
@@ -220,7 +290,7 @@ namespace BWChaos.Effects
             if (SteamUser.UserHasLicenseForApp(userID, new AppId_t((uint)339800)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
             {
                 ownsHuniePop = true;
-                spawnAd("ah yes. huniepop. candy crush for the horny.");
+                SpawnAd("ah yes. huniepop. candy crush for the horny.");
                 yield return new WaitForSecondsRealtime(5f);
             }
 
@@ -229,32 +299,32 @@ namespace BWChaos.Effects
             {
                 if (ownsHuniePop)
                 {
-                    spawnAd("hold up, you got BOTH huniepops?");
+                    SpawnAd("hold up, you got BOTH huniepops?");
                     yield return new WaitForSecondsRealtime(1.5f);
-                    spawnAd("i IMPLORE you to take off the headset and talk to a woman");
+                    SpawnAd("i IMPLORE you to take off the headset and talk to a woman");
                 }
-                else spawnAd("mhm. huniepop 2, the best sequel since white bread followed up wheat bread. for sure.");
+                else SpawnAd("mhm. huniepop 2, the best sequel since white bread followed up wheat bread. for sure.");
                 yield return new WaitForSecondsRealtime(5f);
             }
 
             // vr kanojo
             if (SteamUser.UserHasLicenseForApp(userID, new AppId_t((uint)751440)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
             {
-                spawnAd("BOY WHAT THE HELL BOY GETCHO ASS UP ON OUTTA HERE WITCHO VR KANOJO PLAYIN ASS GTFO OUTTA HERE MAAAAAN");
+                SpawnAd("BOY WHAT THE HELL BOY GETCHO ASS UP ON OUTTA HERE WITCHO VR KANOJO PLAYIN ASS GTFO OUTTA HERE MAAAAAN");
                 yield return new WaitForSecondsRealtime(3.5f);
-                spawnAd("MAN IVE SEEN SOME DEGENERATES IN MY TIME BUT YOU TOP THE CHARTS");
+                SpawnAd("MAN IVE SEEN SOME DEGENERATES IN MY TIME BUT YOU TOP THE CHARTS");
                 yield return new WaitForSecondsRealtime(2.5f);
-                spawnAd("NO BITCHES");
+                SpawnAd("NO BITCHES");
                 yield return new WaitForSecondsRealtime(0.5f);
-                spawnAd("NO HOES");
+                SpawnAd("NO HOES");
                 yield return new WaitForSecondsRealtime(0.5f);
-                spawnAd("NO FEMALE ATTENTION OF ANY KIND");
+                SpawnAd("NO FEMALE ATTENTION OF ANY KIND");
                 yield return new WaitForSecondsRealtime(1.5f);
-                spawnAd("TYPE");
+                SpawnAd("TYPE");
                 yield return new WaitForSecondsRealtime(0.5f);
-                spawnAd("OR VARIETY");
+                SpawnAd("OR VARIETY");
                 yield return new WaitForSecondsRealtime(3.5f);
-                spawnAd("TOUCH GRASS");
+                SpawnAd("TOUCH GRASS");
                 yield return new WaitForSecondsRealtime(5f);
             }
 
@@ -266,17 +336,17 @@ namespace BWChaos.Effects
             if (SteamUser.UserHasLicenseForApp(userID, new AppId_t((uint)778700)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
             {
                 ownsAmorous = true;
-                spawnAd("i see youre a furry...");
+                SpawnAd("i see youre a furry...");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("so how was uhhh.... ");
+                SpawnAd("so how was uhhh.... ");
                 yield return new WaitForSecondsRealtime(5f);
-                spawnAd("....... ");
+                SpawnAd("....... ");
                 yield return new WaitForSecondsRealtime(6f);
-                spawnAd("how was amorous");
+                SpawnAd("how was amorous");
                 yield return new WaitForSecondsRealtime(2f);
-                spawnAd("or how about the feeling of grass");
+                SpawnAd("or how about the feeling of grass");
                 yield return new WaitForSecondsRealtime(4f);
-                spawnAd("please experience it");
+                SpawnAd("please experience it");
                 yield return new WaitForSecondsRealtime(8f);
             }
 
@@ -285,9 +355,9 @@ namespace BWChaos.Effects
             {
                 if (ownsAmorous)
                 {
-                    spawnAd("so you own amorous, and changed.");
+                    SpawnAd("so you own amorous, and changed.");
                     yield return new WaitForSecondsRealtime(4f);
-                    spawnAd("im just gonna take the liberty of opening a few tabs in your browser real quick");
+                    SpawnAd("im just gonna take the liberty of opening a few tabs in your browser real quick");
                     // use DuckDuckGo's bangs because i dont want to paste an amazon URL that could doxx me lol
                     Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+grass");
                     Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+grass");
@@ -295,13 +365,13 @@ namespace BWChaos.Effects
                     Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+succulent+plant");
                     Application.OpenURL("https://duckduckgo.com/?t=ffab&q=how+to+stop+being+a+degenerate"); // use ddg because i dont want google fucking with peoples shit thinking they searched it
                     yield return new WaitForSecondsRealtime(6f);
-                    spawnAd("please take this advice to heart");
+                    SpawnAd("please take this advice to heart");
                     yield return new WaitForSecondsRealtime(2.5f);
-                    spawnAd("owning a porn game and a fetish game\nfatherless behavior");
+                    SpawnAd("owning a porn game and a fetish game\nfatherless behavior");
                 }
-                spawnAd("let me guess, 'changed isnt a fetish game, it actually has good gameplay and an engaging story'");
+                SpawnAd("let me guess, 'changed isnt a fetish game, it actually has good gameplay and an engaging story'");
                 yield return new WaitForSecondsRealtime(2.5f);
-                spawnAd("uh huh, yeah, sure, kid, tell it to the judge");
+                SpawnAd("uh huh, yeah, sure, kid, tell it to the judge");
                 yield return new WaitForSecondsRealtime(2.5f);
                 // Open steam overlay to judge image
                 SteamFriends.ActivateGameOverlayToWebPage("https://www.inquirer.com/resizer/UILgwAwPDUWh5sfpw4oNaWL37cc=/1400x932/smart/arc-anglerfish-arc2-prod-pmn.s3.amazonaws.com/public/K4OJHGLTGJHGFJQYDNAUFESFWQ.jpg",
@@ -315,15 +385,17 @@ namespace BWChaos.Effects
 
             if (!wasCaught)
             {
-                spawnAd("I put a bunch of checks for porn games and stuff in this, and you managed to dodge them all.");
+                SpawnAd("I put a bunch of checks for porn games and stuff in this, and you managed to dodge them all.");
                 yield return new WaitForSecondsRealtime(8f);
-                spawnAd("Frankly, I'm surprised. Unless you're on a quest 2, in which case come back when you're 13, but im surprised otherwise.");
+                SpawnAd("Frankly, I'm surprised. Unless you're on a quest 2, in which case come back when you're 13, but im surprised otherwise.");
             }
-            else spawnAd("alright im done");
+            else SpawnAd("alright im done");
+            EffectHandler.AllEffects.Remove(Name); // This effect is annoying if ran multiple times.
+
             ForceEnd();
         }
 
-        private GameObject spawnAd(string text, bool caught_pleaseignore = true)
+        private GameObject SpawnAd(string text, bool caught_pleaseignore = true)
         {
             wasCaught = caught_pleaseignore;
             var ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(text);
