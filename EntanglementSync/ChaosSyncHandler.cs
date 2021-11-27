@@ -24,8 +24,8 @@ namespace BWChaos.Sync
 
             NetworkMessage.RegisterHandler<ChaosMessageHandler>();
 
-            //var ee = new EntangleEffect();
-            //EffectHandler.AllEffects.Add(ee.Name, ee);
+            var ee = new EntangleEffect();
+            EffectHandler.AllEffects.Add(ee.Name, ee);
 
             Chaos.OnEffectRan += OnEffectRan;
         }
