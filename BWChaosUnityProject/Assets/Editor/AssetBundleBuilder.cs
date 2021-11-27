@@ -46,7 +46,12 @@ public class AssetBundleBuilder : EditorWindow
                 if (File.Exists(savePath))
                     File.Delete(savePath);
 
-                File.Move(Application.temporaryCachePath + "/" + fileName, savePath);
+                //if (File.Exists(Path.ChangeExtension(savePath, "manifest")))
+                //    File.Delete(Path.ChangeExtension(savePath, "manifest"));
+
+                try { File.Move(Application.temporaryCachePath + "/" + fileName, savePath); }
+                catch { File.Delete(Path.ChangeExtension(savePath, "manifest")); EditorUtility.DisplayDialog("", "Export failed\nRetry it maybe?", "OK"); }
+
                 EditorUtility.DisplayDialog("", "Export Successful!", "OK");
             }
         }
