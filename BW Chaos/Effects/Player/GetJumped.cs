@@ -12,7 +12,7 @@ namespace BWChaos.Effects
         public override void OnEffectStart()
         {
             Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
-            if (!pool) return;
+            if (pool == null) return;
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
 
             for (int i = 0; i < 8; i++)
@@ -25,7 +25,7 @@ namespace BWChaos.Effects
                 var spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
                 var spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
                 spawnedNB.gameObject.SetActive(true);
-                spawnedNB.GetComponent<PuppetMasta.PuppetMaster>().DisabledToActive();
+                spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive();
             }
         }
     }
