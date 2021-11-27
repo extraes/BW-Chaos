@@ -1,5 +1,6 @@
 # BONEWORKS Chaos [![forthebadge](https://forthebadge.com/images/badges/contains-tasty-spaghetti-code.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/works-on-my-machine.svg)](https://forthebadge.com)
 #### ChaosModV, but for a VR Physics game!
+##### And a great example of what happens when you give a shitposting teen an IDE (My VS2022 background is Ralsei smoking a blunt as I type this)
 
 ## Installation
 
@@ -107,17 +108,22 @@ Odds are it's in either the Misc or Player folders.
 
 If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEWORKS fan server! Preferably in the #mod-general channel, my username and tag are extraes#2048!
 
-### Known issues
+If you somehow find a way to break the Twitch bot or Discord bot, or hack them in some way, please tell me so I can ~~troll people before I~~ fix it.
+
+### Known issues/FAQ
+##### I don't know if these questions will be frequently asked, but I've got them here just in case
 
 - Errors appearing in the console on a scene transition (changing level)
 
-  - This is harmless. It just means that an effect failed to properly stop. The effect should automatically stop.
+  - This is harmless. It just means that an effect failed to *"properly"* stop. The error actually appearing means that the effect was forcefully stopped by MelonLoader before anything bad could happen. Thanks MelonLoader! (I'd die on the spot if I got a nullref in unmanaged code)
 
   - This shows up as something along the lines of "Exception in coroutine of type BWChaos.EffectHandler+<Timer>" and usually contains the term "System.NullReferenceException"
 
   - Even though I know *why* this happens, it is very tedious to hunt down every instance by myself, so if you told me which effect caused it, I would be grateful.
 
-    - You can find this information by either giving me your **log file** or telling me the first few lines of the error (e.g. where it says "[ERROR]" and the first few "at BWChaos.Effects...")
+    - You can find this information by either giving me your **log file** or telling me the first few lines of the error, where it says "[ERROR]" and the first few "at BWChaos.Effects..."
+
+    - If you give me a screenshot of your log file, I will place a pipe bomb in your mailbox, or a comedically timed lit stick of dynamite.
 
 - BWChaos does not work for some people on certain configurations of the Steam version, specifically the "ChaosModStartupException" error
 
@@ -127,10 +133,70 @@ If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEW
 
   - Yeah maybe I'll make it smoother, make it interpolate or something. It's not really a priority though.
 
+- 'Garble some textures' and 'Swap textures at random' lag the game when they start!
+
+ - Well the game should've loaded on startup, but I guess the textures got nulled, so that didn't pan out. It's unfortunate how the world works sometimes, isn't it? Blame IL2.
+
+- Garble some textures has a chance to make the scene dark/a random color!
+
+ - Yeah that's cause it randomizes the color of 20% of the materials in the game, and since it's 2021, it doesn't discriminate, so something it changes corresponds to the lighting of the scene. Are you telling me to discriminate? That's messed up, man. Shame on you.
+
+- 'Video Textures' lags my game when it's active!
+
+ - I didn't have that issue but someone with a 1060 6G did, so it's 100% a ~~skill~~ GPU bound issue. It's a nice effect that I think is funny as fuck, but it does tax the GPU more than I'd like, so I had to mark it as LAGGY, no matter how much I would've loved to see it get used more. I guess get a new GPU or force disable it.
+
+ - Also you should probably not spam it if you have less than 6G of VRAM, to be honest.
+
+- The texture effects keep ballooning my VRAM usage! (Hi WNP!)
+
+ - That's cause they set the texture of each mesh renderer they encounter, meaning they create a new Material for each object they hit. This is probably a memory leak, but it's a memory leak that's fixable by reloading the scene.
+
+ - Originally these effects loaded their textures and set the textures of each material they encounter, but that made them persist between scenes, and one of my goals with this mod is to make no changes that are not reversible via a scene change, so they create new materials which are deleted on scene change/reload.
+
+- Vine boom sound effects keeps going after it ends! And it's inconsistent in what it *does* do!
+
+ - It was a bitch to even do what it currently does, so count your blessings.
+
+ - No, but for real, it doesn't look for inactive gameobjects, which I may change in the future.
+
+- Does Get Fucking Doxxed show my real IP?
+
+ - No, run it again and find out. It generates a random, yet valid, IP every time it's ran, with 4 segments each containing a number between 0 and 255. And then it does spinnies cause I thought it was funny. And then Vine boom sound effect, also, because I thought it was funny.
+
+- The music effects are too loud/overwhelming!
+
+ - They obey your music mixer volume setting, so decrease that and the music will go adios.
+
+- An effect doesn't work on the Oculus version of the game!
+
+ - Please tell me what effect it is! Give me a log, or send me the first few lines of the error, where it says "[ERROR]" and the first few "at BWChaos.Effects..."
+
+ - I try to make the mod compatible between the Steam and Oculus versions, but I'm not Rich Uncle Pennybags, so I can't buy the game multiple times for the niche of people that use an Oculus copy, but if you help me test, then we can all sing Kumbaya.
+
+### Credits
+
+- Code modders: occasional help and ideas (shoutouts to trev for rewriting my original code, creating a better groundwork to base Chaos off of)
+
+- Sychke: Testing the Twitch bot and providing much needed testing and feedback.
+
+- Alfie: Making the mod's icon, over 4 months go, in July. Sorry it took me this long!
+
+- ZCubed & Lakatrazz: Making Entanglement so I don't have to make my own way of sending data over the wire.
+
+- GS: IDK if he wants to be credited but he helped me test earlier versions of the mod, on both codebases Legacy and Rewrite, as well as helping me test Entanglement syncing.
+
+- Chap: Making ModThatIsNotMod, actually nah screw that guy for making his namespace so damn long.
+
+- MelonLoader Team: Making a great framework for mod development, including persistent data/preferences, coroutine running, IL2CPP type injection, automatic harmony instance creation and patching, and of course, being the first universal Unity modloader that could mods in IL2CPP games. Oh and, including a zip file library that I could ~~yoink~~ use.
+
+- Samboy: I haven't directly interacted with them but Tomlet is great and I'm using it for a personal project and I don't think I'll return to JSON, and CPP2IL, while not perfect, is magic for what it's already capable of.
+
 ### Contributing
 
 If you want to add another effect, by all means feel free to do so. Make a Pull Request on the GitHub repo and add a new effect.
 
 If you want to change the UI, you can make a PR for that too, since the Unity project I use for building the UI is in the git repo too.
+
+If you want to add a new image, instruction, or video, do that through the Unity project too. (Or just send it in the BW server's meme channel and ping me to add it, and I may do it)
 
 I don't have a code of coduct or anything, so feel free to evade taxes and stuff after making a PR.
