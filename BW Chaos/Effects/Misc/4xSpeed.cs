@@ -16,6 +16,7 @@ namespace BWChaos.Effects
         {
             GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
             Time.timeScale = 1;
+            GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
         }
     }
 }
