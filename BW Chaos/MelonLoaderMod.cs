@@ -20,7 +20,7 @@ namespace BWChaos
         public const string Name = "BWChaos";
         public const string Author = "extraes, trev";
         public const string Company = null;
-        public const string Version = "0.2.0";
+        public const string Version = "2.1.0";
         public const string DownloadLink = null;
     }
 
@@ -75,24 +75,24 @@ namespace BWChaos
 
             #region Load effect resources
 
-            MelonLogger.Msg("Loading effect resources, please wait...");
+            Chaos.Log("Loading effect resources, please wait...");
             // Load the AssetBundle straight from memory to avoid copying unnecessary files to disk
             Assembly.UseEmbeddedResource("BWChaos.Resources.effectresources", bytes => GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(bytes));
             GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
 
-            MelonLogger.Msg("Loaded effect resources; All resource paths:");
             // Unity doesn't like executing the same method on an assetbundle more than once, so I need to cache the paths here in my own readonly list, because for
             // whatever reason, other IEnumerables seemed to get nulled in IL2's shitfuck domain. s/o to oBjEcT wAs GaRbAgE cOlLeCtEd In ThE iL2CpP dOmAiN
             GlobalVariables.ResourcePaths = GlobalVariables.EffectResources.GetAllAssetNames().ToList().AsReadOnly(); // use linq to cast lol
 #if DEBUG
+            Chaos.Log("Loaded effect resources; All resource paths:");
             foreach (var path in GlobalVariables.ResourcePaths)
-                MelonLogger.Msg(path);
+                Chaos.Log(path);
 #endif
 
-            MelonLogger.Msg("Loading him");
+            Chaos.Log("Loading him");
             Assembly.UseEmbeddedResource("BWChaos.Resources.jevil", bytes => ModThatIsNotMod.CustomItems.LoadItemsFromBundle(AssetBundle.LoadFromMemory(bytes)));
 
-            MelonLogger.Msg("Done loading effect resources");
+            Chaos.Log("Done loading effect resources");
 
             #endregion
 
@@ -110,7 +110,7 @@ namespace BWChaos
             #endregion
 
 #if DEBUG
-            MelonLogger.Msg($"Of {asmEffects.Count} total effects, {EffectHandler.AllEffects.Count} are present.");
+            Chaos.Log($"Of {asmEffects.Count} total effects, {EffectHandler.AllEffects.Count} are present.");
 #endif
 
             BoneMenu.Register();
@@ -168,6 +168,7 @@ namespace BWChaos
         private readonly int width = 200;
         private readonly int height = 25;
         private readonly int gap = 5;
+        private string prevNetsim = "Send network data";
         // IMGUI for flatscreen debugging (for smoke testing new effects)
         public override void OnGUI()
         {
@@ -188,6 +189,20 @@ namespace BWChaos
                     vertOffset += height + gap;
                 }
             }
+            
+            // IDC if this looks like dogshit, its not going in release builds, so suck it up
+            prevNetsim = GUI.TextField(new Rect(Screen.width - horizStart - width * 2, Screen.height - gap - height, width * 2, height), prevNetsim);
+            if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 2 * (gap + height), width * 2, height), "Send (name>data)"))
+            {
+                var nsdata = Utilities.Argsify(prevNetsim, '>');
+                if (EffectBase._dataRecieved == null) Warn("There are no listeners for network data active right now");
+                else EffectBase._dataRecieved.Invoke(nsdata[0], nsdata[1]);
+            }
+            if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 3 * (gap + height), width * 2, height), "Start server"))
+            {
+                Assembly entanglementAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.GetName().Name == "Entanglement");
+                entanglementAssembly.GetType("Entanglement.Network.Server").GetMethod("StartServer", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
+            }
         }
 #endif
 
@@ -195,7 +210,7 @@ namespace BWChaos
 
         private async void ClientConnectedToServer(object sender, EventArgs e)
         {
-            MelonLogger.Msg("Connected to the bot!");
+            Chaos.Log("Connected to the bot!");
             await GlobalVariables.WatsonClient.SendAsync("ignorerepeatvotes:" + Prefs.IgnoreRepeatVotes);
             // Send data for startup then clear it out so that there's less of an opportunity for reflection to steal shit (i think)
             Prefs.SendBotInitalValues(); // doesnt really matter if we await this
@@ -203,7 +218,7 @@ namespace BWChaos
 
         private void ClientDisconnectedFromServer(object sender, EventArgs e)
         {
-            MelonLogger.Msg("Disconnected from the Discord bot, was the process killed?");
+            Chaos.Log("Disconnected from the Discord bot, was the process killed?");
         }
 
         private void ClientReceiveMessage(object sender, MessageReceivedEventArgs e)
@@ -214,14 +229,14 @@ namespace BWChaos
             switch (messageType)
             {
                 case "error":
-                    MelonLogger.Error("An error has occured within the Discord bot!");
-                    MelonLogger.Error(messageData);
+                    Error("An error has occured within the Discord bot!");
+                    Error(messageData);
                     break;
                 case "log":
-                    MelonLogger.Msg(messageData);
+                    Chaos.Log(messageData);
                     break;
                 default:
-                    MelonLogger.Error("UNKNOWN MESSAGE TYPE: " + messageType);
+                    Error("UNKNOWN MESSAGE TYPE: " + messageType);
                     break;
             }
         }
@@ -232,7 +247,7 @@ namespace BWChaos
 
         private void StartBot()
         {
-            MelonLogger.Msg("Unpacking and starting remote voting process...");
+            Chaos.Log("Unpacking and starting remote voting process...");
 
             #region Extract Bot
 
@@ -297,7 +312,7 @@ namespace BWChaos
             foreach (var str in Prefs.ForceEnabledEffects)
             {
 #if DEBUG
-                MelonLogger.Msg("Force enabling effect '" + str + "' because it was in the melonprefs array");
+                Chaos.Log("Force enabling effect '" + str + "' because it was in the melonprefs array");
 #endif
 
                 if (EffectHandler.AllEffects.Keys.Contains(str)) continue; // we dont want it in the list twice
@@ -307,14 +322,14 @@ namespace BWChaos
                 // If the effect name doesn't exist, "throw" an error
                 if (effect == null)
                 {
-                    MelonLogger.Error($"Force enabled effect '{str}' wasn't found! Check MelonPreferences, are you sure that's the right name for the effect?");
+                    Chaos.Warn($"Force enabled effect '{str}' wasn't found! Check MelonPreferences, are you sure that's the right name for the effect?");
                     continue;
                 }
 
                 // don't allow oculus players to try and crash my shit
                 if (effect.Types.HasFlag(EffectTypes.USE_STEAM) && !isSteamVer)
                 {
-                    MelonLogger.Warning("This is the Oculus version, however you attempted to use a Steam effect! This is not allowed! Are you trying to crash your game???");
+                    Chaos.Warn("This is the Oculus version, however you attempted to use a Steam effect! This is not allowed! Are you trying to crash your game???");
                     continue;
                 }
 
@@ -355,6 +370,13 @@ namespace BWChaos
         }
 
         #endregion
+
+        internal static void Log(string str) => GlobalVariables.thisChaos.LoggerInstance.Msg(str);
+        internal static void Log(object obj) => GlobalVariables.thisChaos.LoggerInstance.Msg(obj?.ToString() ?? "null");
+        internal static void Warn(string str) => GlobalVariables.thisChaos.LoggerInstance.Warning(str);
+        internal static void Warn(object obj) => GlobalVariables.thisChaos.LoggerInstance.Warning(obj?.ToString() ?? "null");
+        internal static void Error(string str) => GlobalVariables.thisChaos.LoggerInstance.Error(str);
+        internal static void Error(object obj) => GlobalVariables.thisChaos.LoggerInstance.Error(obj?.ToString() ?? "null");
     }
 
     internal class ChaosModStartupException : Exception
