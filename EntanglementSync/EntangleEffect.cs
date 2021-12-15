@@ -11,7 +11,7 @@ namespace BWChaos.Sync
 {
     internal class EntangleEffect : Effects.EffectBase
     {
-        public EntangleEffect() : base("Get Fucking Entangled") { }
+        public EntangleEffect() : base("Get Fucking Entangled", 5) { }
 
         private static readonly string[] smallTalk = new string[] { 
             "how's the weather?",
@@ -40,6 +40,7 @@ namespace BWChaos.Sync
             while (users.Count < Node.activeNode.connectedUsers.Count) yield return null; // cant do WaitUntil cause IL2 strips more than twitch thots when they get a prime sub
             foreach (var user in users)
             {
+                yield return new UnityEngine.WaitForSecondsRealtime(1f);
                 Utilities.SpawnAd("yo tell " + user.Username + " " + smallTalk[UnityEngine.Random.RandomRange(0,smallTalk.Length)] + " for me");
             }
         }

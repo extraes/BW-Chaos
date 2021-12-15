@@ -28,6 +28,7 @@ namespace BWChaos.Sync
             EffectHandler.AllEffects.Add(ee.Name, ee);
 
             Chaos.OnEffectRan += OnEffectRan;
+            EffectBase._sendData += SendEffectData;
         }
         
 
@@ -38,12 +39,12 @@ namespace BWChaos.Sync
             if (!IsEffectSyncable(effect.Types))
             {
                 ModuleLogger.Msg("Not going to sync " + effect.Name);
-                Utilities.SpawnAd($"Not gonna sync this effect lol ({effect.Name})");
+                Utilities.SpawnAd($"Not gonna sync this effect lol:\n{effect.Name}");
                 return;
             }
-
+            
             // send data
-            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { effectName = effect.Name });
+            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { effectName = effect.Name, syncData = "start" });
             ModuleLogger.Msg("Telling Entanglement to sync effect: " + effect.Name);
             Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
@@ -51,6 +52,14 @@ namespace BWChaos.Sync
         private bool IsEffectSyncable(EffectBase.EffectTypes types)
         {
             return !(types.HasFlag(EffectBase.EffectTypes.USE_STEAM) || types.HasFlag(EffectBase.EffectTypes.AFFECT_STEAM_PROFILE) || types.HasFlag(EffectBase.EffectTypes.DONT_SYNC));
+        }
+
+
+        private static void SendEffectData(string name, string data)
+        {
+            if (Node.activeNode.connectedUsers.Count == 0) return;
+            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { effectName = name, syncData = data });
+            Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
     }
 
@@ -63,10 +72,13 @@ namespace BWChaos.Sync
             if (!(data is ChaosMessageData)) throw new Exception("Unexpected msgdata type");
             var cmd = data as ChaosMessageData;
 
+            byte[] bytes = ChaosSyncHandler.thisVersion
+                           .Concat(Encoding.UTF8.GetBytes(cmd.effectName+ ":" + cmd.syncData)).ToArray();
+
             var msg = new NetworkMessage
             {
-                messageType = (byte)MessageIndex,
-                messageData = ChaosSyncHandler.thisVersion.Concat(Encoding.UTF8.GetBytes(cmd.effectName)).ToArray()
+                messageType = MessageIndex.Value,
+                messageData = bytes,
             };
             return msg;
         }
@@ -85,22 +97,35 @@ namespace BWChaos.Sync
 
 
             string strData = Encoding.UTF8.GetString(message.messageData.Skip(3).ToArray());
+            string[] args = Utilities.Argsify(strData, ':'); // [name, data]
 #if DEBUG
             // DONT CARE ABOUT SENDER LOL BUT LOG IT ANYWAY
             ModuleLogger.Msg(sender.ToString() + " told us " + strData);
 #endif
-            
-            if (EffectHandler.AllEffects.TryGetValue(strData, out EffectBase eToRun))
-                eToRun.Run();
-            else
-                Utilities.SpawnAd("'" + strData + "' isn't an effect you have, so it won't run, just enjoy the show!");
 
+            switch (args[1])
+            {
+                case "start":
+                    if (EffectHandler.AllEffects.TryGetValue(args[0], out EffectBase eObj))
+                    {
+                        var eToRun = (EffectBase)Activator.CreateInstance(eObj.GetType());
+                        eToRun.isNetworked = true;
+                        eToRun.Run();
+                    }
+                    else
+                        Utilities.SpawnAd("'" + args[0] + "' isn't an effect you have, so it won't run, just enjoy the show!");
+                    break;
+
+                default:
+                    EffectBase._dataRecieved?.Invoke(args[0], args[1]);
+                    break;
+            }
         }
-
     }
     public class ChaosMessageData : NetworkMessageData
     {
         public string effectName;
+        public string syncData;
     }
 
     //public class ChaosMessageData : INetworkSerializable
