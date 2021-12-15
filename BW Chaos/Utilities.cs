@@ -46,5 +46,20 @@ namespace BWChaos
         {
             return GameObject.FindObjectsOfTypeAll(UnhollowerRuntimeLib.Il2CppType.Of<T>()).Select(obj => obj.Cast<T>());
         }
+
+        public static string[] Argsify(string data, char split)
+        {
+            string[] args = data.Split(split);
+            string arg = args[0];
+            string argg = string.Join(split.ToString(), args.Skip(1));
+            return new string[] { arg, argg };
+        }
+
+        public static Vector3 DeserializeV3(string vecStr, char delimiter = ',')
+        {
+            string[] vs = vecStr.Split(delimiter);
+            float[] vs1 = vs.Select(v => float.Parse(v)).ToArray();
+            return new Vector3(vs1[0], vs1[1], vs1[2]);
+        }
     }
 }

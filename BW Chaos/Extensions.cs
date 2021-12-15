@@ -78,5 +78,28 @@ namespace BWChaos
         {
             return sequence.ElementAt(UnityEngine.Random.Range(0, sequence.Count()));
         }
+
+        public static string GetFullPath(this Transform t)
+        {
+            string path = "/" + t.name;
+            while (t.parent != null)
+            {
+                t = t.parent;
+                path = "/" + t.name + path;
+            }
+            return path;
+        }
+
+        public static string[] Serialize(this Vector3 vec, int decimals, char delimiter = ',')
+        {
+            float[] floats = new float[] { vec.x, vec.y, vec.z, };
+            string[] strings = floats.Select(f => Math.Round(f, decimals).ToString()).ToArray();
+            return strings;
+        }
+
+        public static string Join<T>(this IEnumerable<T> seq, string delim = ",")
+        {
+            return string.Join(delim, seq);
+        }
     }
 }
