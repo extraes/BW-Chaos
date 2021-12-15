@@ -31,11 +31,17 @@ namespace BWChaosRemoteVoting
             watsonServer.ClientConnected += ClientConnected;
             watsonServer.ClientDisconnected += ClientDisconnected;
             watsonServer.MessageReceived += MessageReceived;
+            AppDomain.CurrentDomain.UnhandledException += UnhandledException;
             watsonServer.Start();
 
             Console.WriteLine("Created server!");
 
             MainAsync().GetAwaiter().GetResult();
+        }
+
+        private static void UnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            watsonServer.SendAsync(currentClientIpPort, "error:" + (e.ExceptionObject as Exception).ToString());
         }
 
         private static async Task MainAsync()

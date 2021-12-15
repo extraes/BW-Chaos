@@ -40,13 +40,13 @@ namespace BWChaosRemoteVoting
 
         private static Task SocketErrored(DiscordClient sender, SocketErrorEventArgs e)
         {
-            watsonServer.SendAsync(currentClientIpPort, e.Exception.ToString());
+            watsonServer.SendAsync(currentClientIpPort, "error:" + e.Exception.ToString());
             return null;
         }
 
         private static Task ClientErrored(DiscordClient sender, ClientErrorEventArgs e)
         {
-            watsonServer.SendAsync(currentClientIpPort, e.Exception.ToString());
+            watsonServer.SendAsync(currentClientIpPort, "error:" + e.Exception.ToString());
             return null;
         }
 
