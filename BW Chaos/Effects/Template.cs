@@ -3,6 +3,7 @@ using UnityEngine;
 using MelonLoader;
 using ModThatIsNotMod;
 using System.Collections;
+using Random = UnityEngine.Random;
 
 namespace BWChaos.Effects
 {
@@ -10,8 +11,9 @@ namespace BWChaos.Effects
     {
         public Template() : base("Template Effect") { }
 
-        public override void OnEffectStart() => MelonLogger.Msg("Placeholder start");
-        public override void OnEffectUpdate() => MelonLogger.Msg("Placeholder update");
-        public override void OnEffectEnd() => MelonLogger.Msg("Placeholder end");
+        public override void HandleNetworkMessage(string data) => Chaos.Log("I got some data! " + data);
+        public override void OnEffectStart() => Chaos.Log("Placeholder start");
+        public override void OnEffectUpdate() => Chaos.Log("Placeholder update");
+        public override void OnEffectEnd() => Chaos.Log("Placeholder end");
     }
 }

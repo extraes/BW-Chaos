@@ -4,13 +4,14 @@ using UnityEngine;
 using System.Reflection;
 using System.Linq;
 using BWChaos.Extras;
+using System;
 
 namespace BWChaos.Effects
 {
     // todo: maybe add a "conflicting effects" list variable in case of something such as 2 effects modifying gravity
     public class EffectBase
     {
-        [System.Flags]
+        [Flags]
         public enum EffectTypes
         {
             NONE = 0,
@@ -29,10 +30,13 @@ namespace BWChaos.Effects
 
         public bool Active { get; private set; }
         public float StartTime { get; private set; }
-        public object AutoCoroutine;
-        private MethodInfo AutoCRMethod;
+        public static Action<string, string> _dataRecieved; // for internal use by the base class; format is (name, data); both are strings instead of bytes because fuck you its easier that way
+        public static Action<string, string> _sendData; // for internal use by base class and sync handler
+        public bool isNetworked = false;
+        public object autoCRToken;
+        private readonly MethodInfo autoCRMethod;
 
-        private IEnumerator CoRunEnumerator;
+        private object coRunToken;
         private bool hasFinished;
 
         public EffectBase(string eName, int eDuration, EffectTypes eTypes = EffectTypes.NONE)
@@ -41,19 +45,34 @@ namespace BWChaos.Effects
             Duration = eDuration;
             Types = eTypes;
             // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
-            AutoCRMethod = (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+            autoCRMethod = (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
                            where method.ReturnType == typeof(IEnumerator) &&
                                  method.GetCustomAttribute<AutoCoroutine>() != null
                            select method).FirstOrDefault();
         }
-
+        
         public EffectBase(string eName, EffectTypes eTypes = EffectTypes.NONE)
         {
             Name = eName;
             Duration = 0;
             Types = eTypes;
+#if DEBUG
+            if ((from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+             where method.ReturnType == typeof(IEnumerator) &&
+                   method.GetCustomAttribute<AutoCoroutine>() != null
+             select method).FirstOrDefault() != null) Chaos.Warn("Effect " + Name + " is supposed to be a one off but it has an AutoCR! Did you mean to give it a duration in the constructor?");
+#endif
         }
 
+#if DEBUG
+        ~EffectBase()
+        {
+            Chaos.Log("I just learned about finalizers soooo");
+            Chaos.Log(Name + " went out of scope/was GC'd");
+        }
+#endif
+
+        public virtual void HandleNetworkMessage(string data) { Chaos.Warn($"This effect '{Name}' sends data but it doesn't receive it! Why?"); } // make sure i dont get caught lacking
         public virtual void OnEffectStart() { }
         public virtual void OnEffectUpdate() { }
         public virtual void OnEffectEnd() { }
@@ -61,14 +80,26 @@ namespace BWChaos.Effects
         public void Run()
         {
 #if DEBUG
-            MelonLogger.Msg("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : "") + (AutoCRMethod != null ? ", it has an AutoCoroutine named " + AutoCRMethod.Name : ""));
+            if (EffectHandler.AllEffects.Values.Contains(this))
+            {
+                Chaos.Warn("The effect handler has an instance of this effect! This should not happen! Are you using IMGUI? Creating a new instance, running, then aborting!");
+                var newE = (EffectBase)Activator.CreateInstance(this.GetType());
+                newE.Run();
+                return;
+            }
+
+            Chaos.Log("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : "") + (autoCRMethod != null ? ", it has an AutoCoroutine named " + autoCRMethod.Name : ""));
             if (GetType().GetMethod(nameof(OnEffectEnd), BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) != null && Duration == 0)
-                MelonLogger.Warning("Effect " + Name + " is SUPPOSED to be a one off, yet it has an OnEffectEnd! What gives?");
+                Chaos.Warn("Effect " + Name + " is SUPPOSED to be a one off, yet it has an OnEffectEnd! What gives?");
 #endif
-            if (AutoCoroutine != null) MelonCoroutines.Stop(AutoCoroutine); // there can only be one autocr at a time
+            if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken); // there can only be one autocr at a time
             Chaos.OnEffectRan?.Invoke(this);
-            if (Duration == 0) OnEffectStart();
-            else CoRunEnumerator = (IEnumerator)MelonCoroutines.Start(CoRun());
+            if (Duration == 0)
+            {
+                OnEffectStart();
+                MelonCoroutines.Start(CoHookNetworker());
+            }
+            else coRunToken = MelonCoroutines.Start(CoRun());
 
             AddToPrevEffects();
         }
@@ -77,16 +108,18 @@ namespace BWChaos.Effects
         {
             if (!hasFinished)
             {
-                if (AutoCoroutine != null) MelonCoroutines.Stop(AutoCoroutine);
-                MelonCoroutines.Stop(CoRunEnumerator);
+                if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken);
+                MelonCoroutines.Stop(coRunToken);
                 try { GlobalVariables.ActiveEffects.Remove(this); } catch { }
                 Active = false;
+                hasFinished = true;
             }
         }
 
         private IEnumerator CoRun()
         {
-            AutoCoroutine = MelonCoroutines.Start((IEnumerator)AutoCRMethod?.Invoke(this, null));
+            if (autoCRMethod != null) autoCRToken = MelonCoroutines.Start((IEnumerator)autoCRMethod.Invoke(this, null));
+            _dataRecieved += FilterNetworkData;
             OnEffectStart();
 
             Active = true;
@@ -98,12 +131,36 @@ namespace BWChaos.Effects
             GlobalVariables.ActiveEffects.Remove(this);
             Active = false;
 
-            if (AutoCoroutine != null) MelonCoroutines.Stop(AutoCoroutine);
+            if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken);
+            _dataRecieved -= FilterNetworkData;
             OnEffectEnd();
             hasFinished = true;
 #if DEBUG
-            MelonLogger.Msg(Name + " has finished running");
+            Chaos.Log(Name + " has finished running");
 #endif
+        }
+
+        private void FilterNetworkData(string name, string data)
+        {
+#if DEBUG
+            Chaos.Log($"Recieved effect data destined for '{name}' -> {data}");
+#endif
+            if (name == Name) HandleNetworkMessage(data);
+        }
+
+        protected void SendNetworkData(string data)
+        {
+#if DEBUG
+            Chaos.Log($"Effect {Name} is sending data {data}");
+#endif
+            _sendData?.Invoke(Name, data);
+        }
+        
+        private IEnumerator CoHookNetworker()
+        {
+            _dataRecieved += FilterNetworkData;
+            yield return new WaitForSecondsRealtime(5); // let effects send and recieve data for 5 seconds
+            _dataRecieved -= FilterNetworkData;
         }
 
         private void AddToPrevEffects()
