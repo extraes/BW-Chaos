@@ -11,9 +11,9 @@ namespace BWChaos.Effects
 {
     internal class EnemyGauntlet : EffectBase
     {
-        public EnemyGauntlet() : base("Enemy gauntlet", 90) { }
+        public EnemyGauntlet() : base("Enemy gauntlet", 120) { }
 
-        private AudioSource soundPlayer = null;
+        private static AudioSource soundPlayer = null;
         public override void OnEffectStart()
         {
             // Load sound asset and play it
@@ -26,14 +26,21 @@ namespace BWChaos.Effects
             soundPlayer.bypassReverbZones = true;
             soundPlayer.ignoreListenerVolume = true;
             soundPlayer.ignoreListenerPause = true;
+            soundPlayer.loop = false;
             soundPlayer.volume = 0.3f;
             soundPlayer.outputAudioMixerGroup = GlobalVariables.MusicMixer;
             soundPlayer.Play();
         }
 
+        public override void OnEffectEnd()
+        {
+            soundPlayer?.Stop();
+        }
+
         [AutoCoroutine]
         public IEnumerator CoRun()
         {
+            if (isNetworked) yield break;
             yield return null;
             int entangleChange = Prefs.SyncEffects ? 2 : 1;
             Pool nbPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
@@ -97,6 +104,7 @@ namespace BWChaos.Effects
             yield return new WaitForSeconds(10f);
             soundPlayer.volume = 0.05f;
             soundPlayer.Stop();
+            ForceEnd();
         }
     }
 }
