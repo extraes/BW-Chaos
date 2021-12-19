@@ -6,13 +6,14 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using UnityEngine;
+using Color = UnityEngine.Color;
 using Random = UnityEngine.Random;
 
 namespace BWChaos.Effects
 {
     internal class GarbageTextures : EffectBase
     {
-        Texture2D[] textures;
+        static Texture2D[] textures;
         public GarbageTextures() : base("Garble Random Textures") { Init(); }
 
         private void Init() {
@@ -73,16 +74,40 @@ namespace BWChaos.Effects
             if (textures == null || textures[0] == null) Init();
             #endregion
 
+            if (isNetworked) return;
+
             foreach (var mesh in GameObject.FindObjectsOfType<MeshRenderer>())
             {
                 if (Random.value < 0.2f)
                 {
                     if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
                     if (mesh.GetComponent<TMPro.TMP_Text>() == null) continue;
-                    // 0 because that _should_ be the main texture.
                     mesh.material.SetTexture("_MainTex", textures.Random());
-                    mesh.material.color = Random.ColorHSV();
+                    Color col = Random.ColorHSV();
+                    mesh.material.color = col;
+
+                    SendNetworkData($"{col.r},{col.g},{col.b},{col.a};{mesh.transform.GetFullPath()}"); // lets be real, the color is the part that makes the most difference
                 }
+            }
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            string[] args = data.Split(';');
+            float[] colors = args[0].Split(',').Select(c => float.Parse(c)).ToArray();
+
+            Color col = new Color(colors[0], colors[1], colors[2]);
+
+            var go = GameObject.Find(args[1]);
+            if (go == null)
+            {
+                Chaos.Warn("GameObject was not found in client: " + args[1]);
+            }
+            else
+            {
+                var mesh = go.GetComponent<MeshRenderer>();
+                mesh.material.SetTexture("_MainTex", textures.Random());
+                mesh.material.color = col;
             }
         }
     }

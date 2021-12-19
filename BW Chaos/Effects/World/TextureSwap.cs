@@ -1,12 +1,11 @@
-﻿using MelonLoader;
-using System.Linq;
+﻿using System.Linq;
 using UnityEngine;
 
 namespace BWChaos.Effects
 {
     internal class TextureSwap : EffectBase
     {
-        Texture[] textures;
+        static Texture[] textures;
         public TextureSwap() : base("Swap Random Textures") { Init(); }
 
         private void Init()
@@ -18,7 +17,7 @@ namespace BWChaos.Effects
             // In case IL2 feels like fucking my shit up.
             textures.ForEach(tex => tex.hideFlags = HideFlags.DontUnloadUnusedAsset);
 #if DEBUG
-            MelonLogger.Msg("Loaded " + textures.Length + " textures into TextureSwap");
+            Chaos.Log("Loaded " + textures.Length + " textures into TextureSwap");
 #endif
         }
 
@@ -27,6 +26,7 @@ namespace BWChaos.Effects
             #region Initialize
             if (textures == null || textures[0] == null) Init();
             #endregion
+            if (isNetworked) return;
 
             foreach (var mesh in GameObject.FindObjectsOfType<MeshRenderer>())
             {
@@ -34,10 +34,34 @@ namespace BWChaos.Effects
                 {
                     if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
                     if (mesh.GetComponent<TMPro.TMP_Text>() == null) continue;
-                    // 0 because that _should_ be the main texture.
-                    mesh.material.SetTexture("_MainTex", textures.Random());
+
+                    Texture tex = textures.Random();
+                    mesh.material.SetTexture("_MainTex", tex);
+                    SendNetworkData($"{tex.name};{mesh.transform.GetFullPath()}");
                 }
             }
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            string[] args = data.Split(';');
+            Texture tex = textures.FirstOrDefault(t => t.name == args[0]);
+
+            var go = GameObject.Find(args[1]);
+            if (go == null)
+            {
+                Chaos.Warn("GameObject was not found in client: " + args[1]);
+                return;
+            }
+            if (tex == null)
+            {
+                Chaos.Error("Texture was not found in client: " + args[0]);
+                return;
+            }
+
+            var mesh = go.GetComponent<MeshRenderer>();
+            mesh.material.SetTexture("_MainTex", tex);
+
         }
     }
 }

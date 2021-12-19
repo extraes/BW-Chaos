@@ -4,6 +4,7 @@ using MelonLoader;
 using ModThatIsNotMod;
 using System.Collections;
 using System.Reflection;
+using TMPro;
 
 namespace BWChaos.Effects
 {
@@ -15,13 +16,30 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            foreach (var tmp in GameObject.FindObjectsOfType<TMPro.TMP_Text>())
+            if (isNetworked) return;
+            foreach (var tmp in GameObject.FindObjectsOfType<TMP_Text>())
             {
                 if (UnityEngine.Random.value < 0.25f)
                 {
-                    tmp.text = spawnAdStrings.Random();
+                    string txt = spawnAdStrings.Random();
+                    tmp.text = txt;
+                    SendNetworkData(tmp.transform.GetFullPath() + ";" + txt);
                 }
             }
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            string[] datas = data.Split(';');
+            var tmp = GameObject.Find(datas[0])?.GetComponent<TMP_Text>();
+            if (tmp == null)
+            {
+#if DEBUG
+                Chaos.Warn($"Path DNE/TMP DNE on path \"{datas[0]}\"");
+#endif
+                return;
+            }
+            tmp.text = datas[1];
         }
     }
 }

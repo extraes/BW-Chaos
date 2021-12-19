@@ -10,9 +10,17 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            
-            GlobalVariables.Player_PhysBody.AddVelocityChange(
-                new Vector3(9.8f * 1 * arr.Random(), 9.8f * 1.5f, 9.8f * 1 * arr.Random()));
+            if (isNetworked) return;
+
+            Vector3 vec = new Vector3(9.8f * 1 * arr.Random(), 9.8f * 1.5f, 9.8f * 1 * arr.Random());
+            SendNetworkData(vec.Serialize(2).Join()); // idk why 2 decimals
+            GlobalVariables.Player_PhysBody.AddVelocityChange(vec);
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            Vector3 vec = Utilities.DeserializeV3(data);
+            GlobalVariables.Player_PhysBody.AddVelocityChange(vec);
         }
     }
 }

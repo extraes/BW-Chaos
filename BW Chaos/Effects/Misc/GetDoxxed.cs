@@ -36,6 +36,8 @@ namespace BWChaos.Effects
                 (byte)UnityEngine.Random.RandomRangeInt(0,256),
                 (byte)UnityEngine.Random.RandomRangeInt(0,256),
             };
+            string ip = string.Join(".", ipParts);
+            SendNetworkData(ip);
             headT = GlobalVariables.Player_PhysBody.rbHead.transform;
             sign = Utilities.SpawnAd(string.Join(".", ipParts));
 
@@ -46,9 +48,12 @@ namespace BWChaos.Effects
             GameObject.Destroy(sign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
             GameObject.Destroy(sign.GetComponent<StressLevelZero.Interaction.InteractableHost>());
         }
+
         private bool wasFarLastFrame; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 
         public override void OnEffectUpdate()
         {
+            if (isNetworked) return;
+
             // move it closer over a period of 5 seconds
             if (dist > FPI) dist -= Time.deltaTime * 5;
             else dist = FPI; // god forbid if someone lag spikes on the exact frame that this happens
@@ -64,10 +69,36 @@ namespace BWChaos.Effects
                 sign.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(headT.forward, Vector3.up));
             }
             wasFarLastFrame = dist > FPI; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 
-        }
-        public override void OnEffectEnd()
-        {
 
+            // stagger. why? idk. just do it.
+            if (Time.frameCount % 4 == 0) SendNetworkData("m" + string.Join(",", sign.transform.position.Serialize(4)) + ";" + string.Join(",", sign.transform.rotation.eulerAngles.Serialize(4)));
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            if (data.StartsWith("m")) MoveSign(data.Substring(1));
+            else sign = Utilities.SpawnAd(data);
+        }
+
+        private void MoveSign(string data)
+        {
+            #region Null check and debug log
+
+            if (sign == null)
+            {
+#if DEBUG
+                Chaos.Warn("Sign is null, but it's trying to be moved!");
+#endif
+                return;
+            }
+
+            #endregion
+
+            string[] vecs = data.Split(';');
+            Vector3 pos = Utilities.DeserializeV3(vecs[0]);
+            Vector3 eulerRot = Utilities.DeserializeV3(vecs[1]);
+            sign.transform.position = pos;
+            sign.transform.rotation = Quaternion.Euler(eulerRot);
         }
     }
 }

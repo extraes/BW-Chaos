@@ -13,9 +13,19 @@ namespace BWChaos.Effects
             yield return null; // Wait 1 frame because otherwise the IEnum thinks Active is false. Why? Beats me!
             while (Active)
             {
-                Utilities.SpawnAd(ads[Random.RandomRange(0, ads.Length)]);
+                string txt = ads[Random.RandomRange(0, ads.Length)];
+                GameObject ad = Utilities.SpawnAd(txt);
+                SendNetworkData($"{txt};{ad.transform.position.Serialize(4).Join()};{ad.transform.rotation.eulerAngles.Serialize(4).Join()}");
                 yield return new WaitForSecondsRealtime(10); // to allow enough time to read it
             }
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            string[] dats = data.Split(';');
+            GameObject ad = Utilities.SpawnAd(dats[0]);
+            ad.transform.position = Utilities.DeserializeV3(dats[1]);
+            ad.transform.rotation = Quaternion.Euler(Utilities.DeserializeV3(dats[2]));
         }
 
         private static string[] ads = new string[] {
@@ -165,6 +175,8 @@ namespace BWChaos.Effects
             "profound.\namateurdiscovered.",
             "saw a pregnant woman\ncalled her melon belly",
             "im gonna give you whats called round these parts a left right goodnight",
+            "i am a conoisseur of fine adhesives",
+            "its raining and im wearing a mask, call that waterboarding",
         };
     }
 }

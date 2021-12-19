@@ -11,10 +11,10 @@ namespace BWChaos.Effects
 {
     internal class VideoTextures : EffectBase
     {
-        GameObject playerParent;
-        VideoClip[] videos;
-        VideoPlayer[] videoPlayers;
-        RenderTexture[] textures;
+        static GameObject playerParent;
+        static VideoClip[] videos;
+        static VideoPlayer[] videoPlayers;
+        static RenderTexture[] textures;
         public VideoTextures() : base("Video textures", EffectTypes.LAGGY) { Init(); }
 
         private void Init()
@@ -33,7 +33,7 @@ namespace BWChaos.Effects
             for (int i = 0; i < videoPlayers.Length; i++)
             {
 #if DEBUG
-                MelonLogger.Msg("Generating videoplayer and rendertexture for " + videos[i].name);
+                Chaos.Log("Generating videoplayer and rendertexture for " + videos[i].name);
 #endif
                 videoPlayers[i] = playerParent.AddComponent<VideoPlayer>();
                 videoPlayers[i].clip = videos[i];
@@ -52,6 +52,8 @@ namespace BWChaos.Effects
 
             playerParent.SetActive(true);
 
+            if (isNetworked) return;
+
             foreach (var mesh in GameObject.FindObjectsOfType<MeshRenderer>())
             {
                 if (Random.value < 0.2f)
@@ -61,6 +63,27 @@ namespace BWChaos.Effects
                     // 0 because that _should_ be the main texture.
                     mesh.material.SetTexture("_MainTex", textures.Random());
                 }
+            }
+        }
+        public override void HandleNetworkMessage(string data)
+        {
+            string[] args = data.Split(';');
+            Texture tex = textures.FirstOrDefault(t => t.name == args[0]);
+
+            var go = GameObject.Find(args[1]);
+            if (go == null)
+            {
+                Chaos.Warn("GameObject was not found in client: " + args[1]);
+            }
+            else
+            {
+                if (tex == null)
+                {
+                    Chaos.Error("Texture was not found in client: " + args[0]);
+                    return;
+                }
+                var mesh = go.GetComponent<MeshRenderer>();
+                mesh.material.SetTexture("_MainTex", tex);
             }
         }
     }

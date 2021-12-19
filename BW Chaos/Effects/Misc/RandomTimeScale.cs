@@ -1,7 +1,6 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
+﻿using MelonLoader;
 using System.Collections;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace BWChaos.Effects
@@ -10,7 +9,7 @@ namespace BWChaos.Effects
     {
         public RandomTimeScale() : base("Random slowmo", 90) { }
 
-        
+
         public override void OnEffectEnd()
         {
             Time.timeScale = 1;
@@ -19,16 +18,38 @@ namespace BWChaos.Effects
         [AutoCoroutine]
         public IEnumerator ChangeTime()
         {
-            yield return new WaitForSecondsRealtime(Random.RandomRange(6, 10));
-            if (!Active) yield break;
-
             var times = new float[] { 0.125f, 0.25f, 0.5f };
 
-            Time.timeScale = times[Random.RandomRange(0, times.Length)];
+
+            while (Active)
+            {
+                float waitTime = Random.RandomRange(6, 10);
+                float timeScale = times.Random();
+
+                SendNetworkData(waitTime + "," + timeScale);
+
+                yield return new WaitForSecondsRealtime(waitTime);
+                Time.timeScale = timeScale;
+                yield return new WaitForSecondsRealtime(3);
+                Time.timeScale = 1;
+
+            }
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            string[] datas = data.Split(',');
+            float f1 = float.Parse(datas[0]);
+            float f2 = float.Parse(datas[1]);
+            MelonCoroutines.Start(NetScale(f1, f2));
+        }
+
+        private IEnumerator NetScale(float waitTime, float timeScale)
+        {
+            yield return new WaitForSecondsRealtime(waitTime);
+            Time.timeScale = timeScale;
             yield return new WaitForSecondsRealtime(3);
             Time.timeScale = 1;
-
-            MelonCoroutines.Start(ChangeTime());
         }
     }
 }
