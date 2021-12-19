@@ -12,7 +12,7 @@ namespace BWChaos.Effects
     {
         public SlowShooting() : base("SUPERSHOT", 90) { }
 
-        private IEnumerator coroutine;
+        private object coroutine;
 
         public override void OnEffectStart()
         {
@@ -23,7 +23,7 @@ namespace BWChaos.Effects
         {
             // avoid conflicting coroutines
             if (coroutine != null) MelonCoroutines.Stop(coroutine);
-            coroutine = (IEnumerator)MelonCoroutines.Start(BringBackTime());
+            coroutine = MelonCoroutines.Start(BringBackTime());
         }
 
         private IEnumerator BringBackTime()
