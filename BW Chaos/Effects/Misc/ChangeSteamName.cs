@@ -30,13 +30,16 @@ namespace BWChaos.Effects
             "The Holy Thighble",
             "#CryptoPunks TAP IN!!!",
             "astolfo enjoyer",
+            "cs.money|darren.chungus.09",
         };
 
         private string steamName = "helo :)";
         public override void OnEffectStart()
         {
             steamName = Steamworks.SteamFriends.GetPersonaName();
-            Steamworks.SteamFriends.SetPersonaName($"{names[UnityEngine.Random.RandomRange(0, names.Length)]}-BWC");
+            string newName = $"{names.Random()}-BWC"; // yeah thisll definitely get cut off by how long most of the names are. oh well lol
+            Steamworks.SteamFriends.SetPersonaName(newName);
+            Utilities.SpawnAd("So, how goes it, " + newName + "?");
         }
         
         public override void OnEffectEnd()
