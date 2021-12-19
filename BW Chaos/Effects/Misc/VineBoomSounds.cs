@@ -19,7 +19,7 @@ namespace BWChaos.Effects
         Dictionary<WalkSoundFX, AudioClip[][]> walkSFXDict = new Dictionary<WalkSoundFX, AudioClip[][]>();
         Dictionary<HandSFX, AudioClip[][]> handSFXDict = new Dictionary<HandSFX, AudioClip[][]>();
         Dictionary<GunSFX, AudioClip[][]> gunSFXDict = new Dictionary<GunSFX, AudioClip[][]>();
-        Dictionary<Type, PropertyInfo[]> typeToPropInfo = new Dictionary<Type, PropertyInfo[]>();
+        //Dictionary<Type, PropertyInfo[]> typeToPropInfo = new Dictionary<Type, PropertyInfo[]>();
         public VineBoomSounds() : base("Vine Boom Sound Effects", 30) { Init(); }
 
         private void Init()
@@ -28,8 +28,8 @@ namespace BWChaos.Effects
             vineBoomSound.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
 #if DEBUG
-            MelonLogger.Msg("Loaded the moyai sound into VineBoomSounds");
-            if (vineBoomSound == null) MelonLogger.Error("Scratch that, it's null. Blame the IRS. And the CIA, those bioluminescent fucks");
+            Chaos.Log("Loaded the moyai sound into VineBoomSounds");
+            if (vineBoomSound == null) Chaos.Error("Scratch that, it's null. Blame the IRS. And the CIA, those bioluminescent fucks");
 #endif
 
             //var asmCSharp = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.FullName == "Assembly-CSharp, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null");

@@ -31,7 +31,7 @@ namespace BWChaos.Effects
                 var go = rb.gameObject; //                V luckily passing null to contains doesnt error out
                 if (gameObjects.Contains(go.GetComponent<RepulseBehaviour>())) continue;
 #if DEBUG
-                //MelonLogger.Msg($"Gave {go.name} the script");
+                //Chaos.Log($"Gave {go.name} the script");
 #endif
 
                 gameObjects.Add(go.AddComponent<RepulseBehaviour>());
@@ -71,7 +71,7 @@ namespace BWChaos.Effects
             float dt = Time.fixedDeltaTime;
             Vector3 p = transform.position; //our current position
             Vector3 v = rb.velocity; //our current velocity
-            // subt V3.p because then rb's wont try to go into the floor    V
+            // subt V3.up because then rb's wont try to go into the floor   V
             Vector3 force = rb.mass * (target.transform.position - Vector3.up - p - v * dt) / (dt);
 
             rb.AddForce(-Vector3.ClampMagnitude(force * mult, 100 * rb.mass));
@@ -79,14 +79,16 @@ namespace BWChaos.Effects
 
         public void Destroy ()
         {
-            MelonCoroutines.Stop(CToken);
+            MelonCoroutines.Stop(CToken); // if this nulls, oh well, this thread is dying anyway
         }
 
         private IEnumerator CheckDist()
         {
             while (true)
             {
+                // null-check this because MelonCoroutines dont stop with a gameobject
                 if (this?.gameObject == null || !gameObject.active) yield break;
+                // dont do shit if we're not in 15m, and also dont do shit if we're being held by the player (or otherwise a part of the player)
                 isNear = ((target.position - gameObject.transform.position).sqrMagnitude < 15 * 15) && transform.root.name != "[RigManager (Default Brett)]";
                 yield return new WaitForSecondsRealtime(1);
             }

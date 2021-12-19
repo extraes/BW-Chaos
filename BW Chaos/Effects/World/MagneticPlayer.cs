@@ -31,7 +31,7 @@ namespace BWChaos.Effects
                 var go = rb.gameObject; //                V luckily passing null to contains doesnt error out
                 if (gameObjects.Contains(go.GetComponent<MagnetBehaviour>())) continue;
 #if DEBUG
-                //MelonLogger.Msg($"Gave {go.name} the script");
+                //Chaos.Log($"Gave {go.name} the script");
 #endif
                 
                 gameObjects.Add(go.AddComponent<MagnetBehaviour>());

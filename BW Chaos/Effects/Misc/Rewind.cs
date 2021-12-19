@@ -9,14 +9,14 @@ namespace BWChaos.Effects
 {
     internal class Rewind : EffectBase
     {
-        public Rewind() : base("Record then rewind 15 seconds", 30, EffectTypes.LAGGY) { }
+        public Rewind() : base("Record then rewind 15 seconds", 30, EffectTypes.LAGGY | EffectTypes.DONT_SYNC) { }
         private GlobalClock clock = null;
-        private bool isRewindAlreadyActive = false; // We don't want two rewinds at the same time. That would be bad.
+        private static bool isRewindAlreadyActive = false; // We don't want two rewinds at the same time. That would be bad.
         public override void OnEffectStart()
         {
             if (isRewindAlreadyActive)
             {
-                MelonLogger.Warning("Two instances of Rewind can't be active at the same time! Not running again!");
+                Chaos.Warn("Two instances of Rewind can't be active at the same time! Not running again!");
             }
 
             isRewindAlreadyActive = true;
@@ -32,8 +32,8 @@ namespace BWChaos.Effects
             catch (System.Exception err)
             {
 #if DEBUG
-                MelonLogger.Warning("Caught Singleton exception, adding Timekeeper now. In case you wanted the error, here:");
-                MelonLogger.Warning(err);
+                Chaos.Warn("Caught Singleton exception, adding Timekeeper now. In case you wanted the error, here:");
+                Chaos.Warn(err);
 #endif
                 chronos.AddComponent<Timekeeper>();
             }
