@@ -16,7 +16,7 @@ namespace BWChaos.Effects
             Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
             if (pool == null)
             {
-                MelonLogger.Warning("Nullbody pool not found! Why?");
+                Chaos.Warn("Nullbody pool not found! Why?");
                 return;
             }
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
@@ -27,8 +27,8 @@ namespace BWChaos.Effects
             
             nullbody.gameObject.SetActive(true);
             // im not sure _why_ kinematic punching-bag-ify's it, but im not complaining 
-            nullbody.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive();
-            nullbody.GetComponent<AIBrain>().behaviour.health.cur_hp = float.PositiveInfinity;
+            nullbody.StartCoroutine(nullbody.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+            nullbody.GetComponent<AIBrain>().behaviour.health.cur_hp = int.MaxValue;
 
         }
     }

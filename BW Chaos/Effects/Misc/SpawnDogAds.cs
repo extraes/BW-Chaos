@@ -7,13 +7,13 @@ namespace BWChaos.Effects
     {
         public SpawnDogAd() : base("Spawn Dog Ads", 75) { }
 
-        public override void OnEffectStart() => MelonLoader.MelonCoroutines.Start(CoRun());
-
-        private IEnumerator CoRun()
+        [AutoCoroutine]
+        public IEnumerator CoRun()
         {
             yield return null;
             while (Active)
             {
+                // cant sync this unless i try to patch MTINM or implement chap's logic in my own code. Oh well.
                 ModThatIsNotMod.RandomShit.AdManager.CreateDogAd();
                 yield return new WaitForSecondsRealtime(2.5f);
             }

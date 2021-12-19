@@ -16,23 +16,35 @@ namespace BWChaos.Effects
             "http://www.5z8.info/56-DEPLOY-TROJAN-287.mw9----_g9v0ut_facebook-hack",    // https://longdogechallenge.com/ infinidoge
             "http://www.5z8.info/barely-legal_r7p9ws_add-worm",                         // http://eelslap.com/ eelslap!
             "http://www.5z8.info/hack-outlook_b9r3vo_boobs",                            // http://corndog.io/ a bunch of corndogs floating in space
+            "http://www.5z8.info/facebook-hack_k8o3fv_start-trojan"                     // https://bullsquid.com/ spinning bullsquid from hl1
         };
+
+        public override void HandleNetworkMessage(string data)
+        {
+            MelonCoroutines.Start(CoShow(data));
+        }
 
         [AutoCoroutine]
         public System.Collections.IEnumerator CoRun ()
         {
-            var pickedURL = shadyURLs[UnityEngine.Random.RandomRange(0, shadyURLs.Length)];
+            var pickedURL = shadyURLs.Random();
+            SendNetworkData(pickedURL);
+            yield return CoShow(pickedURL);
+        }
+
+        public System.Collections.IEnumerator CoShow(string url)
+        {
             SpawnAd("Hey wanna see one of my favorite websites");
-            yield return new WaitForSeconds(5f);
-            SpawnAd(pickedURL);
+            yield return new WaitForSeconds(4f);
+            SpawnAd(url);
 
             if (Chaos.isSteamVer)
             {
                 yield return new WaitForSeconds(5f);
                 SpawnAd("Why don't I show you :^)");
                 yield return new WaitForSeconds(5f);
-                
-                Steamworks.SteamFriends.ActivateGameOverlayToWebPage(pickedURL, Steamworks.EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default);
+
+                Steamworks.SteamFriends.ActivateGameOverlayToWebPage(url, Steamworks.EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default);
             }
         }
     }

@@ -20,7 +20,7 @@ namespace BWChaos.Effects
 
         private void Init()
         {
-            playerParent = new GameObject("BWChaos Instruction Parent") { hideFlags = HideFlags.DontUnloadUnusedAsset };
+            if (playerParent == null) playerParent = new GameObject("BWChaos Instruction Parent") { hideFlags = HideFlags.DontUnloadUnusedAsset };
             // Load the videos using a lambda in linq cause otherwise id have to for(){} it
             if (videos == null || videos[0] == null) 
                 videos = GlobalVariables.ResourcePaths
@@ -44,8 +44,8 @@ namespace BWChaos.Effects
             vidMat.hideFlags = HideFlags.DontUnloadUnusedAsset;
             vidMat.mainTexture = texture;
 #if DEBUG
-            MelonLogger.Msg("Loaded " + videos.Length + " textures into ImportantInstructions and made render texture");
-            videos.ForEach(v => MelonLogger.Msg("Instructional " + v.name + " is loaded"));
+            Chaos.Log("Loaded " + videos.Length + " textures into ImportantInstructions and made render texture");
+            videos.ForEach(v => Chaos.Log("Instructional " + v.name + " is loaded"));
 #endif
         }
 
@@ -63,7 +63,7 @@ namespace BWChaos.Effects
             videoPlayer.clip = videos.Random();
             
 #if DEBUG
-            MelonLogger.Msg($"Set material - Video: {videoPlayer.clip.name}, {videoPlayer.clip.length}s ({videoPlayer.length}s)");
+            Chaos.Log($"Set material - Video: {videoPlayer.clip.name}, {videoPlayer.clip.length}s ({videoPlayer.length}s)");
 #endif
 
             // Create/get audiosource
@@ -79,7 +79,7 @@ namespace BWChaos.Effects
             videoPlayer.Play();
 
             MelonCoroutines.Start(ModulateVolume());
-            if (videoPlayer.clip.name == "you should kys... NOW") MelonCoroutines.Start(LTG());
+            if (videoPlayer.clip.name == "you should kys... NOW") MelonCoroutines.Start(LTG()); // todo: dont hardcode this (but wtf else do i do lol)
         }
 
         private System.Collections.IEnumerator ModulateVolume ()
@@ -104,7 +104,7 @@ namespace BWChaos.Effects
         private System.Collections.IEnumerator LTG ()
         {
 #if DEBUG
-            MelonLogger.Msg("Running LTG");
+            Chaos.Log("Running LTG");
 #endif
             yield return new WaitForSeconds(5.833f);
             if (!Active) yield break;
