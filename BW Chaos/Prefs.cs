@@ -10,6 +10,7 @@ namespace BWChaos
         internal static bool UseLaggyEffects { get; private set; } = false;
         internal static bool UseGravityEffects { get; private set; } = false;
         internal static bool UseSteamProfileEffects { get; private set; } = false;
+        internal static bool UseMetaEffects { get ; private set; } = true;
         internal static bool ShowCandidatesOnScreen { get; private set; } = true;
         internal static bool ShowWristUI { get; private set; } = true;
         internal static bool SendCandidatesInChannel { get; private set; } = true;
@@ -31,6 +32,7 @@ namespace BWChaos
             MelonPreferences.CreateEntry("BW_Chaos", "useGravityEffects", UseGravityEffects, "useGravityEffects");
             MelonPreferences.CreateEntry("BW_Chaos", "useSteamProfileEffects", UseSteamProfileEffects, "useSteamProfileEffects");
             MelonPreferences.CreateEntry("BW_Chaos", "useLaggyEffects", UseLaggyEffects, "useLaggyEffects");
+            MelonPreferences.CreateEntry("BW_Chaos", "useMetaEffects", UseMetaEffects, "useMetaEffects");
             // voteprefs
             MelonPreferences.CreateEntry("BW_Chaos", "showCandidatesOnScreen", ShowCandidatesOnScreen, "showCandidatesOnScreen");
             MelonPreferences.CreateEntry("BW_Chaos", "showWristUI", ShowWristUI, "showWristUI");
@@ -77,7 +79,8 @@ namespace BWChaos
                 (EffectTypes.USE_STEAM, Chaos.isSteamVer),
                 (EffectTypes.LAGGY, UseLaggyEffects),
                 (EffectTypes.HIDDEN, true),
-                (EffectTypes.DONT_SYNC, !SyncEffects)
+                (EffectTypes.DONT_SYNC, !SyncEffects),
+                (EffectTypes.META, UseMetaEffects),
             });
         }
 

@@ -9,7 +9,7 @@ namespace BWChaos.Effects
 {
     internal class FastTimer : EffectBase
     {
-        public FastTimer() : base("[Meta] Fast Effect Timer", 90) { }
+        public FastTimer() : base("Fast Effect Timer", 90, EffectTypes.META) { }
         static readonly FieldInfo secInfo = typeof(EffectHandler).GetField("secondsEachEffect", BindingFlags.Instance | BindingFlags.NonPublic);
 
         public override void OnEffectStart() => secInfo.SetValue(EffectHandler.Instance, 15);
