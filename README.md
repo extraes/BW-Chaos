@@ -12,7 +12,9 @@ To configure BW Chaos, use BoneMenu or **MelonPreferences.cfg**, but note that B
 
 This mod supports two methods of audience interaction, via Discord and Twitch.
 
-To enable this, set **enableRemoteVoting** to **true** in MelonPreferences
+To enable this, set **enableRemoteVoting** to **true** in MelonPreferences.
+
+Please know that if you've got an antivirus, it may kill the voting process without telling you, and you'll only know from the mod saying that it disconnected (I've written a bit more in the 2.0.0 changelog and FAQ about it)
 
 ### Twitch
 
@@ -191,9 +193,15 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
   - Yeah. Enable it in preferences.
 
+  - If you see that it disconnects and asks if its killed without you having done anything, its most likely that an antivirus program killed the process because it thinks its suspicious.
+
 - What do "Meta" effects do?
 
   - Meta does not refer to the company. Fuck Facebook. Meta refers to effects that act upon the mod itself or its effects, like Faster Effect Timer speeds up the timer, and Triple Threat runs 3 other effects.
+
+- Something's wrong with the Entanglement module!
+
+  - Yeah it's very possible that I made it send too much data at once and got you or Entanglement ratelimited. My bad. Just tell me what happened at the time.
 
 ### Credits
 
@@ -222,3 +230,29 @@ If you want to change the UI, you can make a PR for that too, since the Unity pr
 If you want to add a new image, instruction, or video, do that through the Unity project too. (Or just send it in the BW server's meme channel and ping me to add it, and I may do it)
 
 I don't have a code of coduct or anything, so feel free to evade taxes and stuff after making a PR.
+
+### Changelog
+
+- New in 2.1.0
+
+  - Fix various things for MelonLoader 0.5, making 0.5 the new minimum version for Chaos.
+
+  - Add per-effect Entanglement syncing to many effects.
+
+  - Change underlying effect running, at the risk of decreasing performance and increasing memory usage, but makes Entanglement syncing easier and lets effects have their own timers each time they're ran.
+
+  - Remote voting process (the Discord/Twitch bot) is now zip compressed, allowing me to add even more resources for effects to use.
+  
+  - Various other changes which you can see [here](https://github.com/extraes/BW-Chaos/commits/rewrite), these changes are the ones made in December.
+
+- New in 2.0.0
+
+  - Entirely new codebase
+
+    - Written with a focus on stability without relying on the try-catch crutch that the Legacy release did.
+
+    - Also made with extra attention paid to external dependencies, like the WatsonWebsocket DLL and NodeJS. Those are no longer needed, so now the mod is a single DLL that will not attempt to install any external software.
+
+      - That said, your antivirus may kill the remote voting process, because it is admittedly a little sketchy for an unsigned DLL to take a file out of itself, decompress it, execute it, and then start talking with it, but if you just play solo, you'll not have any problems.
+
+    - Foundation was written by a competent programmer, Trev, and I was able to, I think at least, effectively "inherit" it, learn from it, and expand upon it.
