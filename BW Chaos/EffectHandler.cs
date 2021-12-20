@@ -2,6 +2,7 @@
 using MelonLoader;
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using UnityEngine;
@@ -16,7 +17,7 @@ namespace BWChaos
 
         public static bool randomOnNoVotes = false;
 
-        public static System.Collections.Generic.Dictionary<string, EffectBase> AllEffects = new System.Collections.Generic.Dictionary<string, EffectBase>();
+        public static Dictionary<string, EffectBase> AllEffects = new Dictionary<string, EffectBase>();
         public static EffectHandler Instance;
         public static bool advanceTimer = false;
 
@@ -24,7 +25,7 @@ namespace BWChaos
         private int currentTimerValue;
         private int numberFlip = 0;
 
-        private IEnumerator timerInstance;
+        private object timerToken;
 
         #region Wrist and Overlay Variables
 
@@ -89,23 +90,23 @@ namespace BWChaos
             wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
 
             // Start the timer immediately
-            timerInstance = (IEnumerator)MelonCoroutines.Start(Timer());
+            timerToken = MelonCoroutines.Start(Timer());
             ResetEffectCandidates();
         }
 
         public void OnDestroy()
         {
-            MelonCoroutines.Stop(timerInstance);
+            MelonCoroutines.Stop(timerToken);
             // foreach throws "System.InvalidOperationException: Collection was modified; enumeration operation may not execute."
             // maybe this will fix?
             
-            for (int i = 0;  GlobalVariables.ActiveEffects.Count > 0; i++)
+            for (int i = 0;  GlobalVariables.ActiveEffects.Count != 0; i++)
             {
 #if DEBUG
-                MelonLogger.Msg($"Iteration: {i}, Ending effect {GlobalVariables.ActiveEffects[0]?.Name ?? "null (wha?)"}");
+                Chaos.Log($"Iteration: {i}, Ending effect {GlobalVariables.ActiveEffects[0]?.Name ?? "null (wha?)"}");
 #endif
                 GlobalVariables.ActiveEffects[0].ForceEnd();
-                if (i < 100) break; // fuck em we ball
+                if (i < 100) break; // if forceend didnt do shit to an effect, just forget it
             }
 
             GlobalVariables.ActiveEffects.Clear();
@@ -115,16 +116,22 @@ namespace BWChaos
 
         public void Update()
         {
-            string newString = string.Empty;
+            string newString = GlobalVariables.PreviousEffects.Join("\n") + "\n";
+            //newString += GlobalVariables.PreviousEffects.Join("\n");
             // Hide hidden effects (Like FakeCrash) from the player
-            foreach (EffectBase e in GlobalVariables.PreviousEffects)
+            List<string> activeTags = new List<string>();
+            foreach (EffectBase e in GlobalVariables.ActiveEffects)
             {
-                // Is this more readable than ternary operatoring in a ternary operator?
-                string activeTag = e.Types.HasFlag(EffectBase.EffectTypes.HIDDEN) ? "HIDDEN" : (e.Duration - (int)(Time.realtimeSinceStartup - e.StartTime)).ToString();
+                activeTags.Clear();
+                activeTags.Add((e.Duration - (int)(Time.realtimeSinceStartup - e.StartTime)).ToString());
+                if (e.Types.HasFlag(EffectBase.EffectTypes.HIDDEN)) activeTags.Add("HIDDEN");
+                if (e.Types.HasFlag(EffectBase.EffectTypes.META)) activeTags.Add("META");
+
                 newString += e.Active ?
-                    $"{e.Name} {activeTag}\n" :
+                    $"{e.Name} {activeTags.Join(" ")}\n" :
                     $"{e.Name}\n";
             }
+
 
             overlayText.text = newString;
             // Hide all hidden effects, replace them with Immortality (because its relatively hard to discover)
@@ -138,7 +145,7 @@ namespace BWChaos
             if (col.name == "TRIGGER_EXIT")
             {
 #if DEBUG
-                MelonLogger.Msg("Caught Trigger Exit before this gameobject was actually destroyed, cool!");
+                Chaos.Log("Caught Trigger Exit before this gameobject was actually destroyed, cool!");
 #endif
                 GameObject.Destroy(this);
             }
@@ -163,7 +170,7 @@ namespace BWChaos
                     int[] votes = GetVotes(); // to show effect votes live on the overlay
                     UpdateVoteBars(votes);
 #if DEBUG
-                    MelonLogger.Msg($"Recieved incomplete votes: [{string.Join(", ", votes)}]; Total: {votes.Sum()}");
+                    Chaos.Log($"Recieved incomplete votes: [{string.Join(", ", votes)}]; Total: {votes.Sum()}");
 #endif
                 }
                 else voteBars[0].transform.parent.gameObject.SetActiveRecursively(false);
@@ -175,8 +182,8 @@ namespace BWChaos
                 currentTimerValue += 1;
                 float fillAmount = (float)currentTimerValue / secondsEachEffect;
 
-                overlayImage.fillAmount = fillAmount;
-                wristImage.fillAmount = fillAmount;
+                MelonCoroutines.Start(SlerpUICirle(overlayImage, fillAmount));
+                MelonCoroutines.Start(SlerpUICirle(wristImage, fillAmount));
 
                 if (currentTimerValue >= secondsEachEffect)
                 {
@@ -187,7 +194,7 @@ namespace BWChaos
             }
         }
 
-        // Slep the vote bars according to how many votes each one has, an animation makes it look pretty!
+        // Slerp the vote bars according to how many votes each one has, an animation makes it look pretty!
         private IEnumerator SlerpVoteBar(Transform transform, Vector3 to)
         {
             yield return null;
@@ -200,6 +207,20 @@ namespace BWChaos
             }
         }
 
+        // Slerp GUI for the same reason, prettiness!
+        private IEnumerator SlerpUICirle(Image img, float to)
+        {
+            if (to == 1) to = 0;
+            (float, float) tup = (img.fillAmount, to);
+            yield return null;
+            for (float i = 0; i < 1; i += 0.05f)
+            {
+                if (img == null) yield break; // null check because i dont want to do ondestroy shit
+                img.fillAmount = tup.Slerp(i);
+                yield return new WaitForFixedUpdate();
+            }
+        }
+
         private void RunVotedEffect()
         {
             int[] accumulatedVotes = GetVotes();
@@ -208,25 +229,28 @@ namespace BWChaos
             // Get the top voted effect
             (int, int) voted = GetVotedEffect(accumulatedVotes); // format is (arrIndex, value)
 #if DEBUG
-            MelonLogger.Msg($"Voted effect: {(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].Name)}, [{string.Join(", ", accumulatedVotes)}]");
-            if (voted.Item2 == 0) MelonLogger.Msg("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
-            MelonLogger.Msg("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !randomOnNoVotes));
+            Chaos.Log($"Voted effect: {(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].Name)} (of type '{(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].GetType().Name)}'), [{string.Join(", ", accumulatedVotes)}]");
+            if (voted.Item2 == 0) Chaos.Log("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
+            Chaos.Log("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !randomOnNoVotes));
 #endif
+            Type votedType;
             // return if the top voted effect has no votes & modpref is set to not run on no votes
             if (voted.Item2 == 0 && !randomOnNoVotes) return;
             if (voted.Item1 == 4 || voted.Item2 == 0)
             {
                 // Get a random effect from the dictionary
                 EffectBase e = AllEffects.Random().Value;
-                MelonLogger.Msg(e.Name + " (random) was chosen");
-                e.Run();
+                Chaos.Log(e.Name + " (random) was chosen");
+                votedType = e.GetType();
             }
             else
             {
                 EffectBase e = GlobalVariables.CandidateEffects[voted.Item1];
-                MelonLogger.Msg(e.Name + " was chosen");
-                e.Run();
+                Chaos.Log(e.Name + " was chosen");
+                votedType = e.GetType();
             }
+            EffectBase eff = (EffectBase)Activator.CreateInstance(votedType);
+            eff.Run();
 
             // Sometimes the timer/wristcanvas gets fucky with its offsets, so reinforce them here
             wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -300,8 +324,9 @@ namespace BWChaos
         {
             // reset GUI values to default
             currentTimerValue = 0;
-            overlayImage.fillAmount = 0;
-            wristImage.fillAmount = 0;
+            //MelonCoroutines.Start(SlerpUICirle(overlayImage, 0));     commented cause it would interfere with existing coroutines,
+            //MelonCoroutines.Start(SlerpUICirle(wristImage, 0));       and cause i just added a check in there
+
             UpdateVoteBars(new int[] { 0, 0, 0, 0, 0 });
 
             string botMesssage = "-- New Candidate Effects --";
