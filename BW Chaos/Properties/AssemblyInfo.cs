@@ -18,3 +18,4 @@ using System.Runtime.InteropServices;
 
 [assembly: MelonInfo(typeof(BWChaos.Chaos), BWChaos.BuildInfo.Name, BWChaos.BuildInfo.Version, BWChaos.BuildInfo.Author, BWChaos.BuildInfo.DownloadLink)]
 [assembly: MelonGame("Stress Level Zero", "BONEWORKS")]
+[assembly: VerifyLoaderVersion(0, 5, 1, true)]
