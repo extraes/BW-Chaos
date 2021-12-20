@@ -120,15 +120,23 @@ namespace BWChaos
 
             #endregion
 
+            #region Do misc startup thing(s)
+
             BoneMenu.Register();
 
-            // go straight to loggerinstance because it lets me use pretty colors :^)
+            #endregion
+
+            #region Output startup times
+
             allSW.Stop();
+            // go straight to loggerinstance because it lets me use pretty colors :^)
             LoggerInstance.Msg(ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.AllEffects.Count} to be used in Chaos.");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect initialization: {effectSW.ElapsedMilliseconds}ms");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect resource loading: {resSW.ElapsedMilliseconds}ms");
             if (Prefs.SyncEffects) LoggerInstance.Msg(ConsoleColor.Blue, $" - Entanglement module find & start: {syncSW.ElapsedMilliseconds}ms");
             if (Prefs.EnableRemoteVoting) LoggerInstance.Msg(ConsoleColor.Blue, $" - Remote voter unpack & start: {botSW.ElapsedMilliseconds}ms");
+
+            #endregion
         }
 
         public override void OnApplicationQuit()
@@ -234,7 +242,7 @@ namespace BWChaos
 
         private void ClientDisconnectedFromServer(object sender, EventArgs e)
         {
-            Chaos.Log("Disconnected from the Discord bot, was the process killed?");
+            Chaos.Log("Disconnected from the voting process. If you didn't close the game, make sure your antivirus isn't killing it");
         }
 
         private void ClientReceiveMessage(object sender, MessageReceivedEventArgs e)
@@ -272,7 +280,7 @@ namespace BWChaos
 
             if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
             if (File.Exists(exePath)) File.Delete(exePath);
-            
+
             using (Stream stream = Assembly.GetManifestResourceStream("BWChaos.Resources.BWChaosDiscordBot.zip"))
             {
                 var buffer = new byte[4096];
@@ -391,12 +399,16 @@ namespace BWChaos
 
         #endregion
 
+        #region MelonLogger replacements
+
         internal static void Log(string str) => GlobalVariables.thisChaos.LoggerInstance.Msg(str);
         internal static void Log(object obj) => GlobalVariables.thisChaos.LoggerInstance.Msg(obj?.ToString() ?? "null");
         internal static void Warn(string str) => GlobalVariables.thisChaos.LoggerInstance.Warning(str);
         internal static void Warn(object obj) => GlobalVariables.thisChaos.LoggerInstance.Warning(obj?.ToString() ?? "null");
         internal static void Error(string str) => GlobalVariables.thisChaos.LoggerInstance.Error(str);
         internal static void Error(object obj) => GlobalVariables.thisChaos.LoggerInstance.Error(obj?.ToString() ?? "null");
+
+        #endregion
     }
 
     internal class ChaosModStartupException : Exception
