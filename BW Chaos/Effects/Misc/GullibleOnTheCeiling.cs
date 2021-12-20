@@ -26,7 +26,9 @@ namespace BWChaos.Effects
             GameObject.Destroy(sign.GetComponent<StressLevelZero.Props.ObjectDestructable>());
             GameObject.Destroy(sign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
             GameObject.Destroy(sign.GetComponent<StressLevelZero.Interaction.InteractableHost>());
-            sign.GetComponent<Rigidbody>().detectCollisions = false;
+            var rb = sign.GetComponent<Rigidbody>();
+            rb.detectCollisions = false;
+            rb.useGravity = false;
         }
         public override void OnEffectUpdate()
         {
@@ -52,7 +54,9 @@ namespace BWChaos.Effects
                 GameObject.Destroy(newSign.GetComponent<StressLevelZero.Props.ObjectDestructable>());
                 GameObject.Destroy(newSign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
                 GameObject.Destroy(newSign.GetComponent<StressLevelZero.Interaction.InteractableHost>());
-                sign.GetComponent<Rigidbody>().detectCollisions = false;
+                var rb = sign.GetComponent<Rigidbody>();
+                rb.detectCollisions = false;
+                rb.useGravity = false; // disable gravity because otherwise itll fall in the 4 frame interval
 
                 signs.Add(id, newSign);
                 newSign.transform.position = pos;
