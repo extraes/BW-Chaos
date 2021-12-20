@@ -141,6 +141,8 @@
     <Compile Include="Effects\Misc\ImportantInstructions.cs" />
     <Compile Include="Effects\Misc\ReplaceText.cs" />
     <Compile Include="Effects\Misc\FasterTimer.cs" />
+    <Compile Include="Effects\Misc\RunPreviousEffects.cs" />
+    <Compile Include="Effects\Misc\TripleThreat.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
     <Compile Include="Effects\Misc\InvincibleNullbody.cs" />
@@ -161,10 +163,11 @@
     <Compile Include="Effects\Player\NoRegen.cs" />
     <Compile Include="Effects\Player\Immortality.cs" />
     <Compile Include="Effects\Player\GetJumped.cs" />
-    <Compile Include="Effects\World\Fling.cs" />
+    <Compile Include="Effects\World\FlingEverything.cs" />
     <Compile Include="Effects\Misc\Lag.cs" />
     <Compile Include="Effects\World\GravityCube.cs" />
     <Compile Include="Effects\World\InvertGravity.cs" />
+    <Compile Include="Effects\World\FartWithReverb.cs" />
     <Compile Include="Effects\World\RepulsivePlayer.cs" />
     <Compile Include="Effects\World\PointGravity.cs" />
     <Compile Include="Effects\World\California.cs" />
