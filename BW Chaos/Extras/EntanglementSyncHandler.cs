@@ -53,7 +53,7 @@ namespace BWChaos.Extras
 
             // Load it into the appdomain
             Assembly moduleAssembly = Assembly.Load(moduleRaw);
-            MelonLogger.Msg("Syncing is enabled and Entanglement was found! So far so good! Now we give Entanglement our handler!");
+            Chaos.Log("Syncing is enabled and Entanglement was found! So far so good! Now we give Entanglement our handler!");
             // Then call the setup method reflectively
             setupModuleMethod.Invoke(null, new object[] { moduleAssembly });
         }
