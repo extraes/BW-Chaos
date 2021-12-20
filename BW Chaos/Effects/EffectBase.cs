@@ -21,6 +21,7 @@ namespace BWChaos.Effects
             LAGGY = 1 << 3,
             HIDDEN = 1 << 4,
             DONT_SYNC = 1 << 5,
+            META = 1 << 6,
         }
 
         public string Name { get; }
@@ -80,6 +81,7 @@ namespace BWChaos.Effects
         public void Run()
         {
 #if DEBUG
+            // If there's already an instance of this effect, abort immediately, the new effect system creates a new instance when ran. only IMGUI uses this, so it shouldnt be possible under normal circumstances
             if (EffectHandler.AllEffects.Values.Contains(this))
             {
                 Chaos.Warn("The effect handler has an instance of this effect! This should not happen! Are you using IMGUI? Creating a new instance, running, then aborting!");
@@ -88,7 +90,9 @@ namespace BWChaos.Effects
                 return;
             }
 
+            // Logging for my debug :)
             Chaos.Log("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : "") + (autoCRMethod != null ? ", it has an AutoCoroutine named " + autoCRMethod.Name : ""));
+            // in case i forget to give durations to effects
             if (GetType().GetMethod(nameof(OnEffectEnd), BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) != null && Duration == 0)
                 Chaos.Warn("Effect " + Name + " is SUPPOSED to be a one off, yet it has an OnEffectEnd! What gives?");
 #endif
@@ -98,10 +102,9 @@ namespace BWChaos.Effects
             {
                 OnEffectStart();
                 MelonCoroutines.Start(CoHookNetworker());
+                AddToPrevEffects();
             }
             else coRunToken = MelonCoroutines.Start(CoRun());
-
-            AddToPrevEffects();
         }
 
         public void ForceEnd()
@@ -109,7 +112,7 @@ namespace BWChaos.Effects
             if (!hasFinished)
             {
                 if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken);
-                MelonCoroutines.Stop(coRunToken);
+                if (coRunToken != null) MelonCoroutines.Stop(coRunToken);
                 try { GlobalVariables.ActiveEffects.Remove(this); } catch { }
                 Active = false;
                 hasFinished = true;
@@ -135,6 +138,7 @@ namespace BWChaos.Effects
             _dataRecieved -= FilterNetworkData;
             OnEffectEnd();
             hasFinished = true;
+            AddToPrevEffects();
 #if DEBUG
             Chaos.Log(Name + " has finished running");
 #endif
@@ -167,7 +171,7 @@ namespace BWChaos.Effects
         {
             if (GlobalVariables.PreviousEffects.Count >= 7)
                 GlobalVariables.PreviousEffects.RemoveAt(0);
-            GlobalVariables.PreviousEffects.Add(this);
+            GlobalVariables.PreviousEffects.Add(Name);
         }
     }
 }

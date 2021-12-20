@@ -14,7 +14,7 @@ namespace BWChaos
         public static WatsonWsClient WatsonClient;
         public static List<EffectBase> ActiveEffects = new List<EffectBase>();
         public static List<EffectBase> CandidateEffects = new List<EffectBase>();
-        public static List<EffectBase> PreviousEffects = new List<EffectBase>();
+        public static List<string> PreviousEffects = new List<string>();
 
         public static GameObject WristChaosUI;
         public static GameObject OverlayChaosUI;
