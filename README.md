@@ -139,59 +139,61 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
 - 'Garble some textures' and 'Swap textures at random' lag the game when they start!
 
- - Well the game should've loaded on startup, but I guess the textures got nulled, so that didn't pan out. It's unfortunate how the world works sometimes, isn't it? Blame IL2.
+  - Well the game should've loaded the textures the use on startup, but I guess the textures got unloaded, so that didn't pan out. It's unfortunate how the world works sometimes, isn't it? Blame IL2.
 
 - Garble some textures has a chance to make the scene dark/a random color!
 
- - Yeah that's cause it randomizes the color of 20% of the materials in the game, and since it's 2021, it doesn't discriminate, so something it changes corresponds to the lighting of the scene. Are you telling me to discriminate? That's messed up, man. Shame on you.
+  - Yeah that's cause it randomizes the color of 20% of the materials in the game, and since it's 2021, it doesn't discriminate, so something it changes corresponds to the lighting of the scene. Are you telling me to discriminate? That's messed up, man. Shame on you.
 
 - 'Video Textures' lags my game when it's active!
 
- - I didn't have that issue but someone with a 1060 6G did, so it's 100% a ~~skill~~ GPU bound issue. It's a nice effect that I think is funny as fuck, but it does tax the GPU more than I'd like, so I had to mark it as LAGGY, no matter how much I would've loved to see it get used more. I guess get a new GPU or force disable it.
+  - I didn't have that issue but someone with a 1060 6G did, so it's 100% a ~~skill~~ GPU bound issue. It's a nice effect that I think is funny as fuck, but it does tax the GPU more than I'd like, so I had to mark it as LAGGY, no matter how much I would've loved to see it get used more. I guess get a new GPU or force disable it.
 
- - Also you should probably not spam it if you have less than 6G of VRAM, to be honest.
+  - Also you should probably not spam it if you have less than 6G of VRAM, to be honest.
 
 - The texture effects keep ballooning my VRAM usage! (Hi WNP!)
 
- - That's cause they set the texture of each mesh renderer they encounter, meaning they create a new Material for each object they hit. This is probably a memory leak, but it's a memory leak that's fixable by reloading the scene.
+  - That's cause they set the texture of each mesh renderer they encounter, meaning they create a new Material for each object they hit. This is probably a memory leak, but it's a memory leak that's fixable by reloading the scene.
 
- - Originally these effects loaded their textures and set the textures of each material they encounter, but that made them persist between scenes, and one of my goals with this mod is to make no changes that are not reversible via a scene change, so they create new materials which are deleted on scene change/reload.
+  - Originally these effects loaded their textures and set the textures of each material they encounter, but that made them persist between scenes, and one of my goals with this mod is to make no changes that are not reversible via a scene change, so they create new materials which are deleted on scene change/reload.
 
 - Vine boom sound effects keeps going after it ends! And it's inconsistent in what it *does* do!
 
- - It was a bitch to even do what it currently does, so count your blessings.
+  - It was a bitch to even do what it currently does, so count your blessings.
 
- - No, but for real, it doesn't look for inactive gameobjects, which I may change in the future.
+  - No, but for real, it doesn't look for inactive gameobjects, which I may change in the future.
+    
+    - Okay, it does now, so if it still plays vine booms after ending, then idk what to do
 
 - Does Get Fucking Doxxed show my real IP?
 
- - No, run it again and find out. It generates a random, yet valid, IP every time it's ran, with 4 segments each containing a number between 0 and 255. And then it does spinnies cause I thought it was funny. And then Vine boom sound effect, also, because I thought it was funny.
+  - No, run it again and find out. It generates a random, yet valid, IP every time it's ran, with 4 segments each containing a number between 0 and 255. And then it does spinnies cause I thought it was funny. And then Vine boom sound effect, also, because I thought it was funny.
 
 - The music effects are too loud/overwhelming!
 
- - They obey your music mixer volume setting, so decrease that and the music will go adios.
+  - They obey your music mixer volume setting, so decrease that and the music will go adios.
 
 - An effect doesn't work on the Oculus version of the game!
 
- - Please tell me what effect it is! Give me a log, or send me the first few lines of the error, where it says "[ERROR]" and the first few "at BWChaos.Effects..."
+  - Please tell me what effect it is! Give me a log, or send me the first few lines of the error, where it says "[ERROR]" and the first few "at BWChaos.Effects..."
 
- - I try to make the mod compatible between the Steam and Oculus versions, but I'm not Rich Uncle Pennybags, so I can't buy the game multiple times for the niche of people that use an Oculus copy, but if you help me test, then we can all sing Kumbaya.
+  - I try to make the mod compatible between the Steam and Oculus versions, but I'm not Rich Uncle Pennybags, so I can't buy the game multiple times for the niche of people that use an Oculus copy, but if you help me test, then we can all sing Kumbaya.
 
 - The Entanglement module doesn't work!
 
- - It only syncs the running of effects, not what those effects do. Yes, It's basic, but it's also, to my knowledge, the first mod to have its own entanglement module, so you can't expect it to be magic on the first go.
+  - It only syncs the running of effects, not what those effects do. Yes, It's basic, but it's also, to my knowledge, the first mod to have its own entanglement module, so you can't expect it to be magic on the first go.
 
- - That said, there is "proper" syncing planned, with effects able to send and recieve data over the wire.
+  - That said, there is "proper" syncing planned, with effects able to send and recieve data over the wire.
 
-   - As of writing, I'm working on per-effect syncing. If you think an effect could be synced but isn't, or should be synced differently, please tell me your ideas! (SpawnDogAds cannot be synced, it gets dog pics from a website, so I can't do much about that)
+     - As of writing, I'm working on per-effect syncing. If you think an effect could be synced but isn't, or should be synced differently, please tell me your ideas! (SpawnDogAds cannot be synced, it gets dog pics from a website, so I can't do much about that)
 
 - The remote voting process doesn't work!
 
- - Yeah. Enable it in preferences.
+  - Yeah. Enable it in preferences.
 
 - What do "Meta" effects do?
 
- - Meta does not refer to the company. Fuck Facebook. Meta refers to effects that act upon the mod itself or its effects, like Faster Effect Timer speeds up the timer, and Triple Threat runs 3 other effects.
+  - Meta does not refer to the company. Fuck Facebook. Meta refers to effects that act upon the mod itself or its effects, like Faster Effect Timer speeds up the timer, and Triple Threat runs 3 other effects.
 
 ### Credits
 
