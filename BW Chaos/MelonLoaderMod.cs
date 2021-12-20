@@ -37,6 +37,7 @@ namespace BWChaos
         public override void OnApplicationStart()
         {
             GlobalVariables.thisChaos = this; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
+            var allSW = Stopwatch.StartNew();
 
             #region Check datapath
 
@@ -75,6 +76,7 @@ namespace BWChaos
 
             #region Load effect resources
 
+            var resSW = Stopwatch.StartNew();
             Chaos.Log("Loading effect resources, please wait...");
             // Load the AssetBundle straight from memory to avoid copying unnecessary files to disk
             Assembly.UseEmbeddedResource("BWChaos.Resources.effectresources", bytes => GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(bytes));
@@ -92,28 +94,41 @@ namespace BWChaos
             Chaos.Log("Loading him");
             Assembly.UseEmbeddedResource("BWChaos.Resources.jevil", bytes => ModThatIsNotMod.CustomItems.LoadItemsFromBundle(AssetBundle.LoadFromMemory(bytes)));
 
+            resSW.Stop();
             Chaos.Log("Done loading effect resources");
 
             #endregion
 
             #region Initialize from MelonPrefs & init effects
 
+            Stopwatch effectSW = Stopwatch.StartNew();
             PopulateEffects();
+            effectSW.Stop();
+
+            var syncSW = Stopwatch.StartNew();
             if (Prefs.SyncEffects) Extras.EntanglementSyncHandler.Init();
+            syncSW.Stop();
+
+            var botSW = Stopwatch.StartNew();
             if (Prefs.EnableRemoteVoting)
             {
                 // Discord IDs are ulongs, twitch IDs are strings, so if it fails to parse, then its not a discord channel
-                //Prefs.isTwitch = !ulong.TryParse(Prefs.channelId, out ulong _); commented cause nothing fucking uses it
+                //Prefs.isTwitch = !ulong.TryParse(Prefs.channelId, out ulong _); commented cause nothing fucking uses it, the process can do it find on its own
                 StartBot();
             }
+            botSW.Stop();
 
             #endregion
 
-#if DEBUG
-            Chaos.Log($"Of {asmEffects.Count} total effects, {EffectHandler.AllEffects.Count} are present.");
-#endif
-
             BoneMenu.Register();
+
+            // go straight to loggerinstance because it lets me use pretty colors :^)
+            allSW.Stop();
+            LoggerInstance.Msg(ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.AllEffects.Count} to be used in Chaos.");
+            LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect initialization: {effectSW.ElapsedMilliseconds}ms");
+            LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect resource loading: {resSW.ElapsedMilliseconds}ms");
+            if (Prefs.SyncEffects) LoggerInstance.Msg(ConsoleColor.Blue, $" - Entanglement module find & start: {syncSW.ElapsedMilliseconds}ms");
+            if (Prefs.EnableRemoteVoting) LoggerInstance.Msg(ConsoleColor.Blue, $" - Remote voter unpack & start: {botSW.ElapsedMilliseconds}ms");
         }
 
         public override void OnApplicationQuit()
@@ -200,6 +215,7 @@ namespace BWChaos
             }
             if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 3 * (gap + height), width * 2, height), "Start server"))
             {
+                // not my fault if the user doesnt have entanglement. dont use debug builds maybe lol
                 Assembly entanglementAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.GetName().Name == "Entanglement");
                 entanglementAssembly.GetType("Entanglement.Network.Server").GetMethod("StartServer", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
             }
@@ -261,10 +277,13 @@ namespace BWChaos
             {
                 var buffer = new byte[4096];
 
+                // holy fucking shit i love using
+                // no but fr zip the bot because it makes it significantly (~40mb) smaller, even with the dogwater deflate algorithm, and do all this in memory to avoid writing to disk
                 using (var zipFile = new ZipFile(stream))
                 using (var zipStream = zipFile.GetInputStream(zipFile[0]))
                 using (Stream fsOut = File.Create(exePath))
                     StreamUtils.Copy(zipStream, fsOut, buffer);
+                // using () using () using () using () using () using () using () using () using () 
             }
 
             #endregion
@@ -278,6 +297,7 @@ namespace BWChaos
             botProcess.StartInfo.CreateNoWindow = true;
             botProcess.Start();
 
+            // the mod is the client because trying to create a WWS server didnt work, but a client did for some reason. mono moment i guess.
             GlobalVariables.WatsonClient = new WatsonWsClient("127.0.0.1", 8827, false);
             GlobalVariables.WatsonClient.ServerConnected += ClientConnectedToServer;
             GlobalVariables.WatsonClient.ServerDisconnected += ClientDisconnectedFromServer;
