@@ -38,21 +38,24 @@ namespace BWChaos
                 ecat.CreateBoolElement("Force enable/disable", Color.white, EffectHandler.AllEffects.ContainsKey(effect.Name), addEffect =>
                 {
 #if DEBUG
-                    MelonLogger.Msg("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is " + (EffectHandler.AllEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
+                    Chaos.Log("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is " + (EffectHandler.AllEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
 #endif
                     if (addEffect)
                     {
                         if (!EffectHandler.AllEffects.ContainsKey(effect.Name))
                         {
                             EffectHandler.AllEffects.Add(effect.Name, effect);
-                            if(!Chaos.IsEffectViable(effect.Types)) Prefs.ForceEnabledEffects.Add(effect.Name);
+                            if (!Chaos.IsEffectViable(effect.Types)) Prefs.ForceEnabledEffects.Add(effect.Name);
                         }
                     }
                     else
                     {
-                        effect.ForceEnd();
+                        foreach (var e in GlobalVariables.ActiveEffects)
+                        {
+                            if (e.Name == effect.Name) e.ForceEnd();
+                        }
                         EffectHandler.AllEffects.Remove(effect.Name);
-                        if(Chaos.IsEffectViable(effect.Types)) Prefs.ForceDisabledEffects.Add(effect.Name);
+                        if (Chaos.IsEffectViable(effect.Types)) Prefs.ForceDisabledEffects.Add(effect.Name);
                     }
                     (ecat.elements[1] as BoolElement).SetValue(EffectHandler.AllEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
                 });
@@ -111,6 +114,26 @@ namespace BWChaos
                 MelonPreferences.SetEntryValue<bool>("BW_Chaos", "useSteamProfileEffects", b);
                 MelonPreferences.Save();
                 Chaos.LiveUpdateEffects();
+            });
+
+            if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.UseMetaEffects, b =>
+            {
+                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "useMetaEffects", b);
+                MelonPreferences.Save();
+                Chaos.LiveUpdateEffects();
+            });
+
+            if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.ShowWristUI, b =>
+            {
+                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "showWristUI", b);
+                MelonPreferences.Save();
+                
+            });
+
+            if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
+            {
+                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "showCandidatesOnScreen", b);
+                MelonPreferences.Save();
             });
 
             #endregion
