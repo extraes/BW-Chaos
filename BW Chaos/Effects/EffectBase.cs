@@ -5,6 +5,7 @@ using System.Reflection;
 using System.Linq;
 using BWChaos.Extras;
 using System;
+using System.Collections.Generic;
 
 namespace BWChaos.Effects
 {
@@ -31,12 +32,29 @@ namespace BWChaos.Effects
 
         public bool Active { get; private set; }
         public float StartTime { get; private set; }
+        // https://stackoverflow.com/questions/5851497/static-fields-in-a-base-class-and-derived-classes
+        //private static Dictionary<string, int> indices = new Dictionary<string, int>();
+        //public int EffectIndex
+        //{
+        //    get
+        //    {
+        //        return indices.ContainsKey(this.GetType().Name)
+        //               ? indices[this.GetType().Name]
+        //               : default;
+        //    }
+
+        //    set
+        //    {
+        //        indices[this.GetType().Name] = value;
+        //    }
+        //}
+
         public static Action<string, string> _dataRecieved; // for internal use by the base class; format is (name, data); both are strings instead of bytes because fuck you its easier that way
         public static Action<string, string> _sendData; // for internal use by base class and sync handler
         public bool isNetworked = false;
         public object autoCRToken;
         private readonly MethodInfo autoCRMethod;
-
+        
         private object coRunToken;
         private bool hasFinished;
 
@@ -101,6 +119,7 @@ namespace BWChaos.Effects
             if (Duration == 0)
             {
                 OnEffectStart();
+                // let one-off effects send and recieve data for 5 seconds because otherwise they wont get to send anything
                 MelonCoroutines.Start(CoHookNetworker());
                 AddToPrevEffects();
             }
@@ -163,7 +182,7 @@ namespace BWChaos.Effects
         private IEnumerator CoHookNetworker()
         {
             _dataRecieved += FilterNetworkData;
-            yield return new WaitForSecondsRealtime(5); // let effects send and recieve data for 5 seconds
+            yield return new WaitForSecondsRealtime(5);
             _dataRecieved -= FilterNetworkData;
         }
 
