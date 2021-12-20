@@ -68,7 +68,7 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 - channel: The name of the Twitch channel or Discord channel for the bot to listen to, assuming enableRemoteVoting is true
 
-  - The mod will automatically determine if this is a Twitch or Discord channel and will start the proper bot accordingly. It will fail if your Twitch name is a bunch of numbers though.
+  - The mod will automatically determine if this is a Twitch or Discord channel and will start the proper bot accordingly. It will fail if your Twitch name is a bunch of numbers though. Sucks for you I guess.
 
 - randomEffectOnNoVotes: Determines if the mod will run effects when there were no votes.
 
@@ -90,6 +90,8 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 - enableRemoteVoting: Enables taking votes from Discord/Twitch.
 
+- showWristUI: Determines whether or not the list of previous effects and voting timer should appear on your wrist.
+
 - showCandidatesOnScreen: Shows the candidate effects on screen, with the numbers that need to be voted for each one.
 
 - sendCandidatesInChannel: Only available to Discord remote voting. It will send a list of the effects that users can vote for into the specified channel.
@@ -102,7 +104,9 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 The mod is open source, so if you see an effect and want to know what it does, just go to the [GitHub repository](https://github.com/extraes/BW-Chaos/tree/rewrite/BW%20Chaos/Effects).
 
-Odds are it's in either the Misc or Player folders.
+Odds are it's in either the Misc or Player folders, and the file may have a different name than ingame.
+
+If an effect is laggy and not marked as such, tell me and I'll try to optimize it or I'll mark it as laggy. Tell me your specs too, please.
 
 ## Crashes/errors
 
@@ -111,7 +115,7 @@ If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEW
 If you somehow find a way to break the Twitch bot or Discord bot, or hack them in some way, please tell me so I can ~~troll people before I~~ fix it.
 
 ### Known issues/FAQ
-##### I don't know if these questions will be frequently asked, but I've got them here just in case
+#### I don't know if these questions will be frequently asked, but I've got them here just in case
 
 - Errors appearing in the console on a scene transition (changing level)
 
@@ -173,9 +177,25 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
  - I try to make the mod compatible between the Steam and Oculus versions, but I'm not Rich Uncle Pennybags, so I can't buy the game multiple times for the niche of people that use an Oculus copy, but if you help me test, then we can all sing Kumbaya.
 
+- The Entanglement module doesn't work!
+
+ - It only syncs the running of effects, not what those effects do. Yes, It's basic, but it's also, to my knowledge, the first mod to have its own entanglement module, so you can't expect it to be magic on the first go.
+
+ - That said, there is "proper" syncing planned, with effects able to send and recieve data over the wire.
+
+   - As of writing, I'm working on per-effect syncing. If you think an effect could be synced but isn't, or should be synced differently, please tell me your ideas! (SpawnDogAds cannot be synced, it gets dog pics from a website, so I can't do much about that)
+
+- The remote voting process doesn't work!
+
+ - Yeah. Enable it in preferences.
+
+- What do "Meta" effects do?
+
+ - Meta does not refer to the company. Fuck Facebook. Meta refers to effects that act upon the mod itself or its effects, like Faster Effect Timer speeds up the timer, and Triple Threat runs 3 other effects.
+
 ### Credits
 
-- Code modders: occasional help and ideas (shoutouts to trev for rewriting my original code, creating a better groundwork to base Chaos off of)
+- Code modders: occasional help and ideas (shoutouts to trev for rewriting my original code, creating a better foundation to base Chaos off of)
 
 - Sychke: Testing the Twitch bot and providing much needed testing and feedback.
 
@@ -185,7 +205,7 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
 - GS: IDK if he wants to be credited but he helped me test earlier versions of the mod, on both codebases Legacy and Rewrite, as well as helping me test Entanglement syncing.
 
-- Chap: Making ModThatIsNotMod, actually nah screw that guy for making his namespace so damn long.
+- ~~Chap: Making ModThatIsNotMod~~ actually nah screw that guy for making his namespace so damn long.
 
 - MelonLoader Team: Making a great framework for mod development, including persistent data/preferences, coroutine running, IL2CPP type injection, automatic harmony instance creation and patching, and of course, being the first universal Unity modloader that could mods in IL2CPP games. Oh and, including a zip file library that I could ~~yoink~~ use.
 
