@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# Typescript and nodejs development
+ChaosStreamerServer/node-modules
+ChaosStreamerServer/src/config.json
+ChaosStreamerServer/build
+*config.json*
+
 # User-specific files
 *.rsuser
 *.suo
