@@ -20,7 +20,7 @@ namespace BWChaos
         public const string Name = "BWChaos";
         public const string Author = "extraes, trev";
         public const string Company = null;
-        public const string Version = "2.1.0";
+        public const string Version = "2.2.0";
         public const string DownloadLink = null;
     }
 
@@ -247,9 +247,9 @@ namespace BWChaos
 
         private void ClientReceiveMessage(object sender, MessageReceivedEventArgs e)
         {
-            string[] splitMessage = Encoding.UTF8.GetString(e.Data).Split(':');
+            string[] splitMessage = Utilities.Argsify(Encoding.UTF8.GetString(e.Data), ':');
             string messageType = splitMessage[0];
-            string messageData = string.Join(":", splitMessage?.Skip(1)?.ToArray()) ?? string.Empty;
+            string messageData = splitMessage.Length == 1 ? "" : splitMessage[1];
             switch (messageType)
             {
                 case "error":
@@ -259,6 +259,13 @@ namespace BWChaos
                 case "log":
                     Chaos.Log(messageData);
                     break;
+                case "web":
+#if DEBUG
+                    Chaos.Log("Recieved from webserver: " + messageData);
+#endif
+                    WebResponseHandler.Handle(messageData.Trim());
+                    break;
+
                 default:
                     Error("UNKNOWN MESSAGE TYPE: " + messageType);
                     break;
