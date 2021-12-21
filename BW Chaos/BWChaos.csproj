@@ -194,6 +194,7 @@
     <Compile Include="WatsonWebsocket\Statistics.cs" />
     <Compile Include="WatsonWebsocket\WatsonWebsocket.cs" />
     <Compile Include="Utilities.cs" />
+    <Compile Include="WebResponseHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\chaos_ui_elements" />

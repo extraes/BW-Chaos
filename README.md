@@ -233,6 +233,10 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
 
 ### Changelog
 
+- New in 2.1.1
+
+  - Apparently VerifyLoaderVersion is bunk. Whatever.
+
 - New in 2.1.0
 
   - Fix various things for MelonLoader 0.5, making 0.5 the new minimum version for Chaos.
