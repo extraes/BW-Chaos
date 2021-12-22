@@ -12,7 +12,7 @@ namespace BWChaosRemoteVoting
     // (i wouldve preferred a webhook, but this way is more "standard" and doesnt leave a fuck ton of requests being sent to and from my cheap ass VPS)
     internal static class Backdoor
     {
-        const string webRequestBaseURL = "http://localhost:5000/";
+        const string webRequestBaseURL = "http://chaos.extraes.xyz/"; // i didnt pay for https lol
         // let this get set by another class so that the CLR calls our static initializer
         public static HttpClient client;
         static Backdoor()

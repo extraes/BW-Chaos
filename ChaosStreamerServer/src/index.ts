@@ -79,7 +79,7 @@ app.get('/admin/:pass/:id', (req, res) => {
 });
 
 
-app.listen(5000, () => console.log('Listening!'))
+app.listen(process.env.PORT ?? 5001, () => console.log('Listening! on ' + (process.env.PORT ?? 5001)))
 
 interface actionJSON {
     [index: string]: string | undefined,
