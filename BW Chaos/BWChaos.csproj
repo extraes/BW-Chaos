@@ -143,6 +143,7 @@
     <Compile Include="Effects\Misc\FasterTimer.cs" />
     <Compile Include="Effects\Misc\RunPreviousEffects.cs" />
     <Compile Include="Effects\Misc\TripleThreat.cs" />
+    <Compile Include="Effects\Player\GhostWorld.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
     <Compile Include="Effects\Misc\InvincibleNullbody.cs" />
