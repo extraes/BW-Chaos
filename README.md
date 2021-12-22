@@ -233,6 +233,10 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
 
 ### Changelog
 
+- New in 2.2.0
+
+  - Something something webserver. Just know that if you're a streamer, if I've got your number, ***I've got your fucking number.***
+
 - New in 2.1.1
 
   - Apparently VerifyLoaderVersion is bunk. Whatever.

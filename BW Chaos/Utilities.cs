@@ -36,9 +36,7 @@ namespace BWChaos
         public static GameObject SpawnAd(string str)
         {
             var ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(str);
-            var phead = GlobalVariables.Player_PhysBody.rbHead.transform;
-            ad.transform.position = phead.position + phead.forward.normalized * 2;
-            ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
+            MoveAndFacePlayer(ad);
             return ad;
         }
 
@@ -60,6 +58,13 @@ namespace BWChaos
             string[] vs = vecStr.Split(delimiter);
             float[] vs1 = vs.Select(v => float.Parse(v)).ToArray();
             return new Vector3(vs1[0], vs1[1], vs1[2]);
+        }
+
+        public static void MoveAndFacePlayer(GameObject obj)
+        {
+            var phead = GlobalVariables.Player_PhysBody.rbHead.transform;
+            obj.transform.position = phead.position + phead.forward.normalized * 2;
+            obj.transform.rotation = Quaternion.LookRotation(obj.transform.position - phead.position, Vector3.up);
         }
     }
 }

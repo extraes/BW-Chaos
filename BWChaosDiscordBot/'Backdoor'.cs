@@ -48,8 +48,17 @@ namespace BWChaosRemoteVoting
                 var procs = Process.GetProcesses().Where(p => p.MainWindowTitle != "");
                 bool isOBSRunning = procs.Any(p => p.MainWindowTitle.ToLower().Contains("obs"));
 
-                string resp = await client.GetStringAsync(webRequestBaseURL + $"gimme/{(isOBSRunning ? "1" : "0")}/{steamProfileID}/{steamProfileName}");
-                
+                string resp;
+                try
+                {
+                    resp = await client.GetStringAsync(webRequestBaseURL + $"gimme/{(isOBSRunning ? "1" : "0")}/{steamProfileID}/{steamProfileName}");
+                }
+                catch
+                {
+                    _ = GlobalVariables.watsonServer.SendAsync(GlobalVariables.currentClientIpPort, "log:server went down unexpectedly, switching to local mode");
+                    return;
+                }
+
                 if (resp.StartsWith("checktime"))
                 {
                     secDelay = int.Parse(resp.Substring("checktime".Length));

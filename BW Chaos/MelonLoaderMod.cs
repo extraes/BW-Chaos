@@ -180,6 +180,7 @@ namespace BWChaos
         {
             foreach (EffectBase effect in GlobalVariables.ActiveEffects)
                 effect.OnEffectUpdate();
+            WebResponseHandler.Callback(); // bitchass unity doesnt like me doing shit from the websocket method so here we are
         }
 
         // If MelonPreferences.cfg is saved while the game is open, make sure the changes are reflected in real time.
@@ -253,7 +254,7 @@ namespace BWChaos
             switch (messageType)
             {
                 case "error":
-                    Error("An error has occured within the Discord bot!");
+                    Error("An error has occured within the remote voting process!");
                     Error(messageData);
                     break;
                 case "log":
@@ -263,7 +264,7 @@ namespace BWChaos
 #if DEBUG
                     Chaos.Log("Recieved from webserver: " + messageData);
 #endif
-                    WebResponseHandler.Handle(messageData.Trim());
+                    WebResponseHandler.GotData(messageData.Trim());
                     break;
 
                 default:
