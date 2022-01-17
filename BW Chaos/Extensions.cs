@@ -44,6 +44,8 @@ namespace BWChaos
             return InHierarchyOf(t, parentName);
         }
 
+        public static bool IsChildOfRigManager(this Transform t) => InHierarchyOf(t, "[RigManager (Default Brett)]");
+
         public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> fun)
         {
             foreach (T item in sequence) fun(item);
@@ -90,11 +92,28 @@ namespace BWChaos
             return path;
         }
 
-        public static string[] Serialize(this Vector3 vec, int decimals, char delimiter = ',')
+        [Obsolete("Use " + nameof(ToBytes) + " and send Vector3s as bytes instead")]
+        public static string[] Stringify(this Vector3 vec, int decimals, char delimiter = ',')
         {
             float[] floats = new float[] { vec.x, vec.y, vec.z, };
             string[] strings = floats.Select(f => Math.Round(f, decimals).ToString()).ToArray();
             return strings;
+        }
+
+        public static byte[] ToBytes(this Vector3 vec)
+        {
+            float[] floats = new float[] { vec.x, vec.y, vec.z, };
+            return floats.Select(f => BitConverter.GetBytes(f)).ToArray().Flatten();
+        }
+
+        public static byte[] Flatten(this byte[][] arrarr)
+        { //                           DAMN DANIEL ^
+            IEnumerable<byte> bytes = new byte[] { }; // use ienumerable to avoid recasting constantly
+            foreach (var item in arrarr)
+            {
+                bytes = bytes.Concat(item);
+            }
+            return bytes.ToArray();
         }
 
         public static string Join<T>(this IEnumerable<T> seq, string delim = ",")

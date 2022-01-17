@@ -44,7 +44,7 @@ namespace BWChaos.Sync
             }
             
             // send data
-            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { effectName = effect.Name, syncData = "start" });
+            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { type = EffectBase.NetMsgType.START, effectIndex = 0, syncData = Encoding.UTF8.GetBytes(effect.Name) });
             ModuleLogger.Msg("Telling Entanglement to sync effect: " + effect.Name);
             Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
@@ -55,10 +55,10 @@ namespace BWChaos.Sync
         }
 
 
-        private static void SendEffectData(string name, string data)
+        private static void SendEffectData(EffectBase.NetMsgType msgType, byte index, byte[] data)
         {
             if (Node.activeNode.connectedUsers.Count == 0) return;
-            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { effectName = name, syncData = data });
+            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { type = msgType, effectIndex = index, syncData = data });
             Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
     }
@@ -73,7 +73,9 @@ namespace BWChaos.Sync
             var cmd = data as ChaosMessageData;
 
             byte[] bytes = ChaosSyncHandler.thisVersion
-                           .Concat(Encoding.UTF8.GetBytes(cmd.effectName+ ":" + cmd.syncData)).ToArray();
+                           .Concat(new byte[] { (byte)cmd.type, cmd.effectIndex })
+                           .Concat(cmd.syncData)
+                           .ToArray();
 
             var msg = new NetworkMessage
             {
@@ -93,39 +95,42 @@ namespace BWChaos.Sync
             // Makes sure same bw chaos version
             var msgVer = message.messageData.Take(3);
             if (!msgVer.SequenceEqual(ChaosSyncHandler.thisVersion))
-                ModuleLogger.Msg("BW Chaos version mismatch!!! Expected: " + string.Join(",", ChaosSyncHandler.thisVersion) + ". Got: " + string.Join(",", msgVer));
+                ModuleLogger.Msg("BW Chaos version mismatch!!! Expected: " + string.Join(",", ChaosSyncHandler.thisVersion) + ". Got: " + string.Join(",", msgVer) + "!!! This causes a mismatch with effect syncing! Do not expect this to function properly!");
 
+            EffectBase.NetMsgType type = (EffectBase.NetMsgType)message.messageData.Skip(3).First();
+            byte idx = message.messageData.Skip(4).First();
+            byte[] data = message.messageData.Skip(5).ToArray();
 
-            string strData = Encoding.UTF8.GetString(message.messageData.Skip(3).ToArray());
-            string[] args = Utilities.Argsify(strData, ':'); // [name, data]
 #if DEBUG
             // DONT CARE ABOUT SENDER LOL BUT LOG IT ANYWAY
-            ModuleLogger.Msg(sender.ToString() + " told us " + strData);
+            ModuleLogger.Msg(sender.ToString() + " told us " + data);
 #endif
 
-            switch (args[1])
+            switch (type)
             {
-                case "start":
-                    if (EffectHandler.AllEffects.TryGetValue(args[0], out EffectBase eObj))
+                case EffectBase.NetMsgType.START:
+                    var eName = Encoding.UTF8.GetString(data);
+                    if (EffectHandler.AllEffects.TryGetValue(eName, out EffectBase eObj))
                     {
                         var eToRun = (EffectBase)Activator.CreateInstance(eObj.GetType());
                         eToRun.isNetworked = true;
                         eToRun.Run();
                     }
                     else
-                        Utilities.SpawnAd("'" + args[0] + "' isn't an effect you have, so it won't run, just enjoy the show!");
+                        Utilities.SpawnAd("'" + eName + "' isn't an effect you have, so it won't run, just enjoy the show!");
                     break;
 
                 default:
-                    EffectBase._dataRecieved?.Invoke(args[0], args[1]);
+                    EffectBase._dataRecieved?.Invoke(type, idx, data);
                     break;
             }
         }
     }
     public class ChaosMessageData : NetworkMessageData
     {
-        public string effectName;
-        public string syncData;
+        public EffectBase.NetMsgType type;
+        public byte effectIndex;
+        public byte[] syncData;
     }
 
     //public class ChaosMessageData : INetworkSerializable

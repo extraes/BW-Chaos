@@ -6,6 +6,7 @@ using System.Linq;
 using BWChaos.Extras;
 using System;
 using System.Collections.Generic;
+using System.Text;
 
 namespace BWChaos.Effects
 {
@@ -25,6 +26,14 @@ namespace BWChaos.Effects
             META = 1 << 6,
         }
 
+        public enum NetMsgType : byte
+        {
+            STRING = 0,
+            BYTEARRAY = 1,
+            RAWBYTES = 2,
+            START = 3,
+        }
+
         public string Name { get; }
         public int Duration { get; }
         public EffectTypes Types { get; }
@@ -33,24 +42,28 @@ namespace BWChaos.Effects
         public bool Active { get; private set; }
         public float StartTime { get; private set; }
         // https://stackoverflow.com/questions/5851497/static-fields-in-a-base-class-and-derived-classes
-        //private static Dictionary<string, int> indices = new Dictionary<string, int>();
-        //public int EffectIndex
-        //{
-        //    get
-        //    {
-        //        return indices.ContainsKey(this.GetType().Name)
-        //               ? indices[this.GetType().Name]
-        //               : default;
-        //    }
+        private static Dictionary<string, byte> indices = new Dictionary<string, byte>();
+        private static byte nextIndex;
+        public byte EffectIndex
+        {
+            get { return indices[this.GetType().Name]; }
+            set { indices[this.GetType().Name] = value; }
+        }
+        private byte myIndex; // cache as a byte so i dont have GetType called every time i access it
 
-        //    set
-        //    {
-        //        indices[this.GetType().Name] = value;
-        //    }
-        //}
-
-        public static Action<string, string> _dataRecieved; // for internal use by the base class; format is (name, data); both are strings instead of bytes because fuck you its easier that way
-        public static Action<string, string> _sendData; // for internal use by base class and sync handler
+        /// <summary>
+        /// Fired by Entanglement module and used by base class to fire override. The format is (type, effect index, data)
+        /// </summary>
+        public static Action<NetMsgType, byte, byte[]> _dataRecieved;
+        /// <summary>
+        /// Fired by base class. Use SendNetworkData instead.
+        /// Format is (type, index, data)
+        /// </summary>
+        public static Action<NetMsgType, byte, byte[]> _sendData; // for internal use by base class and sync handler
+        /// <summary>
+        /// Fired by base class. Use SendNetworkData instead. The format is (type, effect index, data)
+        /// </summary>
+        public static Action<NetMsgType, byte, byte[]> _sendBytes;
         public bool isNetworked = false;
         public object autoCRToken;
         private readonly MethodInfo autoCRMethod;
@@ -63,6 +76,7 @@ namespace BWChaos.Effects
             Name = eName;
             Duration = eDuration;
             Types = eTypes;
+            
             // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
             autoCRMethod = (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
                            where method.ReturnType == typeof(IEnumerator) &&
@@ -83,6 +97,22 @@ namespace BWChaos.Effects
 #endif
         }
 
+        private void GetIndex()
+        {
+
+            if (!indices.ContainsKey(this.GetType().Name))
+            {
+#if DEBUG
+                Chaos.Log($"Gave type {this.GetType().Name} new index {nextIndex + 1}");
+#endif
+                EffectIndex = nextIndex++;
+            }
+#if DEBUG
+            else Chaos.Log($"Created new instance of {this.GetType().Name} with preexisting index {EffectIndex}");
+#endif
+            myIndex = EffectIndex;
+        }
+
 #if DEBUG
         ~EffectBase()
         {
@@ -91,7 +121,15 @@ namespace BWChaos.Effects
         }
 #endif
 
-        public virtual void HandleNetworkMessage(string data) { Chaos.Warn($"This effect '{Name}' sends data but it doesn't receive it! Why?"); } // make sure i dont get caught lacking
+        // you may think "extraes, its excessive to have this many overrides!"
+        // but i think this makes it easier to program. unironically
+        // because you can send a string and recieve it through an override and do the same with bytes
+        // like sending an obj name and then its position, because its horribly inefficient to send positions as strings
+        // so you can take the string and the position and assume it gets taken normally
+        // because its sorted in the "backend" of the base class
+        public virtual void HandleNetworkMessage(string data) { Chaos.Warn($"This effect '{Name}' sends string data but it doesn't receive it! Why?"); } // make sure i dont get caught lacking
+        public virtual void HandleNetworkMessage(byte[] data) { Chaos.Warn($"This effect '{Name}' sends bytes but it doesn't receive it! Why?"); } // make sure i dont get caught lacking
+        public virtual void HandleNetworkMessage(byte[][] data) { Chaos.Warn($"This effect '{Name}' sends bytes arrays but it doesn't receive it! Why?"); } // make sure i dont get caught lacking
         public virtual void OnEffectStart() { }
         public virtual void OnEffectUpdate() { }
         public virtual void OnEffectEnd() { }
@@ -111,7 +149,7 @@ namespace BWChaos.Effects
             // Logging for my debug :)
             Chaos.Log("Running effect " + Name + (Duration == 0 ? ", it is a one-off" : "") + (autoCRMethod != null ? ", it has an AutoCoroutine named " + autoCRMethod.Name : ""));
             // in case i forget to give durations to effects
-            if (GetType().GetMethod(nameof(OnEffectEnd), BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) != null && Duration == 0)
+            if (this.GetType().GetMethod(nameof(OnEffectEnd), BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) != null && Duration == 0)
                 Chaos.Warn("Effect " + Name + " is SUPPOSED to be a one off, yet it has an OnEffectEnd! What gives?");
 #endif
             if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken); // there can only be one autocr at a time
@@ -163,22 +201,75 @@ namespace BWChaos.Effects
 #endif
         }
 
-        private void FilterNetworkData(string name, string data)
+        private void FilterNetworkData(NetMsgType type, byte idx, byte[] data)
         {
 #if DEBUG
-            Chaos.Log($"Recieved effect data destined for '{name}' -> {data}");
+            Chaos.Log($"Recieved a {type} message with {data.Length} bytes destined for effect with index {idx}");
 #endif
-            if (name == Name) HandleNetworkMessage(data);
+            if (idx == myIndex)
+            {
+                switch (type)
+                {
+                    case NetMsgType.STRING:
+                        HandleNetworkMessage(Encoding.ASCII.GetString(data));
+                        break;
+                    case NetMsgType.BYTEARRAY:
+                        HandleNetworkMessage(Utilities.SplitBytes(data));
+                        break;
+                    case NetMsgType.RAWBYTES:
+                        HandleNetworkMessage(data);
+                        break;
+#if DEBUG
+                    case NetMsgType.START:
+                        Chaos.Warn($"Recieved {nameof(NetMsgType)}.{nameof(NetMsgType.START)}! This should not be possible! Recheck the Entangle module!");
+                        break;
+#endif
+                    default:
+                        Chaos.Warn($"Unrecognized {nameof(NetMsgType)}: {type}");
+                        break;
+                }
+            }
         }
 
         protected void SendNetworkData(string data)
         {
 #if DEBUG
-            Chaos.Log($"Effect {Name} is sending data {data}");
+            Chaos.Log($"Effect {Name} is sending string data - '{data}'");
 #endif
-            _sendData?.Invoke(Name, data);
+            _sendData?.Invoke(NetMsgType.STRING, myIndex, Encoding.ASCII.GetBytes(data));
         }
-        
+
+        /// <summary>
+        /// This is the only method to get a summary because using bytes in this way is playing with fire. Do not use the 255/0xFF byte.
+        /// Debug builds have a check for 255.
+        /// </summary>
+        /// <param name="data"></param>
+        protected void SendNetworkData(params byte[][] data)
+        {
+#if DEBUG
+            Chaos.Log($"Effect {Name} is sending data {data.Length} byte arrays");
+#endif
+
+            // for the sake of reducing complexity, let me send and recieve byte arrays separated
+            var bytesJoined = Utilities.JoinBytes(data);
+
+            _sendBytes?.Invoke(NetMsgType.BYTEARRAY, myIndex, bytesJoined);
+        }
+
+        /// <summary>
+        /// This is the only method to get a summary because using bytes in this way is playing with fire. Do not use the 255/0xFF byte.
+        /// Debug builds have a check for 255.
+        /// </summary>
+        /// <param name="data"></param>
+        protected void SendNetworkData(byte[] data)
+        {
+#if DEBUG
+            Chaos.Log($"Effect {Name} is sending {data.Length} bytes");
+#endif
+
+            _sendBytes?.Invoke(NetMsgType.RAWBYTES, myIndex, data);
+        }
+
         private IEnumerator CoHookNetworker()
         {
             _dataRecieved += FilterNetworkData;
