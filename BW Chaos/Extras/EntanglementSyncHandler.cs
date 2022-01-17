@@ -23,7 +23,7 @@ namespace BWChaos.Extras
 
             if (entanglementAssembly == null)
             {
-                Utilities.SpawnAd("Entanglement wasn't found! Is it installed?");
+                try { Utilities.SpawnAd("Entanglement wasn't found! Is it installed?"); } catch { }
                 throw new DllNotFoundException("Couldn't find Entanglement!");
             }
 
