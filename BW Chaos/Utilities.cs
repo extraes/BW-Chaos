@@ -110,24 +110,46 @@ namespace BWChaos
             obj.transform.rotation = Quaternion.LookRotation(obj.transform.position - phead.position, Vector3.up);
         }
 
+
+        /* Input: [
+         *      [1,2,3,4,5,6,7]
+         *      [2,3,4,5,6,7,8]
+         * ]
+         * Output: [
+         *      2,7+3,14+3  <- header, says where to split
+         *      1,2,3,4,5,6,7,
+         *      2,3,4,5,6,7,8
+         * ]
+         */
         public static byte[] JoinBytes(byte[][] bytess, byte delim = 255)
         {
             //todo: make this declare the cut indices at the start of the array
             // bytes.Length - 1 because you dont put a delim at the end (unless youre weird i guess)
+            byte arrayCount = (byte)bytess.Length;
+            List<ushort> indices = new List<ushort>(bytess.Length - 1);
+            int definedLengthSum = 0;
             byte[] bytesJoined = new byte[(bytess.Length - 1) + bytess.Sum(b => b.Length)];
+            // need to get the indices beforehand to compose the header
+            foreach(byte[] arr in bytess) {
+                definedLengthSum += arr.Length;
+                indices.Add((ushort)(1 + definedLengthSum + bytess.Length));
+            }
+            foreach(ushort idx in indices) Console.WriteLine(idx);
 
+
+            //todo: conform to new specification
             int offset = 0;
             for (int i = 0; i < bytess.Length; i++)
             {
                 Buffer.BlockCopy(bytess[i], 0, bytesJoined, offset, bytess[i].Length);
                 
-#if DEBUG
-                for (int dT = offset; dT < bytess[i].Length + offset; dT++)
-                {
-                    if (bytesJoined[dT] == delim)
-                        Chaos.Error($"Byte in bytesJoined at index {dT} (from start pos {i} to end pos {bytess[i].Length + offset}) is the same as the deilimiter byte ({delim})!!! This is bad!!!!!");
-                }
-#endif
+// #if DEBUG
+//                 for (int dT = offset; dT < bytess[i].Length + offset; dT++)
+//                 {
+//                     if (bytesJoined[dT] == delim)
+//                         Chaos.Error($"Byte in bytesJoined at index {dT} (from start pos {i} to end pos {bytess[i].Length + offset}) is the same as the deilimiter byte ({delim})!!! This is bad!!!!!");
+//                 }
+// #endif
 
                 if (offset + bytess[i].Length < bytesJoined.Length)
                 {
@@ -138,19 +160,33 @@ namespace BWChaos
 
             return bytesJoined;
         }
-
+        
         public static byte[][] SplitBytes(byte[] bytes, byte delim = 255)
         {
+            // Grab data from the header
+            int splitsCount = (int)bytes[0];
             List<int> splitIndices = new List<int>();
-
-            // loop through the array to find the delim bytes
-            for (int i = 0; i < bytes.Length; i++)
-            {
-                // add (i + 1) because thats where the next array should start, not on the delim
-                if (bytes[i] == delim) splitIndices.Add(i + 1);
+            for(int i = 0; i < splitsCount; i++) {
+                // add 1 to skip the byte that says how many split indicies there are
+                ushort idx = BitConverter.ToUInt16(bytes, 1 + i * sizeof(ushort));
+                splitIndices.Add((int)idx);
             }
             // add one last one idx otherwise itll think the end is the second to last segment
             splitIndices.Add(bytes.Length + 1);
+
+#if true
+            Console.WriteLine($"There are {splitsCount} indices. They are: ");
+            foreach(int idx in splitIndices) Console.WriteLine(idx);
+#endif
+
+            // // loop through the array to find the delim bytes
+            // for (int i = 0; i < bytes.Length; i++)
+            // {
+            //     // add (i + 1) because thats where the next array should start, not on the delim
+            //     if (bytes[i] == delim) splitIndices.Add(i + 1);
+            // }
+            // // add one last one idx otherwise itll think the end is the second to last segment
+            // splitIndices.Add(bytes.Length + 1);
 
             // dont overallocate *this* array, and avoid using List cause arrays feel smarter
             byte[][] res = new byte[splitIndices.Count][];
@@ -164,7 +200,9 @@ namespace BWChaos
                 // dont overallocate
                 byte[] arr = new byte[len];
                 // copy the bytes
+                Console.WriteLine($"Copying {len} bytes from index {lastIdx} to {thisIdx}");
                 Buffer.BlockCopy(bytes, lastIdx, arr, 0, len);
+
 
                 // save our changes to the array 
                 res[i] = arr;
