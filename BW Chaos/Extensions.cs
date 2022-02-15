@@ -102,23 +102,73 @@ namespace BWChaos
 
         public static byte[] ToBytes(this Vector3 vec)
         {
-            float[] floats = new float[] { vec.x, vec.y, vec.z, };
-            return floats.Select(f => BitConverter.GetBytes(f)).ToArray().Flatten();
+            byte[][] bytess = new byte[][]
+            {
+                BitConverter.GetBytes(vec.x),
+                BitConverter.GetBytes(vec.y),
+                BitConverter.GetBytes(vec.z)
+            };
+            return bytess.Flatten();
+        }
+
+
+        public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> arrarr)
+        { //                                                         DAMN DANIEL ^
+            IEnumerable<T> flatted = new List<T>(); // use ienumerable to avoid recasting constantly
+            foreach (var item in arrarr)
+            {
+                flatted = flatted.Concat(item);
+            }
+            return flatted;
         }
 
         public static byte[] Flatten(this byte[][] arrarr)
-        { //                           DAMN DANIEL ^
-            IEnumerable<byte> bytes = new byte[] { }; // use ienumerable to avoid recasting constantly
-            foreach (var item in arrarr)
+        {
+            int totalToNow = 0;
+            int sum = arrarr.Sum(arr => arr.Length);
+            byte[] result = new byte[sum];
+
+            for (int i = 0; i < arrarr.Length; i++)
             {
-                bytes = bytes.Concat(item);
+                Buffer.BlockCopy(arrarr[i], 0, result, totalToNow, arrarr[i].Length);
+                totalToNow += arrarr[i].Length;
             }
-            return bytes.ToArray();
+
+            return result;
         }
 
         public static string Join<T>(this IEnumerable<T> seq, string delim = ",")
         {
             return string.Join(delim, seq);
+        }
+
+        public static IEnumerable<IEnumerable<T>> SplitList<T>(this IEnumerable<T> source, int maxPerList)
+        {
+            var enumerable = source as IList<T> ?? source.ToList();
+            if (!enumerable.Any())
+            {
+                return new List<IEnumerable<T>>();
+            }
+            return (new List<IEnumerable<T>>() { enumerable.Take(maxPerList) }).Concat(enumerable.Skip(maxPerList).SplitList<T>(maxPerList));
+        }
+
+        public static byte[] SerializePosRot(this Transform t)
+        {
+            byte[] res = new byte[sizeof(float) * 3 * 2];
+
+            t.position.ToBytes().CopyTo(res, 0);
+            t.rotation.eulerAngles.ToBytes().CopyTo(res, sizeof(float) * 3);
+
+            return res;
+        }
+
+        public static void DeserializePosRot(this Transform t, byte[] serializedPosRot, bool dontWarn = false)
+        {
+#if DEBUG
+            if (!dontWarn) if (serializedPosRot.Length != sizeof(float) * 3 * 2) Chaos.Warn("Deserializing posrot of unexpected length " + serializedPosRot.Length + "!!! This could be bad!!!");
+#endif
+            t.position = Utilities.DebyteV3(serializedPosRot);
+            t.rotation = Quaternion.Euler(Utilities.DebyteV3(serializedPosRot, sizeof(float) * 3));
         }
     }
 }
