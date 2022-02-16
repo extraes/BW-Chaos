@@ -110,7 +110,17 @@ namespace BWChaos
             obj.transform.rotation = Quaternion.LookRotation(obj.transform.position - phead.position, Vector3.up);
         }
 
-
+        static Utilities() 
+        {
+            // JoinBytes and SplitBytes tester
+            byte[][] preSplitted = new byte[][] 
+            {
+                new byte[] { 1,2,3,4,5 }
+                new byte[] { 1,2,3,4,5,6 }
+                new byte[] { 1,2,3,4,5,6,7 }
+            };
+            JoinBytes(preSplitted);
+        }
         /* Input: [
          *      [1,2,3,4,5,6,7]
          *      [2,3,4,5,6,7,8]
@@ -124,38 +134,34 @@ namespace BWChaos
         public static byte[] JoinBytes(byte[][] bytess, byte delim = 255)
         {
             //todo: make this declare the cut indices at the start of the array
-            // bytes.Length - 1 because you dont put a delim at the end (unless youre weird i guess)
             byte arrayCount = (byte)bytess.Length;
+            // bytes.Length - 1 because you dont put a delim at the end (unless youre weird i guess, but im not)
             List<ushort> indices = new List<ushort>(bytess.Length - 1);
             int definedLengthSum = 0;
             byte[] bytesJoined = new byte[(bytess.Length - 1) + bytess.Sum(b => b.Length)];
             // need to get the indices beforehand to compose the header
             foreach(byte[] arr in bytess) {
                 definedLengthSum += arr.Length;
-                indices.Add((ushort)(1 + definedLengthSum + bytess.Length));
+                indices.Add((ushort)(1 + definedLengthSum + arr.Length));
             }
-            foreach(ushort idx in indices) Console.WriteLine(idx);
+            // Compose the header
+            bytesJoined[0] = arrayCount;
+            byte[] tempBuffer;
+            for(int i = 0; i < indices.Count; i++) 
+            {
+                ushort idx = indices[i];
+                BitConverter.GetBytes(idx).CopyTo(bytesJoined, i * 2 + 1);
+            }
+            
+            Console.WriteLine(bytesJoined.ToString());
 
 
             //todo: conform to new specification
             int offset = 0;
-            for (int i = 0; i < bytess.Length; i++)
+            ushort lastIdx = (ushort)(1 + indices.Count * 2);
+            for(int i = 0; i < bytesJoined.Length; i++) 
             {
-                Buffer.BlockCopy(bytess[i], 0, bytesJoined, offset, bytess[i].Length);
-                
-// #if DEBUG
-//                 for (int dT = offset; dT < bytess[i].Length + offset; dT++)
-//                 {
-//                     if (bytesJoined[dT] == delim)
-//                         Chaos.Error($"Byte in bytesJoined at index {dT} (from start pos {i} to end pos {bytess[i].Length + offset}) is the same as the deilimiter byte ({delim})!!! This is bad!!!!!");
-//                 }
-// #endif
-
-                if (offset + bytess[i].Length < bytesJoined.Length)
-                {
-                    bytesJoined[offset + bytess[i].Length] = delim;
-                }
-                offset += bytess[i].Length + 1;
+                i +=
             }
 
             return bytesJoined;
