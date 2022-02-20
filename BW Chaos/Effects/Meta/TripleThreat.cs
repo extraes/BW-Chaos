@@ -12,6 +12,7 @@ namespace BWChaos.Effects
         public IEnumerator CoRun()
         {
             if (isNetworked) yield break;
+            yield return null;
 
             while (Active)
             { 

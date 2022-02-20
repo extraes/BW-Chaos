@@ -8,15 +8,12 @@ namespace BWChaos.Effects
     {
         public FourTimesSpeed() : base("4x Speed", 30) { }
 
-        public override void OnEffectStart() => GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
-
+        public override void OnEffectStart() => Utilities.DisableSloMo();
         public override void OnEffectUpdate() => Time.timeScale = 4;
-
         public override void OnEffectEnd()
         {
-            GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
+            Utilities.EnableSloMo();
             Time.timeScale = 1;
-            GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
         }
     }
 }

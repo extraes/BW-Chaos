@@ -4,6 +4,7 @@ using MelonLoader;
 using ModThatIsNotMod;
 using ModThatIsNotMod.RandomShit;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace BWChaos.Effects
 {
@@ -18,10 +19,10 @@ namespace BWChaos.Effects
         {
             pHead = GlobalVariables.Player_PhysBody.rbHead.transform;
             var sign = AdManager.CreateNewAd("gullible");
-            ushort signID = (ushort)UnityEngine.Random.Range(0,ushort.MaxValue);
+            ushort signID = (ushort)UnityEngine.Random.Range(0, ushort.MaxValue);
             signs.Add(signID, sign);
             myID = signID;
-            SendNetworkData($"{signID};{sign.transform.position.Serialize(4).Join()}");
+            SendNetworkData(BitConverter.GetBytes(signID).Concat(sign.transform.position.ToBytes()).ToArray());
 
             GameObject.Destroy(sign.GetComponent<StressLevelZero.Props.ObjectDestructable>());
             GameObject.Destroy(sign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
@@ -30,6 +31,7 @@ namespace BWChaos.Effects
             rb.detectCollisions = false;
             rb.useGravity = false;
         }
+
         public override void OnEffectUpdate()
         {
             if (signs.TryGetValue(myID, out var sign) && sign != null)
@@ -37,19 +39,20 @@ namespace BWChaos.Effects
                 if (sign == null) return; // In case something goes wrong
                 sign.transform.position = pHead.position + Vector3.up * 2;
                 sign.transform.rotation = Quaternion.LookRotation(Vector3.up);
-                if (Time.frameCount % 4 == 0) SendNetworkData($"{myID};{sign.transform.position.Serialize(4).Join()}");
+                if (Time.frameCount % 4 == 0) SendNetworkData(BitConverter.GetBytes(myID).Concat(sign.transform.position.ToBytes()).ToArray());
             }
         }
 
         // fucking overbuilt shit to support multiple gullible signs
-        public override void HandleNetworkMessage(string data)
-        {
-            string[] datas = data.Split(';');
 
-            ushort id = ushort.Parse(datas[0]);
-            Vector3 pos = Utilities.DeserializeV3(datas[1]);
+        public override void HandleNetworkMessage(byte[] data)
+        {
+            ushort id = BitConverter.ToUInt16(data, 0);
+            Vector3 pos = Utilities.DebyteV3(data, sizeof(ushort));
+
             if (!signs.TryGetValue(id, out var sign))
             {
+                // Create a new sign if one with the given ID doesn't already exist
                 var newSign = AdManager.CreateNewAd("gullible");
                 GameObject.Destroy(newSign.GetComponent<StressLevelZero.Props.ObjectDestructable>());
                 GameObject.Destroy(newSign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
@@ -60,8 +63,11 @@ namespace BWChaos.Effects
 
                 signs.Add(id, newSign);
                 newSign.transform.position = pos;
+                newSign.transform.rotation = Quaternion.LookRotation(Vector3.up);
             }
             else sign.transform.position = pos;
+
+            if (!isNetworked) SendNetworkData(data); // broadcast the data to the others
         }
 
         public override void OnEffectEnd() => signs.Values.ForEach(s => s.Destroy());

@@ -19,7 +19,6 @@ namespace BWChaos.Effects
 
         public override void OnEffectStart()
         {
-            forceMultiplier = MelonPreferences.GetEntryValue<float>(Prefs.CATEGORY_NAME, nameof(California) + "_" + Utilities.GetReadableStringFromMemberName(nameof(forceMultiplier)));
             SendNetworkData(BitConverter.GetBytes(forceMultiplier));
             previousGrav = Physics.gravity;
         }

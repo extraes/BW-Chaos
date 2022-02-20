@@ -11,6 +11,7 @@ namespace BWChaos.Effects
     {
         public FakeCrash() : base("Fake crash", 7, EffectTypes.HIDDEN) { }
         private static AudioSource soundPlayer = null;
+        private static bool alreadyRan = false;
         private int sleepLength;
         public override void OnEffectStart()
         {
@@ -20,22 +21,26 @@ namespace BWChaos.Effects
             if (soundPlayer.clip == null) soundPlayer.clip = GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/windowsbackground.wav");
 
             sleepLength = UnityEngine.Random.RandomRange(4, 8) * 1000;
-            SendNetworkData(sleepLength.ToString());
+            SendNetworkData(BitConverter.GetBytes(sleepLength));
 
             // Bypass effects so that it's not too obvious that the sounds are coming from the game 
-            soundPlayer.bypassListenerEffects = true;
-            soundPlayer.bypassEffects = true;
-            soundPlayer.bypassReverbZones = true;
-            soundPlayer.ignoreListenerVolume = true;
-            soundPlayer.ignoreListenerPause = true;
-            soundPlayer.Play();
+            if (!alreadyRan)
+            {
+                soundPlayer.bypassListenerEffects = true;
+                soundPlayer.bypassEffects = true;
+                soundPlayer.bypassReverbZones = true;
+                soundPlayer.ignoreListenerVolume = true;
+                soundPlayer.ignoreListenerPause = true;
+                soundPlayer.Play();
+            }
+            alreadyRan = true;
 
             MelonCoroutines.Start(InitiateCrash());
         }
 
-        public override void HandleNetworkMessage(string data)
+        public override void HandleNetworkMessage(byte[] data)
         {
-            sleepLength = int.Parse(data);
+            sleepLength = BitConverter.ToInt32(data, 0);
         }
 
         [AutoCoroutine]

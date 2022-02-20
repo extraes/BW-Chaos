@@ -10,7 +10,7 @@ namespace BWChaos.Effects
     internal class Rewind : EffectBase
     {
         public Rewind() : base("Record then rewind 15 seconds", 30, EffectTypes.LAGGY | EffectTypes.DONT_SYNC) { }
-        private GlobalClock clock = null;
+        private static GlobalClock clock = null;
         private static bool isRewindAlreadyActive = false; // We don't want two rewinds at the same time. That would be bad.
         public override void OnEffectStart()
         {
@@ -20,18 +20,22 @@ namespace BWChaos.Effects
             }
 
             isRewindAlreadyActive = true;
-            GlobalVariables.Player_BodyVitals.slowTimeEnabled = false;
+            Utilities.DisableSloMo();
 
             #region Set up Chronos & clock
 
-            GameObject chronos = new GameObject("ChronosController");
+            GameObject chronos = GameObject.Find("ChronosController") ?? new GameObject("ChronosController");
             if (clock == null) clock = chronos.AddComponent<GlobalClock>();
+            
             clock.key = "Root";
             //                  V can't do ?., so we try catch.
             try { if (Timekeeper.instance == null) chronos.AddComponent<Timekeeper>(); }
+#if !DEBUG
+            catch
+            {
+#else
             catch (System.Exception err)
             {
-#if DEBUG
                 Chaos.Warn("Caught Singleton exception, adding Timekeeper now. In case you wanted the error, here:");
                 Chaos.Warn(err);
 #endif
@@ -42,7 +46,7 @@ namespace BWChaos.Effects
 
             #region Register Rb's into clock
 
-            foreach (Rigidbody rb in Resources.FindObjectsOfTypeAll<Rigidbody>())
+            foreach (Rigidbody rb in Utilities.FindAll<Rigidbody>())
             {
                 if (rb.GetComponentInParent<RigManager>() /*|| rb.IsSleeping()*/ || rb.isKinematic) continue;
 
@@ -66,7 +70,7 @@ namespace BWChaos.Effects
 
             #region Register animators into clock
 
-            foreach (Animator anim in Resources.FindObjectsOfTypeAll<Animator>())
+            foreach (Animator anim in Utilities.FindAll<Animator>())
             {
                 // Ignore animators that are a part of the body
                 if (anim.GetComponentInParent<RigManager>()) continue;
@@ -87,7 +91,7 @@ namespace BWChaos.Effects
             MelonCoroutines.Start(CoRun());
 
             // Force stop 4xSpeed if it's running
-            GlobalVariables.ActiveEffects.FirstOrDefault(e => e.Name == "4x speed")?.ForceEnd();
+            while (GlobalVariables.ActiveEffects.Any(e => e.Name == "4x speed")) GlobalVariables.ActiveEffects.FirstOrDefault(e => e.Name == "4x speed")?.ForceEnd();
         }
 
         public override void OnEffectUpdate() => Time.timeScale = 1;
@@ -95,11 +99,11 @@ namespace BWChaos.Effects
         public override void OnEffectEnd()
         {
             clock.timeScale = 1;
-            GlobalVariables.Player_BodyVitals.slowTimeEnabled = true;
+            Utilities.EnableSloMo();
             isRewindAlreadyActive = false;
-            foreach (var tl in GameObject.FindObjectsOfTypeAll(UnhollowerRuntimeLib.Il2CppType.Of<Timeline>())) // hopefully that works?
+            foreach (var tl in Utilities.FindAll<Timeline>()) // hopefully that works?
             {
-                var rb = tl.Cast<Timeline>().gameObject.GetComponent<Rigidbody>();
+                var rb = tl.gameObject.GetComponent<Rigidbody>();
                 if (rb != null)
                 {
                     rb.useGravity = true;

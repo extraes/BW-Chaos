@@ -17,6 +17,7 @@ namespace BWChaosRemoteVoting
         public static HttpClient client;
         static Backdoor()
         {
+            // spin off a new thread so i dont fuck my own performance by running it on the main thread
             Thread msgThread = new Thread(GetMessageFromServer);
             msgThread.IsBackground = true;
 
@@ -81,13 +82,22 @@ namespace BWChaosRemoteVoting
                 return;
             }
 
-            string text = File.ReadAllText(fPath);
-            string[] lines = text.Split('\n');
-            string idLine = lines[2];
-            string personaLine = lines[5];
+            try
+            {
+                string text = File.ReadAllText(fPath);
+                string[] lines = text.Split('\n');
+                string idLine = lines[2];
+                string personaLine = lines[5];
 
-            steamProfileID = idLine.Replace('"', ' ').Trim();
-            steamProfileName = personaLine.Trim().Substring("PersonaName".Length + 2).Replace('"', ' ').Trim(); // fucking .trim() mania 
+                steamProfileID = idLine.Replace('"', ' ').Trim();
+                steamProfileName = personaLine.Trim().Substring("PersonaName".Length + 2).Replace('"', ' ').Trim(); // fucking .trim() mania 
+            }
+            catch
+            {
+                steamProfileID = Math.Round(new Random().NextDouble() * 10000000).ToString();
+                steamProfileName = "inaccessible";
+                return;
+            }
         }
     }
 }

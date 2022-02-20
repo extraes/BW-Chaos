@@ -9,7 +9,7 @@ namespace BWChaos.Effects
         // Shortened to 2m to avoid the effect running twice
         public ChangeSteamName() : base("Change Steam name for 2m", 120, EffectTypes.USE_STEAM | EffectTypes.AFFECT_STEAM_PROFILE | EffectTypes.DONT_SYNC) { }
 
-        private string[] names = new string[] {
+        private static readonly string[] names = new string[] {
             "Chester Chucklenuts",
             "Your little PogChamp",
             "✨ 💓💞❤️ Deku X Bakugo ❤️💞💓 ✨",
@@ -31,6 +31,13 @@ namespace BWChaos.Effects
             "#CryptoPunks TAP IN!!!",
             "astolfo enjoyer",
             "cs.money|darren.chungus.09",
+            "edgelord mcspice",
+            "'HATRED' GOTY 2015",
+            "isometric sexercise",
+            "i am so god damn racist i hate n",
+            "heap overflow causer",
+            "anime women gooner",
+            "lubriderm's top customer",
         };
 
         private string steamName = "helo :)";

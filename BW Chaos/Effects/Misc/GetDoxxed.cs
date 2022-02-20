@@ -1,5 +1,6 @@
 ﻿using ModThatIsNotMod;
 using System;
+using System.Linq;
 using UnityEngine;
 
 namespace BWChaos.Effects
@@ -11,7 +12,7 @@ namespace BWChaos.Effects
         private readonly float FPI = (float)Math.PI;
         private GameObject sign;
         private Transform headT;
-        private AudioSource soundSource;
+        private static AudioSource soundSource;
         private float dist = 50;
         private float x = 0;
         private float y = 0;
@@ -31,10 +32,10 @@ namespace BWChaos.Effects
 
             byte[] ipParts = new byte[]
             {
-                (byte)UnityEngine.Random.RandomRangeInt(0,256),
-                (byte)UnityEngine.Random.RandomRangeInt(0,256),
-                (byte)UnityEngine.Random.RandomRangeInt(0,256),
-                (byte)UnityEngine.Random.RandomRangeInt(0,256),
+                (byte)UnityEngine.Random.RandomRange(0,256),
+                (byte)UnityEngine.Random.RandomRange(0,256),
+                (byte)UnityEngine.Random.RandomRange(0,256),
+                (byte)UnityEngine.Random.RandomRange(0,256),
             };
             string ip = string.Join(".", ipParts);
             SendNetworkData(ip);
@@ -71,16 +72,10 @@ namespace BWChaos.Effects
             wasFarLastFrame = dist > FPI; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 
 
             // stagger. why? idk. just do it.
-            if (Time.frameCount % 4 == 0) SendNetworkData("m" + string.Join(",", sign.transform.position.Serialize(4)) + ";" + string.Join(",", sign.transform.rotation.eulerAngles.Serialize(4)));
+            if (Time.frameCount % 4 == 0) SendNetworkData(sign.transform.SerializePosRot());
         }
 
-        public override void HandleNetworkMessage(string data)
-        {
-            if (data.StartsWith("m")) MoveSign(data.Substring(1));
-            else sign = Utilities.SpawnAd(data);
-        }
-
-        private void MoveSign(string data)
+        public override void HandleNetworkMessage(byte[] data)
         {
             #region Null check and debug log
 
@@ -93,12 +88,13 @@ namespace BWChaos.Effects
             }
 
             #endregion
+            
+            sign.transform.DeserializePosRot(data);
+        }
 
-            string[] vecs = data.Split(';');
-            Vector3 pos = Utilities.DeserializeV3(vecs[0]);
-            Vector3 eulerRot = Utilities.DeserializeV3(vecs[1]);
-            sign.transform.position = pos;
-            sign.transform.rotation = Quaternion.Euler(eulerRot);
+        public override void HandleNetworkMessage(string data)
+        {
+            sign = Utilities.SpawnAd(data);
         }
     }
 }

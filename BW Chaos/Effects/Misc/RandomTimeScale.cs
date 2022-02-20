@@ -9,17 +9,21 @@ namespace BWChaos.Effects
     {
         public RandomTimeScale() : base("Random slowmo", 90) { }
 
-
+        public override void OnEffectStart()
+        {
+            Utilities.DisableSloMo();
+        }
         public override void OnEffectEnd()
         {
             Time.timeScale = 1;
+            Utilities.EnableSloMo();
         }
 
         [AutoCoroutine]
         public IEnumerator ChangeTime()
         {
             var times = new float[] { 0.125f, 0.25f, 0.5f };
-
+            yield return null;
 
             while (Active)
             {
