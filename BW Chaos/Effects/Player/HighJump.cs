@@ -19,8 +19,8 @@ namespace BWChaos.Effects
     {
         public HighJump() : base("High jump", 90) { }
 
-        public static float FwJumpMult = 5f;
-        public static float UpJumpMult = 20f;
+        [RangePreference(0, 25, 1)] public static float forwardJumpMult = 5f;
+        [RangePreference(0, 50, 2)] public static float upJumpMult = 20f;
         public static Action OnJump;
         public override void OnEffectStart() => OnJump += HiJump;
         public override void OnEffectEnd() => OnJump -= HiJump;
@@ -32,8 +32,8 @@ namespace BWChaos.Effects
 
             // Compute velocity vectors for jumping (up) and leaping (forward)
             float walkSpeed = new Vector3(rig.pelvisVelocity.x, 0, rig.pelvisVelocity.z).magnitude;
-            Vector3 forwardJump = GlobalVariables.Player_RigManager.ControllerRig.m_head.forward * walkSpeed * FwJumpMult;
-            Vector3 verticalJump = Vector3.up * HighJump.UpJumpMult;
+            Vector3 forwardJump = GlobalVariables.Player_RigManager.ControllerRig.m_head.forward * walkSpeed * forwardJumpMult;
+            Vector3 verticalJump = Vector3.up * HighJump.upJumpMult;
 
             // Apply jump velocity to the player
             rig.physBody.AddVelocityChange(verticalJump + forwardJump);

@@ -6,21 +6,21 @@ namespace BWChaos.Effects
     internal class FlingPlayer : EffectBase
     {
         public FlingPlayer() : base("Fling Player") { }
+        [RangePreference(0, 5, 0.25f)] static float forceMultiplier = 1f;
         readonly int[] arr = new int[] { -1, 1 };
 
         public override void OnEffectStart()
         {
             if (isNetworked) return;
 
-            Vector3 vec = new Vector3(9.8f * 1 * arr.Random(), 9.8f * 1.5f, 9.8f * 1 * arr.Random());
-            SendNetworkData(vec.Serialize(2).Join()); // idk why 2 decimals
+            Vector3 vec = new Vector3(9.8f * 1 * arr.Random(), 9.8f * 1.5f, 9.8f * 1 * arr.Random()) * forceMultiplier;
+            SendNetworkData(vec.ToBytes()); // idk why 2 decimals
             GlobalVariables.Player_PhysBody.AddVelocityChange(vec);
         }
 
-        public override void HandleNetworkMessage(string data)
+        public override void HandleNetworkMessage(byte[] data)
         {
-            Vector3 vec = Utilities.DeserializeV3(data);
-            GlobalVariables.Player_PhysBody.AddVelocityChange(vec);
+            GlobalVariables.Player_PhysBody.AddVelocityChange(Utilities.DebyteV3(data));
         }
     }
 }

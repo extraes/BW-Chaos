@@ -10,8 +10,9 @@ namespace BWChaos.Effects
 {
     internal class ReplaceText : EffectBase
     {
-        public ReplaceText() : base("Replace a quarter of all text") { }
+        public ReplaceText() : base("Replace text") { }
         private static string[] spawnAdStrings = typeof(SpawnAds).GetField("ads", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as string[];
+        [RangePreference(0, 1f, 0.05f)] static float replaceChance = 0.25f;
 
 
         public override void OnEffectStart()
@@ -19,7 +20,7 @@ namespace BWChaos.Effects
             if (isNetworked) return;
             foreach (var tmp in GameObject.FindObjectsOfType<TMP_Text>())
             {
-                if (UnityEngine.Random.value < 0.25f)
+                if (UnityEngine.Random.value < replaceChance)
                 {
                     string txt = spawnAdStrings.Random();
                     tmp.text = txt;

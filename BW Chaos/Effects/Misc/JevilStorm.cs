@@ -12,7 +12,7 @@ namespace BWChaos.Effects
     {
         public JevilStorm() : base("JEVILING", 30) { }
         private const float FTAU = (float)(Math.PI * 2);
-        private const int JEVIL_AMOUNT = 8;
+        [RangePreference(2, 32, 2)] private static int jevilAmount = 8;
         private static float offset = 0;
         private List<GameObject> jevils = new List<GameObject>();
         
@@ -20,7 +20,7 @@ namespace BWChaos.Effects
         public override void OnEffectStart() 
         {
             var pool = GameObject.Find("pool - Jevil").GetComponent<Pool>();
-            for (int i = 0; i < JEVIL_AMOUNT; i++)
+            for (int i = 0; i < jevilAmount; i++)
             {
                 var poolee = pool.InstantiatePoolee().gameObject;
                 //poolee.transform.SetParent(GlobalVariables.Player_PhysBody.rbPelvis.transform);
@@ -33,14 +33,14 @@ namespace BWChaos.Effects
                 jevils.Add(poolee);
             }
             jevils[0].GetComponent<AudioSource>().Play();
-            jevils[JEVIL_AMOUNT / 2].GetComponent<AudioSource>().Play();
+            jevils[jevilAmount / 2].GetComponent<AudioSource>().Play();
         }
 
         public override void OnEffectUpdate()
         {
             offset += Time.deltaTime;
             Vector3 pos = GlobalVariables.Player_PhysBody.rbPelvis.transform.position;
-            for (int i = 0; i < JEVIL_AMOUNT; i++)
+            for (int i = 0; i < jevilAmount; i++)
             {
                 var ofs = FTAU * ((float)i / jevils.Count) + offset;
                 var x = Mathf.Cos(ofs);

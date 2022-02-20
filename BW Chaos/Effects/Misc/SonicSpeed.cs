@@ -7,12 +7,14 @@ namespace BWChaos.Effects
     internal class SonicSpeed : EffectBase
     {
         public SonicSpeed() : base("SANIC SPEED", 60) { }
+        [RangePreference(0, 250, 10)] static float maxAcceleration = 70;
+        [RangePreference(0, 200, 10)] static float maxVelocity = 20;
 
         public override void OnEffectStart()
         {
             // 10x because who doesnt need a little whiplash in life?
-            GlobalVariables.Player_RigManager.ControllerRig.maxAcceleration = 70;
-            GlobalVariables.Player_RigManager.ControllerRig.maxVelocity = 20;
+            GlobalVariables.Player_RigManager.ControllerRig.maxAcceleration = maxAcceleration;
+            GlobalVariables.Player_RigManager.ControllerRig.maxVelocity = maxVelocity;
         }
 
         public override void OnEffectEnd()

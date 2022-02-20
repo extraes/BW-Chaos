@@ -12,6 +12,7 @@ namespace BWChaos.Effects
     internal class EnemyGauntlet : EffectBase
     {
         public EnemyGauntlet() : base("Enemy gauntlet", 120) { }
+        [RangePreference(0,1, 0.05f)] static float volume = 0.3f;
 
         private static AudioSource soundPlayer = null;
         public override void OnEffectStart()
@@ -27,7 +28,7 @@ namespace BWChaos.Effects
             soundPlayer.ignoreListenerVolume = true;
             soundPlayer.ignoreListenerPause = true;
             soundPlayer.loop = false;
-            soundPlayer.volume = 0.3f;
+            soundPlayer.volume = volume;
             soundPlayer.outputAudioMixerGroup = GlobalVariables.MusicMixer;
             soundPlayer.Play();
         }
@@ -48,7 +49,7 @@ namespace BWChaos.Effects
             Pool crabPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
 
 
-
+            // spawn nullbodies
             for (int i = 0; i < 4; i++)
             {
                 if (i % entangleChange != 0) continue;
@@ -66,6 +67,7 @@ namespace BWChaos.Effects
 
             yield return new WaitForSeconds(10f);
 
+            // spawn a bunch of crablets
             for (int i = 0; i < 4; i++)
             {
                 if (i % entangleChange != 0) continue;
@@ -83,6 +85,7 @@ namespace BWChaos.Effects
 
             yield return new WaitForSeconds(10f);
 
+            // spawn a bunch of earlyexits
             for (int i = 0; i < 4; i++)
             {
                 if (i % entangleChange != 0) continue;

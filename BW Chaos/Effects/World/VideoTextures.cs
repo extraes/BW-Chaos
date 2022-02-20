@@ -1,10 +1,7 @@
-﻿using System;
+﻿using System.Diagnostics;
+using System.Linq;
 using UnityEngine;
 using UnityEngine.Video;
-using MelonLoader;
-using ModThatIsNotMod;
-using System.Collections;
-using System.Linq;
 using Random = UnityEngine.Random;
 
 namespace BWChaos.Effects
@@ -15,7 +12,13 @@ namespace BWChaos.Effects
         static VideoClip[] videos;
         static VideoPlayer[] videoPlayers;
         static RenderTexture[] textures;
-        public VideoTextures() : base("Video textures", EffectTypes.LAGGY) { Init(); }
+        static Material[] materials;
+        static readonly Shader vrstandard = Shader.Find("Valve/vr_standard");
+        [RangePreference(0f, 1f, 0.01f)] static float swapChance = 0.2f;
+        // changing 2300 textures at once crashed my game (in sewers) lmao
+        [RangePreference(25, 2000, 25)] static int limit = 500; // lest the game crash once more
+        public VideoTextures() : base("Video textures", EffectTypes.LAGGY) { }
+
 
         private void Init()
         {
@@ -30,6 +33,7 @@ namespace BWChaos.Effects
 
             videoPlayers = new VideoPlayer[videos.Length];
             textures = new RenderTexture[videos.Length];
+            materials = new Material[videos.Length];
             for (int i = 0; i < videoPlayers.Length; i++)
             {
 #if DEBUG
@@ -38,15 +42,27 @@ namespace BWChaos.Effects
                 videoPlayers[i] = playerParent.AddComponent<VideoPlayer>();
                 videoPlayers[i].clip = videos[i];
                 videoPlayers[i].isLooping = true;
+                videoPlayers[i].SetDirectAudioMute(0, true);
                 textures[i] = new RenderTexture(256, 256, 24);
-                textures[i].hideFlags = HideFlags.DontUnloadUnusedAsset;
+                //textures[i].hideFlags = HideFlags.DontUnloadUnusedAsset;
                 textures[i].wrapMode = TextureWrapMode.Repeat;
+                textures[i].name = videos[i].name;
                 GameObject.DontDestroyOnLoad(textures[i]);
                 videoPlayers[i].targetTexture = textures[i];
+
+                materials[i] = new Material(vrstandard);
+                materials[i].name = textures[i].name;
+                //materials[i].hideFlags = HideFlags.DontUnloadUnusedAsset;
+                GameObject.DontDestroyOnLoad(materials[i]);
+                materials[i].mainTexture = textures[i];
             }
+
+#if DEBUG
+            Chaos.Log($"Created {textures.Length} render textures for {Name}");
+#endif
         }
 
-        public override void OnEffectStart() 
+        public override void OnEffectStart()
         {
             if (playerParent == null || textures == null || textures[0] == null) Init();
 
@@ -54,37 +70,46 @@ namespace BWChaos.Effects
 
             if (isNetworked) return;
 
-            foreach (var mesh in GameObject.FindObjectsOfType<MeshRenderer>())
+            var rends = GameObject.FindObjectsOfType<MeshRenderer>();
+            int count = 0;
+            foreach (var mesh in rends)
             {
-                if (Random.value < 0.2f)
+                if (Random.value < swapChance)
                 {
+                    if (count++ > limit) return; // inline incrementing
                     if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
-                    if (mesh.GetComponent<TMPro.TMP_Text>() == null) continue;
-                    // 0 because that _should_ be the main texture.
-                    mesh.material.SetTexture("_MainTex", textures.Random());
+                    if (mesh.GetComponent<TMPro.TMP_Text>() != null) continue;
+
+                    var mat = materials.Random();
+                    SendNetworkData(mat.name + ";" + mesh.transform.GetFullPath());
+
+                    mesh.material = mat;
                 }
             }
         }
+
         public override void HandleNetworkMessage(string data)
         {
             string[] args = data.Split(';');
-            Texture tex = textures.FirstOrDefault(t => t.name == args[0]);
+            Material mat = materials.FirstOrDefault(m => m.name == args[0]);
 
             var go = GameObject.Find(args[1]);
+            // null checks pog
             if (go == null)
             {
                 Chaos.Warn("GameObject was not found in client: " + args[1]);
+                return;
             }
-            else
+            if (mat == null)
             {
-                if (tex == null)
-                {
-                    Chaos.Error("Texture was not found in client: " + args[0]);
-                    return;
-                }
-                var mesh = go.GetComponent<MeshRenderer>();
-                mesh.material.SetTexture("_MainTex", tex);
+                Chaos.Error("Material was not found in client: " + args[0]);
+                Chaos.Error("(Are you a lite user trying to play with regular users?)");
+                return;
             }
+
+
+            var mesh = go.GetComponent<MeshRenderer>();
+            mesh.material = mat;
         }
     }
 }

@@ -1,34 +1,37 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Text;
+using System.Linq;
 
 namespace BWChaos.Effects
 {
     internal class SpawnAds : EffectBase
     {
         public SpawnAds() : base("Spawn Ads", 120) { }
+        [RangePreference(1, 30, 1)] static float timeBetweenAds = 10;
 
         [AutoCoroutine]
         public IEnumerator CoRun()
         {
             yield return null; // Wait 1 frame because otherwise the IEnum thinks Active is false. Why? Beats me!
+            if (isNetworked) yield break;
             while (Active)
             {
                 string txt = ads[Random.RandomRange(0, ads.Length)];
                 GameObject ad = Utilities.SpawnAd(txt);
-                SendNetworkData($"{txt};{ad.transform.position.Serialize(4).Join()};{ad.transform.rotation.eulerAngles.Serialize(4).Join()}");
-                yield return new WaitForSecondsRealtime(10); // to allow enough time to read it
+                SendNetworkData(ad.transform.SerializePosRot().Concat(Encoding.ASCII.GetBytes(txt)).ToArray());
+                yield return new WaitForSecondsRealtime(timeBetweenAds); // to allow enough time to read it
             }
         }
 
-        public override void HandleNetworkMessage(string data)
+        public override void HandleNetworkMessage(byte[] data)
         {
-            string[] dats = data.Split(';');
-            GameObject ad = Utilities.SpawnAd(dats[0]);
-            ad.transform.position = Utilities.DeserializeV3(dats[1]);
-            ad.transform.rotation = Quaternion.Euler(Utilities.DeserializeV3(dats[2]));
+            string str = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size * 2, data.Length - GlobalVariables.Vector3Size * 2);
+            GameObject ad = Utilities.SpawnAd(str);
+            ad.transform.DeserializePosRot(data, true);
         }
 
-        private static string[] ads = new string[] {
+        private static readonly string[] ads = new string[] {
             "my balls lol!!!!!!!!",
             "deez what sir",
             "hey mods... ni-",
@@ -177,6 +180,37 @@ namespace BWChaos.Effects
             "im gonna give you whats called round these parts a left right goodnight",
             "i am a conoisseur of fine adhesives",
             "its raining and im wearing a mask, call that waterboarding",
+            "I KISS BOYS",
+            "YOU KISS BOYS",
+            "YOU ARENT SUBMISSIVE <i>OR</i> BREEDABLE,\nYOU\nARE\n<b>TWELVE</b>",
+            "is it gay to like women?\nwomen like men, and thats pretty gay.",
+            "this mod goes hard.\nfeel free to screenshot.",
+            "this mod goes hard.\n$5000 to screenshot.\ni make NFTs now. duh.",
+            "obdolbos is only 26k\n(someone said this in a gc and idk what it means)",
+            "am i allowed to put the n word in this or nah\ni mean it is outside the bw server so...",
+            "if you dig a hole that is 6 feet deep, how deep is that hole\n'uhh'\n'uhh yea uhm'\n'seems like about like 20 feet'",
+            "I love grammar conventions, like semicolons and regular colons, dangling prepositions i like to have sentences contain and the oxford comma",
+            "Gymnopedie",
+            "Hee Ho",
+            "YOU\nYES YOU\nYOU JUST GOT <b>PACKWATCHED</b>",
+            "Top exports of countries:\nAmerica - Diabetes\nEngland - False teeth\nBajookieland - Neco arc figurines",
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n" +
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n" +
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n" +
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n" +
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n" +
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n" +
+            "I MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\nI MISS THE RAGE!?\n",
+            "SQUID GAMES!!",
+            "CEPHALOPOD ACTIVITIES!!",
+            "OCTOPUS PASTIMES!!",
+            "what the hell is cyclomatic complexity",
+            "would you rather your woman be dry or cream filled",
+            "if youre reading this, 2.2.0 finally came out after months of procrastination and very little testing in vr lmao",
+            "ive yet to try chaos's per-effect syncing in depth, despite working on top of it for, at this point, months.",
+            "THEY CALL ME CHRONOS.TIMEKEEPER CAUSE IM A FUCKING SINGLETON",
+            "pretty sure im fucking addicted to discord and its shortened my attention span to like 1 minute.",
+            "this is barely a collection of funny text at this point\nits more my thought diary.",
         };
     }
 }

@@ -2,6 +2,7 @@
 using ModThatIsNotMod;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using UnhollowerRuntimeLib;
 using UnityEngine;
@@ -11,6 +12,7 @@ namespace BWChaos.Effects
     internal class FartWithReverb : EffectBase
     {
         public FartWithReverb() : base("Fart With Reverb", 5, EffectTypes.LAGGY | EffectTypes.DONT_SYNC) { }
+        [RangePreference(0.25f, 10, 0.25f)] static float forceMultiplier = 2f;
 
         private static Transform target;
         private static AudioSource aSource;
@@ -21,14 +23,31 @@ namespace BWChaos.Effects
             
             target = GlobalVariables.Player_PhysBody.transform;
 
-            var rbs = GameObject.FindObjectsOfType<Rigidbody>();
-            // split it across two ienumerators
-            MelonCoroutines.Start(ApplyForces(rbs.Take(rbs.Length / 2)));
-            MelonCoroutines.Start(ApplyForces(rbs.Skip(rbs.Length / 2)));
+            var rbs = GameObject.FindObjectsOfType<Rigidbody>().ToList();
+            // match CPU count, not thread count, and higher numbers lag spike the game longer
+            int perCPUCount = 2 * rbs.Count / SystemInfo.processorCount;
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
+
+            // split it across multiple ienumerators
+            for (int i = 0; i < SystemInfo.processorCount / 2; i++)
+            {
+                int min = 2 * i * rbs.Count / SystemInfo.processorCount;
+                var rbPart = rbs.GetRange(min, perCPUCount);
+                MelonCoroutines.Start(ApplyForces(rbPart));
+#if DEBUG
+                Chaos.Log($"Started {nameof(ApplyForces)} with {perCPUCount} rigidbodies starting at idx {min} idxs=({min}-{min+perCPUCount}) because there are {SystemInfo.processorCount} CPUs");
+#endif
+            }
+#if DEBUG
+            sw.Stop();
+            Chaos.Log("Finished starting coroutines in " + sw.ElapsedMilliseconds + "ms");
+#endif
+
             aSource.Play();
         }
 
-        const float mult = 2f;
         private IEnumerator ApplyForces(IEnumerable<Rigidbody> rbs)
         {
             yield return null;
@@ -46,7 +65,7 @@ namespace BWChaos.Effects
                 // subt V3.up because then rb's wont try to go into the floor   V
                 Vector3 force = rb.mass * (target.transform.position - Vector3.up - p - v * dt) / (dt);
 
-                rb.AddForce(-Vector3.ClampMagnitude(force * mult, 500 * rb.mass));
+                rb.AddForce(-Vector3.ClampMagnitude(force * forceMultiplier, 500 * rb.mass));
 
                 if (stagger = !stagger) yield return new WaitForFixedUpdate();
             }

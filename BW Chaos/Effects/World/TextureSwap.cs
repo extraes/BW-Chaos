@@ -6,6 +6,7 @@ namespace BWChaos.Effects
     internal class TextureSwap : EffectBase
     {
         static Texture[] textures;
+        [RangePreference(0f, 1f, 0.01f)] static float swapChance = 0.2f;
         public TextureSwap() : base("Swap Random Textures") { Init(); }
 
         private void Init()
@@ -30,10 +31,10 @@ namespace BWChaos.Effects
 
             foreach (var mesh in GameObject.FindObjectsOfType<MeshRenderer>())
             {
-                if (Random.value < 0.2f)
+                if (Random.value < swapChance)
                 {
                     if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
-                    if (mesh.GetComponent<TMPro.TMP_Text>() == null) continue;
+                    if (mesh.GetComponent<TMPro.TMP_Text>() != null) continue;
 
                     Texture tex = textures.Random();
                     mesh.material.SetTexture("_MainTex", tex);

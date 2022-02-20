@@ -9,7 +9,8 @@ namespace BWChaos.Effects
 {
     internal class BarrySteakfries : EffectBase
     {
-        public BarrySteakfries() : base("Barry Steakfries", 30) { }
+        public BarrySteakfries() : base("Barry Steakfries", 60) { }
+        [RangePreference(0.25f, 50, 0.25f)] static float forceMultiplier = 1;
 
         public override void OnEffectStart()
         {
@@ -18,13 +19,12 @@ namespace BWChaos.Effects
 
         public override void OnEffectEnd()
         {
-
             Hooking.OnPostFireGun -= OnFire;
         }
 
         private void OnFire(Gun gun)
         {
-            GlobalVariables.Player_PhysBody.AddVelocityChange(-gun.transform.forward * 5);
+            GlobalVariables.Player_PhysBody.AddVelocityChange(-gun.transform.forward * 5 * forceMultiplier);
         }
 
     }
