@@ -4,18 +4,22 @@ using MelonLoader;
 using ModThatIsNotMod;
 using System.Collections;
 using Random = UnityEngine.Random;
+using System.Collections.Generic;
 
 namespace BWChaos.Effects
 {
     internal class RunPreviousEffects : EffectBase
     {
         public RunPreviousEffects() : base("Run Previous Effects", 35, EffectTypes.META) { }
+        private string[] pEffects = new string[7];
 
         [AutoCoroutine]
         public IEnumerator CoRun()
         {
             yield return null;
-            foreach (var eName in GlobalVariables.PreviousEffects)
+            // copy to temp array to avoid concurrent modification
+            GlobalVariables.PreviousEffects.CopyTo(pEffects);
+            foreach (var eName in pEffects)
             {
                 if (!Active) yield break;
                 if (eName == Name) continue; // avoid infinite loop
