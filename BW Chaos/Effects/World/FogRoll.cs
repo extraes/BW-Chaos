@@ -43,8 +43,8 @@ namespace BWChaos.Effects
                 startTime += Time.deltaTime;
 
                 float ct = Math.Abs((startTime % cycleLength) - (cycleLength / 2)) * 2;
-                var cur = minmax.Slerp(ct);
-                var delta = mmDelta.Slerp(ct);
+                var cur = minmax.Interpolate(ct);
+                var delta = mmDelta.Interpolate(ct);
                 fog.startDistance = cur;
                 fog.endDistance = delta;
                 //fog.startDistance = delta;

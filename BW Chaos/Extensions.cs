@@ -51,7 +51,7 @@ namespace BWChaos
             foreach (T item in sequence) fun(item);
         }
 
-        public static float Slerp(this (float, float) tuple, float time)
+        public static float Interpolate(this (float, float) tuple, float time)
         {
 
             float clampTime = Mathf.Clamp(time, 0, 1);
