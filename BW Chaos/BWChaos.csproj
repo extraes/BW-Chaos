@@ -95,6 +95,10 @@
     <Reference Include="UnityEngine.IMGUIModule">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
+    <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.ParticleSystemModule.dll</HintPath>
+    </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
@@ -116,12 +120,18 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EffectConfig.cs" />
     <Compile Include="EffectHandler.cs" />
     <Compile Include="Effects\EffectBase.cs" />
     <Compile Include="Effects\Guns\BarrySteakfries.cs" />
     <Compile Include="Effects\Guns\ForceGunManual.cs" />
     <Compile Include="Effects\Guns\GunSpeedup.cs" />
     <Compile Include="Effects\Guns\GunSlowdown.cs" />
+    <Compile Include="Effects\Guns\RandomizeGunSpeeds.cs" />
+    <Compile Include="Effects\Guns\ExplosiveGuns.cs" />
+    <Compile Include="Effects\Guns\InaccurateGuns.cs" />
+    <Compile Include="Effects\Guns\UpNAtomize.cs" />
+    <Compile Include="Effects\Meta\SlowTimer.cs" />
     <Compile Include="Effects\Misc\SonicSpeed.cs" />
     <Compile Include="Effects\Misc\SlowmoPunch.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
@@ -140,9 +150,13 @@
     <Compile Include="Effects\Misc\JevilStorm.cs" />
     <Compile Include="Effects\Misc\ImportantInstructions.cs" />
     <Compile Include="Effects\Misc\ReplaceText.cs" />
-    <Compile Include="Effects\Misc\FasterTimer.cs" />
-    <Compile Include="Effects\Misc\RunPreviousEffects.cs" />
-    <Compile Include="Effects\Misc\TripleThreat.cs" />
+    <Compile Include="Effects\Meta\FasterTimer.cs" />
+    <Compile Include="Effects\Meta\RunPreviousEffects.cs" />
+    <Compile Include="Effects\Misc\RandomForces.cs" />
+    <Compile Include="Effects\Misc\PoolParty.cs" />
+    <Compile Include="Effects\Misc\MyMemeFolder.cs" />
+    <Compile Include="Effects\Meta\TripleThreat.cs" />
+    <Compile Include="Effects\Misc\RandomMesh.cs" />
     <Compile Include="Effects\Player\GhostWorld.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
@@ -151,6 +165,9 @@
     <Compile Include="Effects\Player\Nearsighted.cs" />
     <Compile Include="Effects\Player\FlattenCameras.cs" />
     <Compile Include="Effects\Player\Strengthen.cs" />
+    <Compile Include="Effects\Player\NimbusHands.cs" />
+    <Compile Include="Effects\Player\DontLetHimGrabYou.cs" />
+    <Compile Include="Effects\Player\CrabletCircle.cs" />
     <Compile Include="Effects\Player\Weaken.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
@@ -164,8 +181,10 @@
     <Compile Include="Effects\Player\NoRegen.cs" />
     <Compile Include="Effects\Player\Immortality.cs" />
     <Compile Include="Effects\Player\GetJumped.cs" />
+    <Compile Include="Effects\World\PitchBlackWorld.cs" />
     <Compile Include="Effects\World\FlingEverything.cs" />
     <Compile Include="Effects\Misc\Lag.cs" />
+    <Compile Include="Effects\World\FogRoll.cs" />
     <Compile Include="Effects\World\GravityCube.cs" />
     <Compile Include="Effects\World\InvertGravity.cs" />
     <Compile Include="Effects\World\FartWithReverb.cs" />
@@ -180,8 +199,22 @@
     <Compile Include="Effects\World\InvertVelocity.cs" />
     <Compile Include="Effects\World\GarbageTextures.cs" />
     <Compile Include="Effects\Misc\VineBoomSounds.cs" />
+    <Compile Include="Effects\World\Foggy.cs" />
+    <Compile Include="Effects\World\ExtremeGravity.cs" />
+    <Compile Include="Effects\World\Grounded.cs" />
+    <Compile Include="Effects\World\DarkWorld.cs" />
+    <Compile Include="Effects\World\GravityHands.cs" />
+    <Compile Include="Effects\World\Aggro.cs" />
+    <Compile Include="Effects\World\Compton.cs" />
+    <Compile Include="Effects\World\ScrollingTextures.cs" />
+    <Compile Include="Effects\World\CokedOutNPCs.cs" />
+    <Compile Include="Effects\World\FreezeAll.cs" />
+    <Compile Include="Effects\World\Ejected.cs" />
+    <Compile Include="Effects\World\LockRigidBodies.cs" />
+    <Compile Include="Effects\World\UnbakeLights.cs" />
     <Compile Include="Effects\World\TextureSwap.cs" />
     <Compile Include="Effects\World\VideoTextures.cs" />
+    <Compile Include="Effects\World\WhiteChristmas.cs" />
     <Compile Include="Effects\World\ZeroGravity.cs" />
     <Compile Include="Extensions.cs" />
     <Compile Include="Extras\Attributes.cs" />
@@ -195,7 +228,7 @@
     <Compile Include="WatsonWebsocket\Statistics.cs" />
     <Compile Include="WatsonWebsocket\WatsonWebsocket.cs" />
     <Compile Include="Utilities.cs" />
-    <Compile Include="WebResponseHandler.cs" />
+    <Compile Include="Extras\WebResponseHandler.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\chaos_ui_elements" />

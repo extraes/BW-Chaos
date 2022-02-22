@@ -1,0 +1,50 @@
+﻿using StressLevelZero.Pool;
+using System.Collections;
+using System.Linq;
+using System.Text;
+using UnityEngine;
+
+namespace BWChaos.Effects
+{
+    internal class PoolParty : EffectBase
+    {
+        public PoolParty() : base("Pool Party", 60) { }
+        static Pool[] pools;
+
+
+        [AutoCoroutine]
+        public IEnumerator CoRun()
+        {
+            yield return null;
+            if (isNetworked) yield break;
+
+            if (pools == null || pools[0] == null) pools = GameObject.FindObjectsOfType<Pool>().ToArray();
+            
+            while (Active)
+            {
+                var pool = pools.Random();
+                var spawned = pool.InstantiatePoolee();
+                Utilities.MoveAndFacePlayer(spawned.gameObject);
+                SendNetworkData(spawned.transform.position.ToBytes(), spawned.transform.rotation.eulerAngles.ToBytes(), Encoding.ASCII.GetBytes(pool.name));
+                spawned.gameObject.SetActive(true);
+                yield return new WaitForSeconds(5);
+            }
+        }
+
+        public override void HandleNetworkMessage(byte[] data)
+        {
+            string poolName = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size * 2, data.Length - GlobalVariables.Vector3Size * 2);
+
+            Pool pool = pools.FirstOrDefault(p => p.name == poolName);
+            if (pool == null)
+            {
+                Chaos.Log("Pool not found in client - " + poolName);
+                return;
+            }
+
+            var poolee = pool.InstantiatePoolee();
+            poolee.gameObject.SetActive(true);
+            poolee.transform.DeserializePosRot(data, true);
+        }
+    }
+}
