@@ -2,10 +2,12 @@
 using ModThatIsNotMod;
 using StressLevelZero.Interaction;
 using StressLevelZero.Pool;
+using StressLevelZero.VRMK;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using UnityEngine;
 
@@ -110,110 +112,82 @@ namespace BWChaos
             obj.transform.rotation = Quaternion.LookRotation(obj.transform.position - phead.position, Vector3.up);
         }
 
-        static Utilities() 
-        {
-            // JoinBytes and SplitBytes tester
-            byte[][] preSplitted = new byte[][] 
-            {
-                new byte[] { 1,2,3,4,5 }
-                new byte[] { 1,2,3,4,5,6 }
-                new byte[] { 1,2,3,4,5,6,7 }
-            };
-            JoinBytes(preSplitted);
-        }
         /* Input: [
          *      [1,2,3,4,5,6,7]
-         *      [2,3,4,5,6,7,8]
+         *      [2,3,4,5,6,7,8,9,10]
          * ]
          * Output: [
-         *      2,7+3,14+3  <- header, says where to split
+         *      3, <- header, says how many things there are
+         *      ushorts(7,9)  <- header, says where to split
          *      1,2,3,4,5,6,7,
-         *      2,3,4,5,6,7,8
+         *      2,3,4,5,6,7,8,9,10
+         *      
          * ]
          */
-        public static byte[] JoinBytes(byte[][] bytess, byte delim = 255)
+        public static byte[] JoinBytes(byte[][] bytess)
         {
-            //todo: make this declare the cut indices at the start of the array
             byte arrayCount = (byte)bytess.Length;
             // bytes.Length - 1 because you dont put a delim at the end (unless youre weird i guess, but im not)
             List<ushort> indices = new List<ushort>(bytess.Length - 1);
-            int definedLengthSum = 0;
-            byte[] bytesJoined = new byte[(bytess.Length - 1) + bytess.Sum(b => b.Length)];
+            byte[] bytesJoined = new byte[(bytess.Length * 2 + 1) + bytess.Sum(b => b.Length)];
             // need to get the indices beforehand to compose the header
-            foreach(byte[] arr in bytess) {
-                definedLengthSum += arr.Length;
-                indices.Add((ushort)(1 + definedLengthSum + arr.Length));
+            foreach (byte[] arr in bytess)
+            {
+                indices.Add((ushort)arr.Length);
             }
             // Compose the header
             bytesJoined[0] = arrayCount;
-            byte[] tempBuffer;
-            for(int i = 0; i < indices.Count; i++) 
+            for (int i = 0; i < indices.Count; i++)
             {
                 ushort idx = indices[i];
-                BitConverter.GetBytes(idx).CopyTo(bytesJoined, i * 2 + 1);
+                BitConverter.GetBytes(idx).CopyTo(bytesJoined, i * sizeof(ushort) + 1);
             }
-            
-            Console.WriteLine(bytesJoined.ToString());
 
-
-            //todo: conform to new specification
-            int offset = 0;
-            ushort lastIdx = (ushort)(1 + indices.Count * 2);
-            for(int i = 0; i < bytesJoined.Length; i++) 
+            ushort lastLen = 0;
+            int index = (ushort)arrayCount * 2 + 1;
+            for (int i = 0; i < arrayCount; i++)
             {
-                i +=
+                int thisLen = indices[i];
+                Buffer.BlockCopy(bytess[i], 0, bytesJoined, index, thisLen);
+
+                // set the next index
+                lastLen = (ushort)thisLen;
+                index += thisLen;
             }
 
             return bytesJoined;
         }
-        
-        public static byte[][] SplitBytes(byte[] bytes, byte delim = 255)
+
+        internal static byte[][] SplitBytes(byte[] bytes)
         {
             // Grab data from the header
+            // get number of splits
             int splitsCount = (int)bytes[0];
-            List<int> splitIndices = new List<int>();
-            for(int i = 0; i < splitsCount; i++) {
+            // actually get the list of element sizes
+            int[] splitIndices = new int[splitsCount];
+            for (int i = 0; i < splitsCount; i++)
+            {
                 // add 1 to skip the byte that says how many split indicies there are
                 ushort idx = BitConverter.ToUInt16(bytes, 1 + i * sizeof(ushort));
-                splitIndices.Add((int)idx);
+                splitIndices[i] = idx;
             }
-            // add one last one idx otherwise itll think the end is the second to last segment
-            splitIndices.Add(bytes.Length + 1);
 
-#if true
-            Console.WriteLine($"There are {splitsCount} indices. They are: ");
-            foreach(int idx in splitIndices) Console.WriteLine(idx);
-#endif
-
-            // // loop through the array to find the delim bytes
-            // for (int i = 0; i < bytes.Length; i++)
-            // {
-            //     // add (i + 1) because thats where the next array should start, not on the delim
-            //     if (bytes[i] == delim) splitIndices.Add(i + 1);
-            // }
-            // // add one last one idx otherwise itll think the end is the second to last segment
-            // splitIndices.Add(bytes.Length + 1);
-
-            // dont overallocate *this* array, and avoid using List cause arrays feel smarter
-            byte[][] res = new byte[splitIndices.Count][];
-            // start at zero
-            int lastIdx = 0;
+            byte[][] res = new byte[splitsCount][];
+            // start after the header
+            int lastIdx = splitsCount * sizeof(ushort) + 1;
             for (int i = 0; i < res.Length; i++)
             {
-                int thisIdx = splitIndices[i];
-                // subtract one because the delim (usually 255) takes up a space
-                int len = thisIdx - lastIdx - 1;
-                // dont overallocate
+                int len = splitIndices[i];
+                // dont overallocate lest there be a dead byte
                 byte[] arr = new byte[len];
                 // copy the bytes
-                Console.WriteLine($"Copying {len} bytes from index {lastIdx} to {thisIdx}");
                 Buffer.BlockCopy(bytes, lastIdx, arr, 0, len);
 
 
                 // save our changes to the array 
                 res[i] = arr;
                 // perpetuate the nevereding cycle
-                lastIdx = splitIndices[i];
+                lastIdx += len;
             }
             return res;
         }
@@ -258,6 +232,31 @@ namespace BWChaos
         {
             Chaos.Instance.HarmonyInstance.Unpatch(slowMoMethod, HarmonyPatchType.Prefix);
             skipSlow = false;
+        }
+
+        public static void MultiplyForces(PhysHand hand, float mult = 200f, float torque = 10f)
+        {
+
+            /*
+             * THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE
+             * I GANKED THE FUCK OUT OF THIS CODE FROM LAKATRAZZ'S SPIDERMAN MOD
+             *      IT'S NOT OPEN SOURCE SO I HOPE I DON'T GET SUED, BUT IF HE WANTS THIS GONE, FINE BY ME, ILL REMOVE IT
+             *      I DNSPY'D THE SPIDERMAN MOD AND COPY PASTED THE SPIDERMAN.MODOPTIONS.MULTIPLYFORCES METHOD
+             *      I THINK ITS FINE THO CAUSE I ASKED HIM AND HE SAID "just take code from any of my mods tbh i dont care"
+             *      (https://discord.com/channels/563139253542846474/724595991675797554/913613134885974036)
+             * THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE
+             */
+
+            hand.xPosForce = 90f * mult;
+            hand.yPosForce = 90f * mult;
+            hand.zPosForce = 340f * mult;
+            hand.xNegForce = 90f * mult;
+            hand.yNegForce = 200f * mult;
+            hand.zNegForce = 360f * mult;
+            hand.newtonDamp = 80f * mult;
+            hand.angDampening = torque;
+            hand.dampening = 0.2f * mult;
+            hand.maxTorque = 30f * torque;
         }
     }
 }
