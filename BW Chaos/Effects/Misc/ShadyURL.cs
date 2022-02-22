@@ -9,6 +9,7 @@ namespace BWChaos.Effects
     {
         public ShadyURL() : base("Shady URL", 15) { }
 
+        // todo: use chaos.extraes.xyz/shady/ as a shortener instead of 5z8.info (also add that functionality to the streamer server)
         private string[] shadyURLs = new string[] {
             "http://www.5z8.info/begin-bank-account-xfer_o8u1tn_cockfights",            // https://www.youtube.com/embed/5IVsAcWqTc8?rel=0 GROUSE
             "http://www.5z8.info/hitler_g4v2bu_peepshow",                               // http://endless.horse/ hooooooooooooooooooooooooooooooooooooooorse

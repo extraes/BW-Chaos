@@ -15,7 +15,7 @@ namespace BWChaos.Effects
             foreach (var cam in GlobalVariables.Cameras)
             {
                 cam.transform.localScale = new Vector3(0, 1, 1);
-                cam.fieldOfView *= 0.75f;
+                cam.fieldOfView *= 0.75f; // dont think this even works lol
             }
         }
         public override void OnEffectEnd()
@@ -23,7 +23,7 @@ namespace BWChaos.Effects
             foreach (var cam in GlobalVariables.Cameras)
             {
                 cam.transform.localScale = Vector3.one;
-                cam.fieldOfView /= 0.75f;
+                cam.fieldOfView /= 0.75f; // dont think this even works lol
             }
         }
     }

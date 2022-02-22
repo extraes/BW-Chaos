@@ -12,7 +12,7 @@ namespace BWChaos.Effects
     // i suppose i could just not even attempt to change it back, but... do i even bother?
     internal class VineBoomSounds : EffectBase
     {
-        AudioClip vineBoomSound;
+        static AudioClip vineBoomSound;
         Dictionary<AudioSource, AudioClip> sourceDict = new Dictionary<AudioSource, AudioClip>(); // lord forgive me for how awful this is
         Dictionary<ImpactSFX, AudioClip[][]> impactSFXDict = new Dictionary<ImpactSFX, AudioClip[][]>();
         Dictionary<FootstepSFX, AudioClip[][]> footstepSFXDict = new Dictionary<FootstepSFX, AudioClip[][]>();

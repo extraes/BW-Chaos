@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.IO;
 using System.Linq;
+using System.Text;
 using UnityEngine;
 using Wait = UnityEngine.WaitForSecondsRealtime;
 
@@ -31,6 +32,12 @@ namespace BWChaos.Effects
                 yield return new Wait(4f);
                 SpawnAd("it took some control out of the hands of mod makers");
                 yield return new Wait(4f);
+                SpawnAd("and it uses electron");
+                yield return new Wait(4f);
+                SpawnAd("which is basically the entirety of google chrome");
+                yield return new Wait(4f);
+                SpawnAd("except one program uses the whole of it for one thing");
+                yield return new Wait(4f);
                 SpawnAd("but now i dont really care because theres less 'how do i extract a 7z' questions", false);
                 yield return new Wait(8f);
             }
@@ -52,7 +59,7 @@ namespace BWChaos.Effects
 
             #region Check shortcuts list
 
-            if (shortcuts.FirstOrDefault(f => f.Contains("Cura")) != null) 
+            if (shortcuts.Any(f => f.Contains("Cura"))) 
             {
                 SpawnAd("oh shit you use cura?");
                 yield return new Wait(4f);
@@ -240,6 +247,58 @@ namespace BWChaos.Effects
 
             #endregion
 
+            #region System info checks (thanks Unity!)
+
+            if (SystemInfo.batteryLevel != -1)
+            {
+                SpawnAd("cmon man why the gaming laptop");
+                yield return new Wait(4f);
+                SpawnAd("those things are like triple the price");
+                yield return new Wait(4f);
+                SpawnAd("for a system with a weaker gpu");
+                yield return new Wait(4f);
+                SpawnAd("and 2 minutes of battery life");
+                yield return new Wait(6f);
+                SpawnAd("the only thing i can credit gaming laptops for");
+                yield return new Wait(5f);
+                SpawnAd("is a realistic flight simulator experience");
+                yield return new Wait(6f);
+                SpawnAd("because yknow");
+                yield return new Wait(4f);
+                SpawnAd("loud ass fans");
+                yield return new Wait(8f);
+            }
+
+            if (SystemInfo.graphicsDeviceVendorID != 0x10de)
+            {
+                SpawnAd("lol get a load of the amd gpu user over here");
+                yield return new Wait(4f);
+                SpawnAd("...or youre using integrated graphics...");
+                yield return new Wait(4f);
+                SpawnAd("...");
+                yield return new Wait(4f);
+                SpawnAd("all i know is that youre sure as hell not using an nvidia gpu");
+                yield return new Wait(6f);
+                SpawnAd("big L to be honest");
+                yield return new Wait(8f);
+            }
+
+            if (!SystemInfo.processorType.Contains("AMD"))
+            {
+                SpawnAd("why are you using intel in 2022");
+                yield return new Wait(4f);
+                SpawnAd("cmon man");
+                yield return new Wait(4f);
+                SpawnAd("i shouldnt be putting this much logic in the mod to be honest");
+                yield return new Wait(6f);
+                SpawnAd("cause i dont really want your cpu overheating and blowing up");
+                yield return new Wait(6f);
+                SpawnAd("large L if i must be serious");
+                yield return new Wait(8f);
+            }
+
+            #endregion
+
             if (!Chaos.isSteamVer)
             {
                 SpawnAd("alright im done");
@@ -288,7 +347,7 @@ namespace BWChaos.Effects
 
             #endregion
 
-            #region Check for ( ͡° ͜ʖ ͡°) games
+            #region Check for ( ͡° ͜ʖ ͡°) games (this was supposed to be a lenny face)
 
             // huniepop
             if (SteamUser.UserHasLicenseForApp(userID, new AppId_t((uint)339800)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
@@ -372,20 +431,43 @@ namespace BWChaos.Effects
                     SpawnAd("please take this advice to heart");
                     yield return new Wait(2.5f);
                     SpawnAd("owning a porn game and a fetish game\nfatherless behavior");
+                    yield return new Wait(2.5f);
                 }
                 SpawnAd("let me guess, 'changed isnt a fetish game, it actually has good gameplay and an engaging story'");
-                yield return new Wait(2.5f);
+                yield return new Wait(6.5f);
                 SpawnAd("uh huh, yeah, sure, kid, tell it to the judge");
                 yield return new Wait(2.5f);
                 // Open steam overlay to judge image
                 SteamFriends.ActivateGameOverlayToWebPage("https://www.inquirer.com/resizer/UILgwAwPDUWh5sfpw4oNaWL37cc=/1400x932/smart/arc-anglerfish-arc2-prod-pmn.s3.amazonaws.com/public/K4OJHGLTGJHGFJQYDNAUFESFWQ.jpg",
                     EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default);
 
-                yield return new Wait(5f);
+                yield return new Wait(10f);
             }
 
             #endregion
 
+            #region Check for other games
+
+            // golira tag
+            if (SteamUser.UserHasLicenseForApp(userID, new AppId_t((uint)1533390)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
+            {
+                SpawnAd("yo gorilla tag user");
+                yield return new Wait(3f);
+                SpawnAd("ive got a request");
+                yield return new Wait(3f);
+                SpawnAd("from the heart");
+                yield return new Wait(4f);
+                SpawnAd("can you like");
+                yield return new Wait(5f);
+                SpawnAd("not shout slurs in the ingame voice chat");
+                yield return new Wait(6f);
+                SpawnAd("please");
+                yield return new Wait(3f);
+                SpawnAd("thanks");
+                yield return new Wait(8f);
+            }
+
+            #endregion
 
             if (!wasCaught)
             {
@@ -399,12 +481,11 @@ namespace BWChaos.Effects
             ForceEnd();
         }
 
-        public override void HandleNetworkMessage(string data)
+        public override void HandleNetworkMessage(byte[] data)
         {
-            string[] datas = data.Split(';');
-            var ad = Utilities.SpawnAd(datas[2]);
-            ad.transform.position = Utilities.DeserializeV3(datas[0]);
-            ad.transform.rotation = Quaternion.Euler(Utilities.DeserializeV3(datas[1]));
+            string text = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size * 2, data.Length - GlobalVariables.Vector3Size * 2);
+            var ad = Utilities.SpawnAd(text);
+            ad.transform.DeserializePosRot(data, true);
         }
 
         private GameObject SpawnAd(string text, bool __caught_pleaseignore = true)
@@ -416,7 +497,7 @@ namespace BWChaos.Effects
             ad.transform.position = phead.position + phead.forward.normalized;
             ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
 
-            SendNetworkData(ad.transform.position.Serialize(4).Join() + ";" + ad.transform.rotation.eulerAngles.Serialize(4).Join() + ";" + text);
+            SendNetworkData(ad.transform.SerializePosRot().Concat(Encoding.ASCII.GetBytes(text)).ToArray());
             return ad;
         }
     }

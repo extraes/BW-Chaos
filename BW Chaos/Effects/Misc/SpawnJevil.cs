@@ -25,13 +25,20 @@ namespace BWChaos.Effects
             
             var pool = GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil");
             var jevil = pool.InstantiatePoolee(Vector3.zero, Quaternion.identity).gameObject;
-            var head = Player.GetPlayerHead().transform;
-            
-            jevil.transform.position = head.position + head.forward;
-            jevil.transform.rotation = Quaternion.LookRotation(-Vector3.ProjectOnPlane(head.forward, Vector3.up));
+
+            SendNetworkData(jevil.transform.SerializePosRot());
+            Utilities.MoveAndFacePlayer(jevil);
             jevil.SetActive(true);
             //jevil.GetComponent<AudioSource>().outputAudioMixerGroup = GlobalVariables.MusicMixer; // in case changing it on the pool prefab didn't fix it :shrump:
             soundSource.Play();
+        }
+
+        public override void HandleNetworkMessage(byte[] data)
+        {
+            if (!isNetworked) SendNetworkData(data);
+            var pool = GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil");
+            var jevil = pool.InstantiatePoolee(Vector3.zero, Quaternion.identity).gameObject;
+            jevil.transform.DeserializePosRot(data);
         }
 
     }

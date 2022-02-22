@@ -55,12 +55,15 @@ namespace BWChaos.Effects
             if (videos == null || videos[0] == null || videoPlayer == null) Init();
             #endregion
 
+            if (isNetworked) return;
+
             var sign = Utilities.SpawnAd("");
             sign.transform.rotation = Quaternion.Euler(0, 0, 180);
             // Get the "Mesh" child, and replace its meshrenderer material
             var rend = sign.transform.GetComponentInChildren<MeshRenderer>();
             rend.material = vidMat;
             videoPlayer.clip = videos.Random();
+            SendNetworkData(videoPlayer.clip.name);
             
 #if DEBUG
             Chaos.Log($"Set material - Video: {videoPlayer.clip.name}, {videoPlayer.clip.length}s ({videoPlayer.length}s)");
@@ -73,7 +76,41 @@ namespace BWChaos.Effects
             source.rolloffMode = AudioRolloffMode.Logarithmic;
             source.outputAudioMixerGroup = GlobalVariables.MusicMixer;
 
-            // Make the 
+            // Make the audiosource audible and play the video's sound
+            videoPlayer.SetTargetAudioSource(0, source);
+            videoPlayer.SetDirectAudioVolume(0, 0.3f);
+            videoPlayer.Play();
+
+            MelonCoroutines.Start(ModulateVolume());
+            if (videoPlayer.clip.name == "you should kys... NOW") MelonCoroutines.Start(LTG()); // todo: dont hardcode this (but wtf else do i do lol)
+        }
+
+        public override void HandleNetworkMessage(string data)
+        {
+            var sign = Utilities.SpawnAd("");
+            sign.transform.rotation = Quaternion.Euler(0, 0, 180);
+            // Get the "Mesh" child, and replace its meshrenderer material
+            var rend = sign.transform.GetComponentInChildren<MeshRenderer>();
+            rend.material = vidMat;
+            videoPlayer.clip = videos.FirstOrDefault(v => v.name == data);
+            if (videoPlayer.clip == null)
+            {
+                Chaos.Warn("Video not found in client -> " + data);
+                return;
+            }
+
+#if DEBUG
+            Chaos.Log($"Set material - Video: {videoPlayer.clip.name}, {videoPlayer.clip.length}s ({videoPlayer.length}s)");
+#endif
+
+            // Create/get audiosource
+            var source = sign.GetComponent<AudioSource>() ?? sign.AddComponent<AudioSource>();
+            source.volume = 0f;
+            source.rolloffFactor = 0.75f;
+            source.rolloffMode = AudioRolloffMode.Logarithmic;
+            source.outputAudioMixerGroup = GlobalVariables.MusicMixer;
+
+            // Make the audiosource audible and play the video's sound
             videoPlayer.SetTargetAudioSource(0, source);
             videoPlayer.SetDirectAudioVolume(0, 0.3f);
             videoPlayer.Play();
@@ -89,13 +126,13 @@ namespace BWChaos.Effects
             yield return null;
             while (Active && time < 1.1f)
             {
-                videoPlayer.SetDirectAudioVolume(0, (0f, 0.3f).Slerp(time += Time.deltaTime));
+                videoPlayer.SetDirectAudioVolume(0, (0f, 0.3f).Interpolate(time += Time.deltaTime));
                 yield return new WaitForFixedUpdate();
             }
 
             while (Active && videoPlayer.time < videoPlayer.length)
             {
-                videoPlayer.SetDirectAudioVolume(0, (0.0f, 0.3f).Slerp((float)(videoPlayer.length - videoPlayer.time)));
+                videoPlayer.SetDirectAudioVolume(0, (0.0f, 0.3f).Interpolate((float)(videoPlayer.length - videoPlayer.time)));
                 yield return new WaitForFixedUpdate();
             }
             ForceEnd();
@@ -108,7 +145,7 @@ namespace BWChaos.Effects
 #endif
             yield return new WaitForSeconds(5.833f);
             if (!Active) yield break;
-            GlobalVariables.Player_Health.Death();
+            GlobalVariables.Player_Health?.Death();
         }
     }
 }

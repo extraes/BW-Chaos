@@ -27,33 +27,24 @@ namespace BWChaos.Effects
         public override void OnEffectUpdate()
         {
             Physics.gravity = -gravObject.up * 12f;
-            if (Time.frameCount % 4 == 0) SendNetworkData(string.Join(",", gravObject.position.Serialize(4)) + ";" + string.Join(",", gravObject.rotation.eulerAngles.Serialize(4)));
+            if (Time.frameCount % 4 == 0) SendNetworkData(gravObject.transform.SerializePosRot());
         }
 
-        public override void HandleNetworkMessage(string data)
-        {
-            MoveObj(data.Substring(1));
-        }
-
-        private void MoveObj(string data)
+        public override void HandleNetworkMessage(byte[] data)
         {
             #region Null check and debug log
 
             if (gravObject == null)
             {
 #if DEBUG
-                Chaos.Warn("gravObject is null, but it's trying to be moved!");
+                Chaos.Warn(nameof(gravObject) + " is null, but it's trying to be moved!");
 #endif
                 return;
             }
 
             #endregion
 
-            string[] vecs = data.Split(';');
-            Vector3 pos = Utilities.DeserializeV3(vecs[0]);
-            Vector3 eulerRot = Utilities.DeserializeV3(vecs[1]);
-            gravObject.position = pos;
-            gravObject.rotation = Quaternion.Euler(eulerRot);
+            gravObject.DeserializePosRot(data);
         }
 
         public override void OnEffectEnd()
