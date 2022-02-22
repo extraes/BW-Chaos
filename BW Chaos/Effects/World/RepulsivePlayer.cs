@@ -10,6 +10,8 @@ namespace BWChaos.Effects
 {
     internal class RepulsivePlayer : EffectBase
     {
+        [RangePreference(1, 10, 1)] public static int framesToWait = 4;
+        [RangePreference(0.125f, 10f, 0.125f)] public static float forceMultiplier = 0.5f;
         public RepulsivePlayer() : base("Repulsive player", 30, EffectTypes.LAGGY | EffectTypes.DONT_SYNC) { }
 
         private List<RepulseBehaviour> gameObjects = new List<RepulseBehaviour>();
@@ -48,9 +50,9 @@ namespace BWChaos.Effects
     {
         public RepulseBehaviour(IntPtr ptr) : base(ptr) { }
 
-        private static readonly float mult = 0.5f;
+        private static readonly float mult = RepulsivePlayer.forceMultiplier;
         //                         optuhmuhzayshun V
-        private static readonly int framesToWait = 4;
+        private static readonly int framesToWait = RepulsivePlayer.framesToWait;
         private static Transform target;
         private bool isNear = false;
         private Rigidbody rb;
@@ -65,7 +67,7 @@ namespace BWChaos.Effects
         // shoutouts to camobiwon for suggesting i use a pd controller (and sending link)
         public void FixedUpdate()
         {
-            if (!isNear || (Time.frameCount % framesToWait != 0)) return;
+            if (!isNear || (Time.frameCount % framesToWait != 0) || rb == null) return;
 
             // https://digitalopus.ca/site/pd-controllers/ lol
             float dt = Time.fixedDeltaTime;
@@ -86,10 +88,14 @@ namespace BWChaos.Effects
         {
             while (true)
             {
-                // null-check this because MelonCoroutines dont stop with a gameobject
-                if (this?.gameObject == null || !gameObject.active) yield break;
-                // dont do shit if we're not in 15m, and also dont do shit if we're being held by the player (or otherwise a part of the player)
-                isNear = ((target.position - gameObject.transform.position).sqrMagnitude < 15 * 15) && transform.root.name != "[RigManager (Default Brett)]";
+                try
+                {
+                    // null-check this because MelonCoroutines dont stop with a gameobject
+                    if (this?.gameObject == null || !gameObject.active) yield break;
+                    // dont do shit if we're not in 15m, and also dont do shit if we're being held by the player (or otherwise a part of the player)
+                    isNear = ((target.position - gameObject.transform.position).sqrMagnitude < 7 * 7) && !transform.IsChildOfRigManager();
+                }
+                catch { isNear = false; }
                 yield return new WaitForSecondsRealtime(1);
             }
         }

@@ -10,6 +10,8 @@ namespace BWChaos.Effects
 {
     internal class MagneticPlayer : EffectBase
     {
+        [RangePreference(1, 10, 1)] public static int framesToWait = 4;
+        [RangePreference(0.125f, 10f, 0.125f)] public static float forceMultiplier = 0.5f;
         public MagneticPlayer() : base("Magnetic player", 30, EffectTypes.LAGGY | EffectTypes.DONT_SYNC) { }
 
         private List<MagnetBehaviour> gameObjects = new List<MagnetBehaviour>();
@@ -48,8 +50,8 @@ namespace BWChaos.Effects
     {
         public MagnetBehaviour(IntPtr ptr) : base(ptr) { }
 
-        private static readonly float mult = 0.5f;
-        private static readonly int framesToWait = 4;
+        private static readonly float mult = MagneticPlayer.forceMultiplier;
+        private static readonly int framesToWait = MagneticPlayer.framesToWait;
         private static Transform target;
         private bool isNear = false;
         private Rigidbody rb;
@@ -84,8 +86,14 @@ namespace BWChaos.Effects
         {
             while (true)
             {
-                if (this?.gameObject == null || !gameObject.active) yield break;
-                isNear = ((target.position - gameObject.transform.position).sqrMagnitude < 10 * 10) && transform.root.name != "[RigManager (Default Brett)]";
+                try
+                {
+                    // null-check this because MelonCoroutines dont stop with a gameobject
+                    if (this?.gameObject == null || !gameObject.active) yield break;
+                    // dont do shit if we're not in 15m, and also dont do shit if we're being held by the player (or otherwise a part of the player)
+                    isNear = ((target.position - gameObject.transform.position).sqrMagnitude < 7 * 7) && !transform.IsChildOfRigManager();
+                }
+                catch { isNear = false; }
                 yield return new WaitForSecondsRealtime(1);
             }
         }

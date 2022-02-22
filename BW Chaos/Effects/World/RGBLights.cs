@@ -11,6 +11,7 @@ namespace BWChaos.Effects
     {
         // Because instead of making RGBLights open source, I decided to do this. - extraes
         public RGBLights() : base("RGB-ify lights") { }
+        [RangePreference(0.125f, 2f, 0.125f)] public static float colorCycleTime = 1f;
 
         public override void OnEffectStart()
         {
@@ -31,7 +32,7 @@ namespace BWChaos.Effects
 
         Light light = null;
         bool foundBeamGeo = false;
-        float cycleTime = 1f;
+        float cycleTime = RGBLights.colorCycleTime;
         public void Start()
         {
             light = this.gameObject.GetComponent<Light>();
