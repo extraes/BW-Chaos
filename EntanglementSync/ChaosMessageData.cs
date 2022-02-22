@@ -1,72 +1,13 @@
 ﻿using BWChaos.Effects;
-using Entanglement.Modularity;
 using Entanglement.Network;
-using System.Text;
 
 namespace BWChaos.Sync
 {
-    public class ChaosSyncHandler : EntanglementModule
+    public class ChaosMessageData : NetworkMessageData
     {
-        public static readonly byte mIndex = 99; // 99 because c in binary is 99 :^)
-        public static byte[] thisVersion = new byte[3];
-        public static bool alreadyVersionWarned;
-
-        public override void OnModuleLoaded()
-        {
-            ModuleLogger.Msg("Chaos sync module loaded!");
-
-            // Attach version information to each message because I don't want to do handshaking
-            string[] versions = BuildInfo.Version.Split('.');
-            for (int i = 0; i < thisVersion.Length; i++) thisVersion[i] = byte.Parse(versions[i]);
-            // sorry low data enthusiasts, this is an extraes moment
-
-            NetworkMessage.RegisterHandler<ChaosMessageHandler>();
-
-            Chaos.InjectEffect<EntangleEffect>();
-            Chaos.InjectEffect<PlayerRepresenting>();
-            Chaos.InjectEffect<PlayerRepresenting>();
-
-            Chaos.OnEffectRan += OnEffectRan;
-            EffectBase._sendData += SendEffectData;
-        }
-        
-
-        private void OnEffectRan(EffectBase effect)
-        {
-            if (Node.activeNode.connectedUsers.Count == 0 || !Node.isServer) return;
-            if (effect.isNetworked) return;
-
-            if (!IsEffectSyncable(effect.Types))
-            {
-                ModuleLogger.Msg("Not going to sync " + effect.Name);
-                Utilities.SpawnAd($"Not gonna sync this effect lol:\n{effect.Name}");
-                return;
-            }
-
-            // send data
-            var cmd = new ChaosMessageData 
-            { 
-                type = EffectBase.NetMsgType.START, 
-                effectIndex = 0, // starting an effect doesnt need an index cause the effect is found via its name
-                syncData = Encoding.ASCII.GetBytes(effect.Name) 
-            };
-            var msg = NetworkMessage.CreateMessage(mIndex, cmd);
-            ModuleLogger.Msg("Telling Entanglement to sync effect: " + effect.Name);
-            Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
-        }
-
-        private bool IsEffectSyncable(EffectBase.EffectTypes types)
-        {
-            return !(types.HasFlag(EffectBase.EffectTypes.USE_STEAM) || types.HasFlag(EffectBase.EffectTypes.AFFECT_STEAM_PROFILE) || types.HasFlag(EffectBase.EffectTypes.DONT_SYNC));
-        }
-
-
-        private static void SendEffectData(EffectBase.NetMsgType msgType, byte index, byte[] data)
-        {
-            if (Node.activeNode.connectedUsers.Count == 0) return;
-            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { type = msgType, effectIndex = index, syncData = data });
-            Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
-        }
+        public EffectBase.NetMsgType type;
+        public byte effectIndex;
+        public byte[] syncData;
     }
 
     //public class ChaosMessageData : INetworkSerializable

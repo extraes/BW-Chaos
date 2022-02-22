@@ -1,71 +1,109 @@
 ﻿using BWChaos.Effects;
+using Discord;
 using Entanglement.Modularity;
 using Entanglement.Network;
+using ModThatIsNotMod;
+using System;
+using System.Linq;
 using System.Text;
 
 namespace BWChaos.Sync
 {
-    public class ChaosSyncHandler : EntanglementModule
+    public class ChaosMessageHandler : NetworkMessageHandler
     {
-        public static readonly byte mIndex = 99; // 99 because c in binary is 99 :^)
-        public static byte[] thisVersion = new byte[3];
-        public static bool alreadyVersionWarned;
+        public override byte? MessageIndex { get; } = ChaosSyncHandler.mIndex;
 
-        public override void OnModuleLoaded()
+        public override NetworkMessage CreateMessage(NetworkMessageData data)
         {
-            ModuleLogger.Msg("Chaos sync module loaded!");
+            if (!(data is ChaosMessageData)) throw new Exception("Unexpected msgdata type");
+            var cmd = data as ChaosMessageData;
 
-            // Attach version information to each message because I don't want to do handshaking
-            string[] versions = BuildInfo.Version.Split('.');
-            for (int i = 0; i < thisVersion.Length; i++) thisVersion[i] = byte.Parse(versions[i]);
-            // sorry low data enthusiasts, this is an extraes moment
-
-            NetworkMessage.RegisterHandler<ChaosMessageHandler>();
-
-            Chaos.InjectEffect<EntangleEffect>();
-            Chaos.InjectEffect<PlayerRepresenting>();
-            Chaos.InjectEffect<PlayerRepresenting>();
-
-            Chaos.OnEffectRan += OnEffectRan;
-            EffectBase._sendData += SendEffectData;
-        }
-        
-
-        private void OnEffectRan(EffectBase effect)
-        {
-            if (Node.activeNode.connectedUsers.Count == 0 || !Node.isServer) return;
-            if (effect.isNetworked) return;
-
-            if (!IsEffectSyncable(effect.Types))
+            byte[] bytes = new byte[][] 
             {
-                ModuleLogger.Msg("Not going to sync " + effect.Name);
-                Utilities.SpawnAd($"Not gonna sync this effect lol:\n{effect.Name}");
-                return;
+                ChaosSyncHandler.thisVersion,
+                new byte[] { (byte)cmd.type, cmd.effectIndex },
+                cmd.syncData,
+            }.Flatten();
+
+            var msg = new NetworkMessage
+            {
+                messageType = MessageIndex.Value,
+                messageData = bytes,
+            };
+            return msg;
+        }
+
+        // message.data format:
+        //  zero based
+        //  0-2=version, 3=NetMsgType, 4=idx, 5-end=data
+        //  one based
+        //  1-3=version, 4=NetMsgType, 5=idx, 6-end=data
+        public override void HandleMessage(NetworkMessage message, long sender)
+        {
+            // Makes sure same bw chaos version
+            var msgVer = message.messageData.Take(3);
+            if (!msgVer.SequenceEqual(ChaosSyncHandler.thisVersion))
+            {
+                if (!ChaosSyncHandler.alreadyVersionWarned)
+                {
+                    ChaosSyncHandler.alreadyVersionWarned = true;
+
+                    DiscordIntegration.userManager.GetUser(sender, (Result res, ref User user) =>
+                    {
+                        var name = "ID" + sender.ToString();
+                        if (res == Result.Ok) name = user.Username;
+
+                        string verMismatch1 = $"BW Chaos version mismatch (you: {string.Join(",", ChaosSyncHandler.thisVersion)}, {name}: {string.Join(",", msgVer)})";
+                        string verMismatch2 = $"This causes a mismatch with effect syncing! Do not expect this to function properly!";
+                        Notifications.SendNotification(verMismatch1, 8);
+                        Notifications.SendNotification(verMismatch2, 5);
+                        ModuleLogger.Msg(verMismatch1 + " " + verMismatch2);
+                    });
+                }
             }
 
-            // send data
-            var cmd = new ChaosMessageData 
-            { 
-                type = EffectBase.NetMsgType.START, 
-                effectIndex = 0, // starting an effect doesnt need an index cause the effect is found via its name
-                syncData = Encoding.ASCII.GetBytes(effect.Name) 
-            };
-            var msg = NetworkMessage.CreateMessage(mIndex, cmd);
-            ModuleLogger.Msg("Telling Entanglement to sync effect: " + effect.Name);
-            Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
-        }
+            EffectBase.NetMsgType type = (EffectBase.NetMsgType)message.messageData[3];
+            byte idx = message.messageData[4];
+            byte[] data = new byte[message.messageData.Length - 5];
+            Buffer.BlockCopy(message.messageData, 5, data, 0, data.Length);
 
-        private bool IsEffectSyncable(EffectBase.EffectTypes types)
-        {
-            return !(types.HasFlag(EffectBase.EffectTypes.USE_STEAM) || types.HasFlag(EffectBase.EffectTypes.AFFECT_STEAM_PROFILE) || types.HasFlag(EffectBase.EffectTypes.DONT_SYNC));
-        }
+            if (Node.isServer)
+            {
+                if (type == EffectBase.NetMsgType.START)
+                {
+                    ModuleLogger.Msg("The hell is bozo " + sender + " over there doing trying to start shit? I'm the server!");
+                    return;
+                }
+                else
+                {
+                    (Node.activeNode as Server).BroadcastMessageExcept(NetworkChannel.Reliable, message.messageData, sender);
+                }
+                
+            }
 
+#if DEBUG
+            // DONT CARE ABOUT SENDER LOL BUT LOG IT ANYWAY
+            ModuleLogger.Msg(sender.ToString() + " told us " + data);
+#endif
 
-        private static void SendEffectData(EffectBase.NetMsgType msgType, byte index, byte[] data)
-        {
-            if (Node.activeNode.connectedUsers.Count == 0) return;
-            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { type = msgType, effectIndex = index, syncData = data });
-            Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
+            switch (type)
+            {
+                case EffectBase.NetMsgType.START:
+                    var eName = Encoding.ASCII.GetString(data);
+                    if (EffectHandler.AllEffects.TryGetValue(eName, out EffectBase eObj))
+                    {
+                        var eToRun = (EffectBase)Activator.CreateInstance(eObj.GetType());
+                        eToRun.isNetworked = true;
+                        eToRun.Run();
+                    }
+                    else
+                        Utilities.SpawnAd("'" + eName + "' isn't an effect you have, so it won't run, just enjoy the show!");
+                    break;
+
+                default:
+                    EffectBase._dataRecieved?.Invoke(type, idx, data);
+                    break;
+            }
         }
     }
 
