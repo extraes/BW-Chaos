@@ -46,4 +46,4 @@ using System.Runtime.InteropServices;
 // 4 = the author
 // 5 = the abbreviation, basically what it's logged as (optional)
 
-[assembly: EntanglementModuleInfo(typeof(BWChaos.Sync.ChaosSyncHandler), "BW Chaos", "0.0.0", "Extraes", "Chaos")]
+[assembly: EntanglementModuleInfo(typeof(BWChaos.Sync.ChaosSyncHandler), "BWChaos", "2.2.1", "extraes", "Chaos")]
