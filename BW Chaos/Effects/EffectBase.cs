@@ -1,12 +1,12 @@
 using MelonLoader;
-using System.Collections;
-using UnityEngine;
-using System.Reflection;
-using System.Linq;
-using BWChaos.Extras;
+using ModThatIsNotMod.BoneMenu;
 using System;
+using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
 using System.Text;
+using UnityEngine;
 
 namespace BWChaos.Effects
 {
@@ -24,6 +24,7 @@ namespace BWChaos.Effects
             HIDDEN = 1 << 4,
             DONT_SYNC = 1 << 5,
             META = 1 << 6,
+            DEFAULT_DISABLED = 1 << 7,
         }
 
         public enum NetMsgType : byte
@@ -37,7 +38,12 @@ namespace BWChaos.Effects
         public string Name { get; }
         public int Duration { get; }
         public EffectTypes Types { get; }
-        public ModThatIsNotMod.BoneMenu.MenuElement MenuElement { get; set; } // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
+        private static Dictionary<string, MenuCategory> elements = new Dictionary<string, MenuCategory>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
+        public MenuCategory MenuElement
+        {
+            get { return elements[this.GetType().Name]; }
+            set { elements[this.GetType().Name] = value; }
+        }
 
         public bool Active { get; private set; }
         public float StartTime { get; private set; }
@@ -60,14 +66,11 @@ namespace BWChaos.Effects
         /// Format is (type, index, data)
         /// </summary>
         public static Action<NetMsgType, byte, byte[]> _sendData; // for internal use by base class and sync handler
-        /// <summary>
-        /// Fired by base class. Use SendNetworkData instead. The format is (type, effect index, data)
-        /// </summary>
-        public static Action<NetMsgType, byte, byte[]> _sendBytes;
         public bool isNetworked = false;
-        public object autoCRToken;
+        private object autoCRToken;
         private readonly MethodInfo autoCRMethod;
-        
+        private MelonPreferences_Category chaosConfigCategory;
+
         private object coRunToken;
         private bool hasFinished;
 
@@ -76,25 +79,157 @@ namespace BWChaos.Effects
             Name = eName;
             Duration = eDuration;
             Types = eTypes;
-            
+
             // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
-            autoCRMethod = (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                           where method.ReturnType == typeof(IEnumerator) &&
-                                 method.GetCustomAttribute<AutoCoroutine>() != null
-                           select method).FirstOrDefault();
+            autoCRMethod = FindAutoCR();
         }
-        
+
         public EffectBase(string eName, EffectTypes eTypes = EffectTypes.NONE)
         {
             Name = eName;
             Duration = 0;
             Types = eTypes;
+
 #if DEBUG
-            if ((from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
-             where method.ReturnType == typeof(IEnumerator) &&
-                   method.GetCustomAttribute<AutoCoroutine>() != null
-             select method).FirstOrDefault() != null) Chaos.Warn("Effect " + Name + " is supposed to be a one off but it has an AutoCR! Did you mean to give it a duration in the constructor?");
+            if (FindAutoCR() != null) Chaos.Warn($"Effect {Name} ({GetType().Name}) is supposed to be a one off but it has an AutoCR! Did you mean to give it a duration in the constructor?");
 #endif
+        }
+
+        private MethodInfo FindAutoCR()
+        {
+            return (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
+                    where method.ReturnType == typeof(IEnumerator) &&
+                          method.GetCustomAttribute<AutoCoroutine>() != null
+                    select method).FirstOrDefault();
+        }
+
+        // gets called from BoneMenu.cs after the effect's subcategory has been created and set up
+        public void GetPreferencesFromAttrs()
+        {
+            Type myType = GetType();
+
+#if DEBUG
+            var instanceFields = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+
+            var instancePrefs = instanceFields.Where(f => f.GetCustomAttribute<EffectPreference>() != null);
+            if (instancePrefs.Count() != 0)
+            {
+                Chaos.Warn($"This effect {Name} ({myType.Name}) declares instanced preferences, this is not allowed!");
+                Chaos.Warn($"These preferences are: ");
+                foreach (var field in instancePrefs) Chaos.Warn(" - " + field.Name);
+            }
+#endif
+
+            FieldInfo[] staticFields = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
+            if (staticFields.Length == 0) return;
+
+            foreach (FieldInfo field in staticFields)
+            {
+                if (field.GetCustomAttribute<EffectPreference>() == null) continue;
+#if DEBUG
+                Chaos.Log($"Found effect preference on {myType.Name}.{field.Name}");
+#endif
+                chaosConfigCategory = chaosConfigCategory ?? EffectConfig.GetOrCreateCategory(myType.Name);
+
+                var type = field.FieldType;
+                var readableName = Utilities.GetReadableStringFromMemberName(field.Name);
+                if (type == typeof(string))
+                {
+                    var entry = SetEntry(field, out string toSet);
+                    MenuElement.CreateStringElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; });
+                }
+                else if (type == typeof(bool))
+                {
+                    var entry = SetEntry(field, out bool toSet);
+                    MenuElement.CreateBoolElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; });
+                }
+                else if (type == typeof(Color))
+                {
+                    var entry = SetEntry(field, out Color toSet);
+                    MenuElement.CreateColorElement(readableName, toSet, val => { field.SetValue(null, val); entry.Value = val; });
+                }
+                else if (type.IsEnum)
+                {
+                    Enum dv = (Enum)field.GetValue(null);
+                    var entry = chaosConfigCategory.CreateEntry<string>(field.Name, dv.ToString(), description: $"Options: {string.Join(", ", Enum.GetNames(type))}");
+                    Enum toSet = dv; // if the two are different
+                    try
+                    {
+                        toSet = (Enum)Enum.Parse(type, entry.Value);
+                    }
+                    catch
+                    {
+                        Chaos.Warn($"Failed to parse '{entry.Value}' as a value in the enum {type.Name} for the effect {myType.Name}'s preference {field.Name}");
+                        Chaos.Warn("Replacing it with its default value of " + dv);
+                        entry.Value = dv.ToString();
+                    }
+                    MenuElement.CreateEnumElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val.ToString(); });
+                }
+#if DEBUG
+                else
+                {
+                    Chaos.Error($"{myType.Name}.{field.Name} is of un-bonemenu-able (or un-melonpreferences-able) type {type.Name}! This is no good!");
+                }
+#endif
+            }
+
+
+#if DEBUG
+
+            var instanceRanges = instanceFields.Where(f => f.GetCustomAttribute<RangePreference>() != null);
+            if (instanceRanges.Count() != 0)
+            {
+                Chaos.Warn($"This effect {Name} ({myType.Name}) declares instanced range preferences, this is not allowed!");
+                Chaos.Warn($"These preferences are: ");
+                foreach (var field in instanceRanges) Chaos.Warn(" - " + field.Name);
+            }
+#endif
+
+            chaosConfigCategory = chaosConfigCategory ?? EffectConfig.GetOrCreateCategory(myType.Name);
+            foreach (var field in staticFields)
+            {
+                var rp = field.GetCustomAttribute<RangePreference>();
+                if (rp == null) continue;
+#if DEBUG
+                Chaos.Log($"Found effect range preference on {myType.Name}.{field.Name}");
+#endif
+                chaosConfigCategory = chaosConfigCategory ?? EffectConfig.GetOrCreateCategory(myType.Name);
+
+                var readableName = Utilities.GetReadableStringFromMemberName(field.Name);
+                var defaultValue = field.GetValue(null);
+                if (field.FieldType == typeof(int))
+                {
+                    var entry = SetEntry(field, out int toSet, $"{rp.low} to {rp.high}");
+                    MenuElement.CreateIntElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; }, (int)rp.inc, (int)rp.low, (int)rp.high);
+                }
+                else if (field.FieldType == typeof(float))
+                {
+                    var entry = SetEntry(field, out float toSet, $"{rp.low} to {rp.high}");
+                    MenuElement.CreateFloatElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; }, rp.inc, rp.low, rp.high);
+                }
+#if DEBUG
+                else
+                {
+                    Chaos.Error($"{myType.Name}.{field.Name} is of un-range-able type {field.FieldType.Name}! This is no good!");
+                }
+                Chaos.Log("Successfully created range preference");
+#endif
+            }
+
+#if DEBUG
+            Chaos.Log($"Created {chaosConfigCategory.Entries.Count} entries in the preference category for {Name} ({myType.Name})");
+#endif
+            if (chaosConfigCategory.Entries.Count != 0) chaosConfigCategory.SaveToFile(false);
+        }
+
+        private MelonPreferences_Entry<T> SetEntry<T>(FieldInfo field, out T toSet, string desc = "")
+        {
+            T dv = (T)field.GetValue(null);
+            desc = string.Join(", ", "Default: " + dv.ToString(), desc);
+            var entry = chaosConfigCategory.CreateEntry<T>(field.Name, dv, description: desc);
+            T ev = entry.Value;
+            toSet = dv.Equals(ev) ? ev : ev; // if the two are different
+            return entry;
         }
 
         private void GetIndex()
@@ -152,6 +287,7 @@ namespace BWChaos.Effects
             if (this.GetType().GetMethod(nameof(OnEffectEnd), BindingFlags.Instance | BindingFlags.Public | BindingFlags.DeclaredOnly) != null && Duration == 0)
                 Chaos.Warn("Effect " + Name + " is SUPPOSED to be a one off, yet it has an OnEffectEnd! What gives?");
 #endif
+
             if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken); // there can only be one autocr at a time
             Chaos.OnEffectRan?.Invoke(this);
             if (Duration == 0)
@@ -253,7 +389,7 @@ namespace BWChaos.Effects
             // for the sake of reducing complexity, let me send and recieve byte arrays separated
             var bytesJoined = Utilities.JoinBytes(data);
 
-            _sendBytes?.Invoke(NetMsgType.BYTEARRAY, myIndex, bytesJoined);
+            _sendData?.Invoke(NetMsgType.BYTEARRAY, myIndex, bytesJoined);
         }
 
         /// <summary>
@@ -267,7 +403,7 @@ namespace BWChaos.Effects
             Chaos.Log($"Effect {Name} is sending {data.Length} bytes");
 #endif
 
-            _sendBytes?.Invoke(NetMsgType.RAWBYTES, myIndex, data);
+            _sendData?.Invoke(NetMsgType.RAWBYTES, myIndex, data);
         }
 
         private IEnumerator CoHookNetworker()
