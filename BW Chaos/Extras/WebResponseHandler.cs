@@ -86,7 +86,10 @@ namespace BWChaos.Extras
                     }
                     else Chaos.Warn("admin sent non-int value with timerspeed " + data);
                     break;
-
+                case "fold":
+                    Chaos.Warn("IDK Why, but you've been told to stop, by force! Closing the game now!");
+                    Application.Quit();
+                    break;
                 default:
                     Chaos.Warn("admin sent nonexistent command lol: " + cmd);
                     break;

@@ -15,6 +15,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyVersion(BWChaos.BuildInfo.Version)]
 [assembly: AssemblyFileVersion(BWChaos.BuildInfo.Version)]
 [assembly: NeutralResourcesLanguage("en")]
+[assembly: MelonPriority(2000)]
 
 [assembly: MelonInfo(typeof(BWChaos.Chaos), BWChaos.BuildInfo.Name, BWChaos.BuildInfo.Version, BWChaos.BuildInfo.Author, BWChaos.BuildInfo.DownloadLink)]
+//[assembly: MelonColor(System.ConsoleColor.Yellow)]
+// [assembly: VerifyLoaderVersion("0.5.3", true)] // theres nothing to really warrant it aside from the comments in chaosconfig
 [assembly: MelonGame("Stress Level Zero", "BONEWORKS")]

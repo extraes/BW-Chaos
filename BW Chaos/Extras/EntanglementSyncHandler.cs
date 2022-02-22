@@ -24,7 +24,7 @@ namespace BWChaos.Extras
             if (entanglementAssembly == null)
             {
                 try { Utilities.SpawnAd("Entanglement wasn't found! Is it installed?"); } catch { }
-                throw new DllNotFoundException("Couldn't find Entanglement!");
+                throw new DllNotFoundException("Couldn't find Entanglement! Did you mean to set syncEffectsViaEntanglement to false?");
             }
 
             // Then get the ModuleHandler dynamically
@@ -38,21 +38,14 @@ namespace BWChaos.Extras
             if (setupModuleMethod == null) throw new MissingMethodException("Failed to find SetupModule()");
 
             // Then load our embedded module
-            Assembly thisAssembly = Assembly.GetExecutingAssembly();
-            string[] manifestResources = thisAssembly.GetManifestResourceNames();
-
             // Layout for resources is basically YOUR_ASSEMBLY.FOLDER.FILE.EXTENSION
             byte[] moduleRaw = null;
+            Assembly moduleAssembly;
 
-            using (Stream str = thisAssembly.GetManifestResourceStream("BWChaos.Resources.EntanglementSync.dll"))
-            using (MemoryStream memoryStream = new MemoryStream())
-            {
-                str.CopyTo(memoryStream);
-                moduleRaw = memoryStream.ToArray();
-            }
+            Chaos.Assembly.UseEmbeddedResource("BWChaos.Resources.EntanglementSync.dll", b => moduleRaw = b);
+            moduleAssembly = Assembly.Load(moduleRaw);
 
             // Load it into the appdomain
-            Assembly moduleAssembly = Assembly.Load(moduleRaw);
             Chaos.Log("Syncing is enabled and Entanglement was found! So far so good! Now we give Entanglement our handler!");
             // Then call the setup method reflectively
             setupModuleMethod.Invoke(null, new object[] { moduleAssembly });
