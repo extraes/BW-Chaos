@@ -15,8 +15,6 @@ namespace BWChaos
     {
         public EffectHandler(IntPtr ptr) : base(ptr) { }
 
-        public static bool randomOnNoVotes = false;
-
         public static Dictionary<string, EffectBase> AllEffects = new Dictionary<string, EffectBase>();
         public static EffectHandler Instance;
         public static bool advanceTimer = false;
@@ -44,6 +42,10 @@ namespace BWChaos
         private Image[] voteBars = new Image[5];
 
         #endregion
+
+#if DEBUG
+        private List<string> ranEffects = new List<string>();
+#endif
 
         public void Start()
         {
@@ -100,7 +102,7 @@ namespace BWChaos
             // foreach throws "System.InvalidOperationException: Collection was modified; enumeration operation may not execute."
             // maybe this will fix?
             
-            for (int i = 0;  GlobalVariables.ActiveEffects.Count != 0; i++)
+            for (int i = 0; GlobalVariables.ActiveEffects.Count != 0; i++)
             {
 #if DEBUG
                 Chaos.Log($"Iteration: {i}, Ending effect {GlobalVariables.ActiveEffects[0]?.Name ?? "null (wha?)"}");
@@ -116,10 +118,10 @@ namespace BWChaos
 
         public void Update()
         {
-            string newString = GlobalVariables.PreviousEffects.Join("\n") + "\n";
+            string newString = GlobalVariables.PreviousEffects.Take(7 - GlobalVariables.ActiveEffects.Count).Join("\n") + "\n";
             //newString += GlobalVariables.PreviousEffects.Join("\n");
             // Hide hidden effects (Like FakeCrash) from the player
-            List<string> activeTags = new List<string>();
+            List<string> activeTags = new List<string>(4);
             foreach (EffectBase e in GlobalVariables.ActiveEffects)
             {
                 activeTags.Clear();
@@ -187,7 +189,24 @@ namespace BWChaos
 
                 if (currentTimerValue >= secondsEachEffect)
                 {
-                    RunVotedEffect();
+#if !DEBUG
+                    try 
+                    { 
+#endif
+                        RunVotedEffect();
+#if !DEBUG
+                    }
+                    catch(Exception ex) 
+                    {
+                        Chaos.Error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        Chaos.Error("Error occurred while running effect! Exception details below:");
+                        Chaos.Error(ex);
+                        Chaos.Error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        Chaos.Error("Tell extraes#2048 on the BONEWORKS Discord server!");
+                        ModThatIsNotMod.Notifications.SendNotification("Failed to run an effect!\nSend a log in the BW server and ping extraes#2048!", 10);
+                    }
+#endif
+
                     ResetEffectCandidates();
                     voteText.text = string.Empty;
                 }
@@ -216,9 +235,51 @@ namespace BWChaos
             for (float i = 0; i < 1; i += 0.05f)
             {
                 if (img == null) yield break; // null check because i dont want to do ondestroy shit
-                img.fillAmount = tup.Slerp(i);
-                yield return new WaitForFixedUpdate();
+                img.fillAmount = tup.Interpolate(i);
+                yield return null;
             }
+        }
+
+        private IEnumerator ScrollNewCandidates(string[] newLinesOriginal) 
+        {
+            yield return null;
+            if (candidateText?.text == null) yield break;
+
+            string[] oldLines = candidateText.text.Split('\n');
+            int longestLine = 0;
+            foreach(string line in oldLines) if (line.Length > longestLine) longestLine = line.Length; // this line was written entirely by VS2022 autocomplete, hell yea
+
+            //Chaos.Log($"Starting loop - longest line is {longestLine} characters");
+            for (int i = 0; i < longestLine; i++)
+            {
+                for (int y = 0; y < oldLines.Length; y++)
+                {
+                    string line = oldLines[y];
+                    //Chaos.Log($"grabbed line {}")
+                    if (line.Length == 0) continue; // avoid indexoutofboundsexception
+                    oldLines[y] = line.Substring(0, line.Length); // trim one off the top
+                }
+                if (candidateText?.text == null) yield break;
+                candidateText.text = string.Join("\n", oldLines);
+                yield return null;
+            }
+
+            string[] newLines = newLinesOriginal.ToArray();
+            foreach(string line in newLines) if (line.Length > longestLine) longestLine = line.Length; // reuse longestLine
+
+            for (int i = 1; i < longestLine; i++)
+            {
+                for (int y = 0; y < newLines.Length; y++)
+                {
+                    string line = newLinesOriginal[y];
+                    if (line.Length < i) continue; // avoid indexoutofboundsexception
+                    newLines[y] = line.Substring(0, i); // trim one off the top
+                }
+                if (candidateText?.text == null) yield break;
+                candidateText.text = string.Join("\n", newLines);
+                yield return null;
+            }
+            candidateText.text = string.Join("\n", newLinesOriginal);
         }
 
         private void RunVotedEffect()
@@ -235,7 +296,7 @@ namespace BWChaos
 #endif
             Type votedType;
             // return if the top voted effect has no votes & modpref is set to not run on no votes
-            if (voted.Item2 == 0 && !randomOnNoVotes) return;
+            if (voted.Item2 == 0 && !Prefs.RandomOnNoVotes) return;
             if (voted.Item1 == 4 || voted.Item2 == 0)
             {
                 // Get a random effect from the dictionary
@@ -251,6 +312,11 @@ namespace BWChaos
             }
             EffectBase eff = (EffectBase)Activator.CreateInstance(votedType);
             eff.Run();
+
+#if DEBUG
+            if (!ranEffects.Contains(eff.Name)) ranEffects.Add(eff.Name);
+            Chaos.Log($"Out of {AllEffects.Count} enabled effects ({Chaos.asmEffects.Count} in assembly), {ranEffects.Count} have been ran so far. ({AllEffects.Count - ranEffects.Count} to go)");
+#endif
 
             // Sometimes the timer/wristcanvas gets fucky with its offsets, so reinforce them here
             wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -358,7 +424,9 @@ namespace BWChaos
 
             if (Prefs.ShowCandidatesOnScreen && advanceTimer)
             {
-                candidateText.text = string.Join("\n", botMesssage.Split('\n').Skip(1)); // Skip the first line of botmessage
+                var lines = botMesssage.Split('\n').Skip(1).ToArray();
+                if (Prefs.ScrollCandidates) MelonCoroutines.Start(ScrollNewCandidates(lines));
+                else candidateText.text = string.Join("\n", lines);
                 overlayImage.rectTransform.anchoredPosition = overlayImagePos_Candidates;
             }
             else
