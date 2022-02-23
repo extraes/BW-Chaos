@@ -28,10 +28,9 @@ namespace BWChaos
         public static Camera[] Cameras;
 
         public static AudioMixerGroup MusicMixer;
+        public static AudioMixerGroup SFXMixer;
 
         public static AssetBundle EffectResources;
         public static IReadOnlyList<string> ResourcePaths;
-
-        public static Chaos thisChaos; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
     }
 }

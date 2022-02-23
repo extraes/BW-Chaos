@@ -20,23 +20,28 @@ namespace BWChaos
         public const string Name = "BWChaos";
         public const string Author = "extraes, trev";
         public const string Company = null;
-        public const string Version = "2.2.0";
-        public const string DownloadLink = null;
+        public const string Version = "2.2.1";
+        public const string DownloadLink = "https://boneworks.thunderstore.io/package/BWChaosDevs/BW_Chaos/";
     }
 
-    public partial class Chaos : MelonMod
+
+
+    public class Chaos : MelonMod
     {
         internal static bool isSteamVer = !File.Exists(Path.Combine(Application.dataPath, "..", "Boneworks_Oculus_Windows64.exe"));
-        readonly static new Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
+        internal readonly static new Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
+        private static Chaos _instance;
+        public static Chaos Instance => _instance;
         internal static List<EffectBase> asmEffects = new List<EffectBase>();
         internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)>();
         public static Action<EffectBase> OnEffectRan;
 
+        private bool started = false;
         internal Process botProcess;
 
         public override void OnApplicationStart()
         {
-            GlobalVariables.thisChaos = this; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
+            _instance = this; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
             var allSW = Stopwatch.StartNew();
 
             #region Check datapath
@@ -53,6 +58,11 @@ namespace BWChaos
             // If MP's are gotten before they're registered in ML, an error is thrown.
             Prefs.Init();
             Prefs.Get();
+
+            if (Prefs.UseLaggyEffects && SystemInfo.graphicsMemorySize < 4000)
+            {
+                Chaos.Warn("You enabled laggy effects with less than 4gb VRAM! Texture changing effects use a lot of VRAM!");
+            }
 
             #endregion
 
@@ -122,7 +132,10 @@ namespace BWChaos
 
             #region Do misc startup thing(s)
 
+            var miscSW = Stopwatch.StartNew();
             BoneMenu.Register();
+            started = true;
+            miscSW.Stop();
 
             #endregion
 
@@ -133,18 +146,23 @@ namespace BWChaos
             LoggerInstance.Msg(ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.AllEffects.Count} to be used in Chaos.");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect initialization: {effectSW.ElapsedMilliseconds}ms");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect resource loading: {resSW.ElapsedMilliseconds}ms");
+            LoggerInstance.Msg(ConsoleColor.Blue, $" - Misc startup tasks: {miscSW.ElapsedMilliseconds}ms");
             if (Prefs.SyncEffects) LoggerInstance.Msg(ConsoleColor.Blue, $" - Entanglement module find & start: {syncSW.ElapsedMilliseconds}ms");
             if (Prefs.EnableRemoteVoting) LoggerInstance.Msg(ConsoleColor.Blue, $" - Remote voter unpack & start: {botSW.ElapsedMilliseconds}ms");
 
-            #endregion
+            #endregion   
         }
-
+        
         public override void OnApplicationQuit()
         {
             // If they were started, stop the clients and their processes.
             GlobalVariables.WatsonClient?.Stop();
             botProcess?.Kill();
             botProcess?.Dispose();
+
+            var cats = EffectConfig.rawCategories;
+            Log("Saving preferences for " + cats.Count + " effects");
+            foreach (var cat in cats) cat.SaveToFile(false);
         }
 
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
@@ -152,6 +170,9 @@ namespace BWChaos
             // you already know what the fuck goin on
             if (EffectHandler.AllEffects.Count < 1) while (true) { }
 
+#if DEBUG
+            var sw = Stopwatch.StartNew();
+#endif
             // Grab the necessary references when the scene starts. 
             GlobalVariables.Player_BodyVitals =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.BodyVitals>();
@@ -162,7 +183,9 @@ namespace BWChaos
             GlobalVariables.Player_PhysBody =
                 GameObject.FindObjectOfType<StressLevelZero.VRMK.PhysBody>();
             GlobalVariables.MusicMixer =
-                GameObject.FindObjectOfType<Data_Manager>().audioManager.audioMixer.FindMatchingGroups("Music").FirstOrDefault(m => m.name == "Music");
+                GameObject.FindObjectOfType<Data_Manager>().audioManager.audioMixer.FindMatchingGroups("Music").First();
+            GlobalVariables.SFXMixer =
+                GameObject.FindObjectOfType<Data_Manager>().audioManager.audioMixer.FindMatchingGroups("SFX").First();
             // Separate cameras because it's better this way, I think. It's more distinguishable even if it requires two lines to keep the two "in sync"
             GlobalVariables.SpectatorCam =
                 GameObject.Find("[RigManager (Default Brett)]/[SkeletonRig (GameWorld Brett)]/Head/FollowCamera").GetComponent<Camera>();
@@ -174,53 +197,64 @@ namespace BWChaos
 
             GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil").Prefab.GetComponent<AudioSource>().outputAudioMixerGroup =
                 GlobalVariables.MusicMixer;
+
+#if DEBUG
+            sw.Stop();
+            Chaos.Log("Found all globalvar's in " + sw.ElapsedMilliseconds + "ms");
+#endif
+            Physics.gravity = new Vector3(0,-9.81f,0);
         }
 
         public override void OnUpdate()
         {
             foreach (EffectBase effect in GlobalVariables.ActiveEffects)
                 effect.OnEffectUpdate();
-            WebResponseHandler.Callback(); // bitchass unity doesnt like me doing shit from the websocket method so here we are
+            Extras.WebResponseHandler.Callback(); // bitchass unity doesnt like me doing shit from the websocket method so here we are
         }
 
         // If MelonPreferences.cfg is saved while the game is open, make sure the changes are reflected in real time.
-        public override void OnPreferencesLoaded() => LiveUpdateEffects();
+        public override void OnPreferencesLoaded()
+        {
+            // ML 0.5.2 likes to do this cool thing where it calls OnPreferencesLoaded multiple times
+            // before it even runs OnApplicationStart, so we need to ML-proof this for some fucking reason.
+            if (started) LiveUpdateEffects();
+        }
 
 #if DEBUG
         private readonly int horizStart = 5;
         private readonly int vertStart = 25;
-        private readonly int width = 200;
-        private readonly int height = 25;
+        private readonly int width = 150;
+        private readonly int height = 20;
         private readonly int gap = 5;
         private string prevNetsim = "Send network data";
         // IMGUI for flatscreen debugging (for smoke testing new effects)
         public override void OnGUI()
         {
-            if (Prefs.enableIMGUI)
+            if (!Prefs.enableIMGUI) return;
+
+            var horizOffset = horizStart;
+            // because otherwise, it clips into unityexplorers top bar lol
+            var vertOffset = vertStart;
+            for (int i = 0; i < EffectHandler.AllEffects.Count; i++)
             {
-                var horizOffset = horizStart;
-                // because otherwise, it clips into unityexplorers top bar lol
-                var vertOffset = vertStart;
-                for (int i = 0; i < EffectHandler.AllEffects.Count; i++)
+                if (vertOffset + height + gap > Screen.height)
                 {
-                    if (vertOffset + height + gap > Screen.height)
-                    {
-                        vertOffset = vertStart;
-                        horizOffset += width + gap;
-                    }
-                    var e = EffectHandler.AllEffects.Values.ElementAt(i);
-                    if (GUI.Button(new Rect(horizOffset, vertOffset, width, height), e.Name)) e.Run();
-                    vertOffset += height + gap;
+                    vertOffset = vertStart;
+                    horizOffset += width + gap;
                 }
+                var e = EffectHandler.AllEffects.Values.ElementAt(i);
+                if (GUI.Button(new Rect(horizOffset, vertOffset, width, height), e.Name)) e.Run();
+                vertOffset += height + gap;
             }
-            
+
+
             // IDC if this looks like dogshit, its not going in release builds, so suck it up
             prevNetsim = GUI.TextField(new Rect(Screen.width - horizStart - width * 2, Screen.height - gap - height, width * 2, height), prevNetsim);
-            if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 2 * (gap + height), width * 2, height), "Send (name>data)"))
+            if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 2 * (gap + height), width * 2, height), "Send (idx>data) (ONLY sends NetMsgType.STRING data)"))
             {
-                var nsdata = Utilities.Argsify(prevNetsim, '>');
+                string[] nsdata = prevNetsim.Split('>');
                 if (EffectBase._dataRecieved == null) Warn("There are no listeners for network data active right now");
-                else EffectBase._dataRecieved.Invoke(nsdata[0], nsdata[1]);
+                else EffectBase._dataRecieved.Invoke(NetMsgType.STRING, byte.Parse(nsdata[0]), Encoding.ASCII.GetBytes(nsdata[1]));
             }
             if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 3 * (gap + height), width * 2, height), "Start server"))
             {
@@ -262,9 +296,9 @@ namespace BWChaos
                     break;
                 case "web":
 #if DEBUG
-                    Chaos.Log("Recieved from webserver: " + messageData);
+                    Chaos.Log("Recieved from webserver: " + messageData); 
 #endif
-                    WebResponseHandler.GotData(messageData.Trim());
+                    Extras.WebResponseHandler.GotData(messageData.Trim());
                     break;
 
                 default:
@@ -329,7 +363,11 @@ namespace BWChaos
             {
                 // Get all effects from the assembly
                 asmEffects = (from t in Assembly.GetTypes()
-                              where t.BaseType == typeof(EffectBase) && t != typeof(Template)
+                              where t.BaseType == typeof(EffectBase)
+                                    && t != typeof(Template)
+#if DEBUG
+                                    && !t.CustomAttributes.Any(a => a.AttributeType == typeof(DontRegisterEffect)) // DontRegisterEffect's shouldnt even be pressent in release builds
+#endif
                               select (EffectBase)Activator.CreateInstance(t)).ToList();
             }
             else
@@ -370,8 +408,6 @@ namespace BWChaos
                 }
 
                 EffectHandler.AllEffects.Add(str, effect);
-
-
             }
 
             #region Local function because fuck you
@@ -392,29 +428,45 @@ namespace BWChaos
         {
             foreach (var tuple in eTypesToPrefs)
                 if (eTypes.HasFlag(tuple.Item1) && !tuple.Item2) return false; //todid: this fucking works?????
-
             return true;
         }
 
         internal static void LiveUpdateEffects()
         {
             // I'm not sure what this would do, but it probably doesn't hurt...
-            EffectHandler.Instance.gameObject.SetActive(false);
+            EffectHandler.Instance?.gameObject.SetActive(false);
             PopulateEffects();
             foreach (var e in GlobalVariables.ActiveEffects.Where(e => !IsEffectViable(e.Types))) e.ForceEnd();
-            EffectHandler.Instance.gameObject.SetActive(true);
+            EffectHandler.Instance?.gameObject.SetActive(true);
         }
 
         #endregion
 
+        public static void InjectEffect<T>() where T : EffectBase
+        {
+            var e = Activator.CreateInstance<T>();
+            asmEffects.Add(e);
+            EffectHandler.AllEffects.Add(e.Name, e);
+            if (Instance.started) e.GetPreferencesFromAttrs();
+        }
+
+        public static void InjectEffect(Type type)
+        {
+            if (type.BaseType != typeof(EffectBase)) throw new InvalidOperationException($"Supplied type {type.Name} does not extend {nameof(EffectBase)} - it must do so in order to be injected into Chaos");
+            var e = (EffectBase)Activator.CreateInstance(type);
+            asmEffects.Add(e);
+            EffectHandler.AllEffects.Add(e.Name, e);
+            if (Instance.started) e.GetPreferencesFromAttrs();
+        }
+
         #region MelonLogger replacements
 
-        internal static void Log(string str) => GlobalVariables.thisChaos.LoggerInstance.Msg(str);
-        internal static void Log(object obj) => GlobalVariables.thisChaos.LoggerInstance.Msg(obj?.ToString() ?? "null");
-        internal static void Warn(string str) => GlobalVariables.thisChaos.LoggerInstance.Warning(str);
-        internal static void Warn(object obj) => GlobalVariables.thisChaos.LoggerInstance.Warning(obj?.ToString() ?? "null");
-        internal static void Error(string str) => GlobalVariables.thisChaos.LoggerInstance.Error(str);
-        internal static void Error(object obj) => GlobalVariables.thisChaos.LoggerInstance.Error(obj?.ToString() ?? "null");
+        internal static void Log(string str) => Instance.LoggerInstance.Msg(str);
+        internal static void Log(object obj) => Instance.LoggerInstance.Msg(obj?.ToString() ?? "null");
+        internal static void Warn(string str) => Instance.LoggerInstance.Warning(str);
+        internal static void Warn(object obj) => Instance.LoggerInstance.Warning(obj?.ToString() ?? "null");
+        internal static void Error(string str) => Instance.LoggerInstance.Error(str);
+        internal static void Error(object obj) => Instance.LoggerInstance.Error(obj?.ToString() ?? "null");
 
         #endregion
     }
@@ -427,5 +479,10 @@ namespace BWChaos
     internal class ChaosModRuntimeException : ChaosModStartupException
     {
         public ChaosModRuntimeException() : base() { }
+    }
+
+    internal class ChaosModDependencyFailedException : Exception
+    {
+        public ChaosModDependencyFailedException(string expected, string got) : base($"A dependency failed to return an expected value (exptcted \"{expected}\", got \"{got}\")") { }
     }
 }
