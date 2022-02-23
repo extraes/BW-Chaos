@@ -168,6 +168,7 @@
     <Compile Include="Effects\Player\NimbusHands.cs" />
     <Compile Include="Effects\Player\DontLetHimGrabYou.cs" />
     <Compile Include="Effects\Player\CrabletCircle.cs" />
+    <Compile Include="Effects\Player\Cage.cs" />
     <Compile Include="Effects\Player\Weaken.cs" />
     <Compile Include="Effects\Template.cs" />
     <Compile Include="Effects\Player\Butterfingers.cs" />
@@ -211,6 +212,7 @@
     <Compile Include="Effects\World\FreezeAll.cs" />
     <Compile Include="Effects\World\Ejected.cs" />
     <Compile Include="Effects\World\LockRigidBodies.cs" />
+    <Compile Include="Effects\World\Fold.cs" />
     <Compile Include="Effects\World\UnbakeLights.cs" />
     <Compile Include="Effects\World\TextureSwap.cs" />
     <Compile Include="Effects\World\VideoTextures.cs" />
@@ -219,6 +221,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Extras\Attributes.cs" />
     <Compile Include="Extras\EntanglementSyncHandler.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
     <Compile Include="Prefs.cs" />
