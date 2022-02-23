@@ -1,14 +1,39 @@
-# BONEWORKS Chaos [![forthebadge](https://forthebadge.com/images/badges/contains-tasty-spaghetti-code.svg)](https://forthebadge.com) [![forthebadge](https://forthebadge.com/images/badges/works-on-my-machine.svg)](https://forthebadge.com)
-#### ChaosModV, but for a VR Physics game!
-##### And a great example of what happens when you give a shitposting teen an IDE (My VS2022 background is Ralsei smoking a blunt as I type this)
+# BONEWORKS Chaos
+
+<p align="center">
+  <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/contains-cat-gifs.svg" height=40/></a>
+  <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/works-on-my-machine.svg" height=40/></a>
+</p>
+
+## Trailer
+
+[![Chaos 2.2.0 Release Trailer](https://cdn.discordapp.com/attachments/735401224639217855/866446943781650453/Bw_chaos.png)](http://www.youtube.com/watch?v=O0JZqL2opHk "Chaos 2.2.0 Release Trailer")
+
+## What it does
+
+It's essentially ChaosModV, but for a VR Physics game. This mod has various "effects" that, when activated, will do a variety of different things, ranging from flinging you into the air, to changing the appearance of a bunch of ingame objects, to making the game foggy.
+
+It will run these effects every 30 seconds (if you want it to), and you can customize the effects that run, depending on if your computer is powerful or if you've felt the touch of a non-familial woman if you're playing a campaign map or if you're boring, and if you're playing with friends using Entanglement or if you're lonely.
 
 ## Installation
 
-Drag BWChaos.dll into your mods folder, that's basically it.
+Drag BWChaos.dll into your mods folder, that's basically it. If you'd like to know more about this mod, keep reading.
 
-To configure BW Chaos, use BoneMenu or **MelonPreferences.cfg**, but note that BoneMenu is missing some options that are present in MelonPreferences
+To configure BW Chaos, use BoneMenu or **MelonPreferences.cfg**, but note that BoneMenu is missing some options that are present in MelonPreferences.
+
+### BWChaos vs BWChaosLite
+
+If you want, you can install BWChaosLite instead of normal, the only difference is that Lite has less effect resources (Videos/Textures).
+
+The omission of a large portion of videos and textures means your game will start faster and also use less RAM/VRAM.
 
 ## Audience interaction
+
+### How to set it up
+
+[![Chaos 2.2.0 Release Trailer](https://img.youtube.com/vi/QcHs1cb-bxA/0.jpg)](http://www.youtube.com/watch?v=QcHs1cb-bxA "Chaos 2.2.0 Release Trailer")
+
+Audience interaction is *optional*, meaning you can play alone if you want, just set **randomEffectOnNoVotes** to true.
 
 This mod supports two methods of audience interaction, via Discord and Twitch.
 
@@ -78,7 +103,9 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 - useLaggyEffects: Enables or disabled the more processing intensive effects, intended for people that can stomach low framerates, because there wasn't a year spent on optimizing it.
 
-- useSteamProfileEffects: Determines if effects changing your Steam profile will run, like "Change Steam name for 5m"
+- useSteamProfileEffects: Determines if effects changing your Steam profile will run, like "Change Steam name for 5m".
+
+- useMetaEffects: Enables or disables effects that change the way the mod behaves, like changing the time between effects.
 
 - syncEffectsViaEntanglement: Determines whether the Entanglement module is enabled or disabled. 
 
@@ -88,7 +115,7 @@ Here is a brief overview of the configurable values in MelonPreferences:
 
 - ignoreRepeatVotesFromSameUser: Determines whether spamming is an effective method of bumping up vote counts.
 
-- proportionalVoting: Determines if proportional voting is enabled or not. If yes, an effect with 60% of votes has a 60% chance of winning, otherwise the top voted effect wins.
+- proportionalVoting: Determines if proportional voting is enabled or not. If yes, an effect with 60% of votes has a 60% chance of winning, if no, the top voted effect wins.
 
 - enableRemoteVoting: Enables taking votes from Discord/Twitch.
 
@@ -101,6 +128,20 @@ Here is a brief overview of the configurable values in MelonPreferences:
 - forceEnabledEffects: A list of effects that will be in the effect pool, regardless of whether or not they adhere to the other preferences.
 
 - forceDisabledEffects: A list of effects that will *never* be in the effect pool, regardless of whether or not they adhere to the other preferences.
+
+## ChaosConfig
+
+Some effects have configurable values. These values will be placed in ChaosConfig.cfg, but most can also be changed in BoneMenu.
+
+These values are intended to be inside certain ranges, however, and changing them too drastically may result in unintended behavior.
+
+These ranges are displayed above the value in a comment, looking like "# 0 to 1" or "# 0.125 to 2"
+
+If you don't see those comments, update MelonLoader.
+
+If there are some aspects of an effect you think should be configurable, feel free to tell me in the BW server.
+
+If you don't know what names line up to what effect, go into the Debug category in BoneMenu and select the option to dump the 'type' names for each effect, and then check the log.
 
 ## Questions
 
@@ -116,8 +157,8 @@ If there's a serious, game-breaking issue, please, TELL ME! Ping me in the BONEW
 
 If you somehow find a way to break the Twitch bot or Discord bot, or hack them in some way, please tell me so I can ~~troll people before I~~ fix it.
 
-### Known issues/FAQ
-#### I don't know if these questions will be frequently asked, but I've got them here just in case
+## Known issues/FAQ
+#### I don't know if these questions will ever be asked, but I've got them here just in case you want to Ctrl+F through them.
 
 - Errors appearing in the console on a scene transition (changing level)
 
@@ -131,13 +172,17 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
     - If you give me a screenshot of your log file, I will place a pipe bomb in your mailbox, or a comedically timed lit stick of dynamite.
 
-- BWChaos does not work for some people on certain configurations of the Steam version, specifically the "ChaosModStartupException" error
+- BWChaos does not work for some people on certain configurations of the Steam version, specifically the "ChaosModStartupException"/"ChaosModRuntimeException" errors
 
   - What is the square root of a fish? Now I'm sad.
 
-- The timer is too jerky!
+- Why does the mod take so long to start?
 
-  - Yeah maybe I'll make it smoother, make it interpolate or something. It's not really a priority though.
+  - Because with the way I created the mod, It's easy to install, being a single DLL with no external libraries needing to be put in MelonLoader/Managed.
+
+  - I use Unity's native assetbundles because they offer compression and are closely integrated with the engine.
+
+    - Because of this compression, assetbundles take some time to decompress, and with the amount of items I have in my assetbundle, it takes a while.
 
 - 'Garble some textures' and 'Swap textures at random' lag the game when they start!
 
@@ -189,6 +234,8 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
      - As of writing, I'm working on per-effect syncing. If you think an effect could be synced but isn't, or should be synced differently, please tell me your ideas! (SpawnDogAds cannot be synced, it gets dog pics from a website, so I can't do much about that)
 
+     - There are some effects which cannot be synced, or would take too much effort to sync. (Like SpawnDogAds. I could take the texture and send the entire thing over Entanglement, but that seems a touch too tedious for me, especially given the 1250 byte packet size limit)
+
 - The remote voting process doesn't work!
 
   - Yeah. Enable it in preferences.
@@ -201,7 +248,33 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
 - Something's wrong with the Entanglement module!
 
-  - Yeah it's very possible that I made it send too much data at once and got you or Entanglement ratelimited. My bad. Just tell me what happened at the time.
+  - Yeah it's very possible that I made it send too much data at once and got you or Entanglement ratelimited. My bad. Just tell me what happened at the time, like what effect caused it or something.
+
+- I don't like some of the videos in My Meme Folder/Video Textures!
+
+  - Disable the effect I guess? I don't feel like adding a "blocked resources" preference
+
+- Some videos in My Meme Folder don't have sound!
+
+  - Yeah, some are like that. Oh well I guess.
+
+- What does framesToWait mean for RepulsivePlayer and MagneticPlayer?
+
+  - To prevent the game from slowing to a *crawl* when these effects are active, I implemented some optimizations.
+    
+    - You didn't ask for an explanation of the other preferences, but you get it anyway.
+    
+    - framesToWait: For every object they are on, I make that object wait a given number of frames before moving towards/away from the player. This means that increasing the number will make the effect seem "weaker", because there's more time between movements, and the opposite is true for decreasing the number.
+
+    - radius: As another optimization measure, I make the objects not do anything if they are more than a given distance away from you.
+
+    - forceMultiplier: Does what it says, makes it stronger the higher it is, weaker the lower it is.
+
+- Why did you force this unholy hell spawn upon the world?
+
+  - Cause I felt like learning C# one summer :)
+
+---
 
 ### Credits
 
@@ -213,13 +286,17 @@ If you somehow find a way to break the Twitch bot or Discord bot, or hack them i
 
 - ZCubed & Lakatrazz: Making Entanglement so I don't have to make my own way of sending data over the wire.
 
-- GS: IDK if he wants to be credited but he helped me test earlier versions of the mod, on both codebases Legacy and Rewrite, as well as helping me test Entanglement syncing.
+- Goldensliv: Invaluable help with testing and putting up with my shit, especially when it comes to the Entanglement module. (And suffering through the Legacy version, sorry lol)
 
 - ~~Chap: Making ModThatIsNotMod~~ actually nah screw that guy for making his namespace so damn long.
 
-- MelonLoader Team: Making a great framework for mod development, including persistent data/preferences, coroutine running, IL2CPP type injection, automatic harmony instance creation and patching, and of course, being the first universal Unity modloader that could mods in IL2CPP games. Oh and, including a zip file library that I could ~~yoink~~ use.
+- MelonLoader Team: Making a great framework for mod development, including persistent data/preferences, coroutine running, IL2CPP type injection, automatic harmony instance creation and patching, and of course, being the first universal Unity modloader that worked in IL2CPP games. Oh and, including a zip file library that I could ~~yoink~~ use.
 
 - Samboy: I haven't directly interacted with them but Tomlet is great and I'm using it for a personal project and I don't think I'll return to JSON, and CPP2IL, while not perfect, is magic for what it's already capable of.
+
+- ~~UCLA, and Garrett Johnson: Making the [wireframe shader](https://github.com/gkjohnson/unity-wireframe-shader) that I yoinked, and making it single pass instanced. It's unlicensed, so if UCLA has any high priced lawyers, please know that I almost never respond to emails and I have DMs disabled, so come get me for my $2 in nickels, if you **dare**.~~ This effect was cut. :(
+
+---
 
 ### Contributing
 
@@ -231,11 +308,21 @@ If you want to add a new image, instruction, or video, do that through the Unity
 
 I don't have a code of coduct or anything, so feel free to evade taxes and stuff after making a PR.
 
+---
+
 ### Changelog
 
 - New in 2.2.0
 
-  - Something something webserver. Just know that if you're a streamer, if I've got your number, ***I've got your fucking number.***
+  - Something something webserver. Just know that if you're a streamer, I might say hi :)
+
+  - Added per-effect configuration, so that things like how strong an effect is can be changed via BoneMenu and ChaosConfig.
+    
+    - I would have liked to do this earlier, but I wanted to do it in a way that didn't make me write MelonPreferences.CreateEntry for every configurable thing.
+
+  - A [trailer](https://www.youtube.com/watch?v=O0JZqL2opHk), because I feel like sending a link to a video is a lot easier than trying to quantify everything this mod does. (And setup guide cause some people dont want to READ the README)
+
+  - Of course, more than 20 new effects!
 
 - New in 2.1.1
 
@@ -264,3 +351,10 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
       - That said, your antivirus may kill the remote voting process, because it is admittedly a little sketchy for an unsigned DLL to take a file out of itself, decompress it, execute it, and then start talking with it, but if you just play solo, you'll not have any problems.
 
     - Foundation was written by a competent programmer, Trev, and I was able to, I think at least, effectively "inherit" it, learn from it, and expand upon it.
+
+
+
+
+<p align="center">
+  <a href="https://forthebadge.com"><img src="https://forthebadge.com/images/badges/made-with-c-sharp.svg" height=30/></a>
+</p>
