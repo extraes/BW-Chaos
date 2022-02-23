@@ -1,6 +1,10 @@
 ﻿using BWChaos.Effects;
+using HarmonyLib;
 using MelonLoader;
+using ModThatIsNotMod;
 using ModThatIsNotMod.BoneMenu;
+using System;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -13,6 +17,7 @@ namespace BWChaos
         internal static MenuCategory boneMenuEntry;
         internal static MenuCategory effectsCategory;
         internal static MenuCategory preferencesCategory;
+        internal static MenuCategory debugCategory;
 
         public static void Register()
         {
@@ -22,9 +27,11 @@ namespace BWChaos
                 boneMenuEntry.CreateFunctionElement("Reset/refilter effects", Color.white, Chaos.LiveUpdateEffects);
                 preferencesCategory = boneMenuEntry.CreateSubCategory("Preferences", Color.white);
                 effectsCategory = boneMenuEntry.CreateSubCategory("Effects", Color.gray);
+                debugCategory = boneMenuEntry.CreateSubCategory("Debug", Color.gray);
             }
 
-            foreach (EffectBase effect in Chaos.asmEffects)
+            var sorted = Chaos.asmEffects.OrderBy(e => e.Name).ToList();
+            foreach (EffectBase effect in sorted)
             {
                 // don't let the oculus players activate effects that use steam
                 if (Chaos.isSteamVer && effect.Types.HasFlag(EffectTypes.USE_STEAM)) continue;
@@ -32,8 +39,14 @@ namespace BWChaos
                 var ecat = effectsCategory.CreateSubCategory(effect.Name, Color.white);
                 effect.MenuElement = ecat;
 
+
                 // As usual, make a force runner
-                ecat.CreateFunctionElement("Force run", Color.white, () => effect.Run());
+                ecat.CreateFunctionElement("Force run", Color.white, () =>
+                {
+                    var type = effect.GetType();
+                    var e = (EffectBase)Activator.CreateInstance(type);
+                    e.Run();
+                });
 
                 ecat.CreateBoolElement("Force enable/disable", Color.white, EffectHandler.AllEffects.ContainsKey(effect.Name), addEffect =>
                 {
@@ -60,7 +73,11 @@ namespace BWChaos
                     (ecat.elements[1] as BoolElement).SetValue(EffectHandler.AllEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
                 });
 
+                ecat.CreateFunctionElement("Flags: " + effect.Types, Color.gray, () => { });
+
+                effect.GetPreferencesFromAttrs();
             }
+
             #region Manually populate bonemenu with MelonPreferences
 
             // Start the entanglement module, assuming it isn't started already
@@ -69,74 +86,140 @@ namespace BWChaos
                 // delete this menu element when its ran
                 preferencesCategory.elements.Remove(preferencesCategory.elements.FirstOrDefault(e => e.displayText == "Start entanglement module"));
                 Extras.EntanglementSyncHandler.Init();
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "syncEffectsViaEntanglement", !Prefs.SyncEffects);
-                MelonPreferences.Save();
+                Prefs.syncEffects.Value = !Prefs.SyncEffects;
+                Prefs.syncEffects.Save();
                 Chaos.LiveUpdateEffects();
             });
 
-            preferencesCategory.CreateBoolElement("Random on no votes", Color.white, EffectHandler.randomOnNoVotes, b =>
+            preferencesCategory.CreateBoolElement("Random on no votes", Color.white, Prefs.RandomOnNoVotes, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "randomEffectOnNoVotes", b);
-                MelonPreferences.Save();
-                Prefs.Get();
+                Prefs.randomOnNoVotes.Value = b;
+                Prefs.randomOnNoVotes.Save();
             });
 
             if (Prefs.EnableRemoteVoting) preferencesCategory.CreateBoolElement("Proportional voting", Color.white, Prefs.ProportionalVoting, b =>
             {
                 MelonPreferences.SetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser", b);
+                Prefs.ignoreRepeatVotes.Value = b;
+                Prefs.ignoreRepeatVotes.Save();
                 GlobalVariables.WatsonClient.SendAsync(Encoding.UTF8.GetBytes("ignorerepeatvotes:" + b)).GetAwaiter().GetResult();
-                MelonPreferences.Save();
             });
 
             preferencesCategory.CreateBoolElement("Show candidate effects on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "showCandidatesOnScreen", b);
-                MelonPreferences.Save();
-                Prefs.Get(); // this doesn't necessitate reloading effects
+                Prefs.showCandidatesOnScreen.Value = b;
+                Prefs.showCandidatesOnScreen.Save();
+                // this doesn't necessitate reloading effects
             });
 
             preferencesCategory.CreateBoolElement("Use gravity effects", Color.white, Prefs.UseGravityEffects, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "useGravityEffects", b);
-                MelonPreferences.Save();
+                Prefs.useGravityEffects.Value = b;
+                Prefs.useGravityEffects.Save();
                 Chaos.LiveUpdateEffects();
             });
 
             preferencesCategory.CreateBoolElement("Use laggy effects", Color.white, Prefs.UseLaggyEffects, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "useLaggyEffects", b);
-                MelonPreferences.Save();
+                Prefs.useLaggyEffects.Value = b;
+                Prefs.useLaggyEffects.Save();
                 Chaos.LiveUpdateEffects();
             });
 
             if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use Steam profile effects", Color.white, Prefs.UseSteamProfileEffects, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "useSteamProfileEffects", b);
-                MelonPreferences.Save();
+                Prefs.useSteamProfileEffects.Value = b;
+                Prefs.useSteamProfileEffects.Save();
                 Chaos.LiveUpdateEffects();
             });
 
             if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.UseMetaEffects, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "useMetaEffects", b);
-                MelonPreferences.Save();
+                Prefs.useMetaEffects.Value = b;
+                Prefs.useMetaEffects.Save();
                 Chaos.LiveUpdateEffects();
             });
 
             if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.ShowWristUI, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "showWristUI", b);
-                MelonPreferences.Save();
-                
+                Prefs.showWristUI.Value = b;
+                Prefs.showWristUI.Save();
             });
 
             if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
             {
-                MelonPreferences.SetEntryValue<bool>("BW_Chaos", "showCandidatesOnScreen", b);
-                MelonPreferences.Save();
+                Prefs.showCandidatesOnScreen.Value = b;
+                Prefs.showCandidatesOnScreen.Save();
             });
 
             #endregion
+
+            #region Populate debug category
+
+            debugCategory.CreateFunctionElement("Log resource paths", Color.white, () => { GlobalVariables.ResourcePaths.ForEach(Chaos.Log); });
+            debugCategory.CreateFunctionElement("Log all enabled effects", Color.white, () => { EffectHandler.AllEffects.ForEach(e => Chaos.Log(e.Value.Name)); });
+            debugCategory.CreateFunctionElement("Log effect syncing indices", Color.white, () => { EffectHandler.AllEffects.ForEach(e => Chaos.Log($"{e.Value.Name}: {e.Value.EffectIndex}")); });
+            debugCategory.CreateFunctionElement("Log effect type names (useful for ChaosConfig)", Color.white, () => { EffectHandler.AllEffects.ForEach(e => Chaos.Log($"Effect '{e.Value.Name}' = type '{e.Value.GetType().Name}'")); });
+            debugCategory.CreateFunctionElement("Log all preferences (w/o token & channel)", Color.white, () =>
+            {
+                foreach (var prop in typeof(Prefs).GetProperties(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
+                {
+                    if (prop.PropertyType.IsPrimitive || prop.PropertyType.IsEnum || prop.PropertyType == typeof(string))
+                    {
+                        Chaos.Log($"{prop.Name}: {prop.GetValue(null)}");
+                    }
+                    else if (prop.PropertyType.GetInterfaces().Any(t => t == typeof(IEnumerable)))
+                    {
+                        Chaos.Log(prop.Name + ": ");
+                        foreach (var item in (IEnumerable)prop)
+                        {
+                            Chaos.Log(" - " + (item?.ToString() ?? "<null>"));
+                        }
+                    }
+                }
+            });
+
+            var logMethods = new HarmonyMethod[]
+            {
+                new HarmonyMethod(typeof(Chaos), nameof(Chaos.Warn), new Type[] { typeof(string) }),
+                new HarmonyMethod(typeof(Chaos), nameof(Chaos.Warn), new Type[] { typeof(object) }),
+                new HarmonyMethod(typeof(Chaos), nameof(Chaos.Error), new Type[] { typeof(string) }),
+                new HarmonyMethod(typeof(Chaos), nameof(Chaos.Error), new Type[] { typeof(object) }),
+            };
+            var postfixes = new HarmonyMethod[]
+            {
+                new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.WarnPostfix), new Type[] { typeof(string) }),
+                new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.WarnPostfix), new Type[] { typeof(object) }),
+                new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.ErrorPostfix), new Type[] { typeof(string) }),
+                new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.ErrorPostfix), new Type[] { typeof(object) }),
+            };
+            debugCategory.CreateFunctionElement("Enable warn/error notifications", Color.white, () =>
+            {
+                for (int i = 0; i < logMethods.Length; i++)
+                {
+                    var logMethod = logMethods[i];
+                    var postfix = postfixes[i];
+                    Chaos.Instance.HarmonyInstance.Patch(logMethod.method, null, postfix);
+                }
+                Notifications.SendNotification("Enabled notifications", 3);
+            });
+
+            #endregion
+        }
+
+        private static NotificationData lastNotif;
+        private static void WarnPostfix(object obj) => WarnPostfix(obj?.ToString() ?? "null");
+        private static void WarnPostfix(string str)
+        {
+            lastNotif?.End();
+            lastNotif = Notifications.SendNotification("WARN - " + str, 5, Color.yellow);
+        }
+
+        private static void ErrorPostfix(object obj) => ErrorPostfix(obj?.ToString() ?? "null");
+        private static void ErrorPostfix(string str)
+        {
+            lastNotif?.End();
+            lastNotif = Notifications.SendNotification("ERROR - " + str, 5, Color.red);
         }
     }
 }
