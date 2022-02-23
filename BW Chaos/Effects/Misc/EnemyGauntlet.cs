@@ -55,8 +55,8 @@ namespace BWChaos.Effects
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
                 float theta = (i / 8f) * 360;
-                float x = (float)(Math.Cos(theta * Math.PI / 180));
-                float y = (float)(Math.Sin(theta * Math.PI / 180));
+                float x = Mathf.Cos(theta * Constants.FPI / 180);
+                float y = Mathf.Sin(theta * Constants.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
@@ -73,8 +73,8 @@ namespace BWChaos.Effects
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
                 float theta = (i / 8f) * 360;
-                float x = (float)(Math.Cos(theta * Math.PI / 180));
-                float y = (float)(Math.Sin(theta * Math.PI / 180));
+                float x = Mathf.Cos(theta * Constants.FPI / 180);
+                float y = Mathf.Sin(theta * Constants.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
@@ -91,8 +91,8 @@ namespace BWChaos.Effects
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
                 float theta = (i / 8f) * 360;
-                float x = (float)(Math.Cos(theta * Math.PI / 180));
-                float y = (float)(Math.Sin(theta * Math.PI / 180));
+                float x = Mathf.Cos(theta * Constants.FPI / 180);
+                float y = Mathf.Sin(theta * Constants.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));

@@ -26,7 +26,7 @@ namespace BWChaos.Effects
 
         public override void HandleNetworkMessage(byte[] data)
         {
-            string str = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size * 2, data.Length - GlobalVariables.Vector3Size * 2);
+            string str = Encoding.ASCII.GetString(data, Constants.Vector3Size * 2, data.Length - Constants.Vector3Size * 2);
             GameObject ad = Utilities.SpawnAd(str);
             ad.transform.DeserializePosRot(data, true);
         }
