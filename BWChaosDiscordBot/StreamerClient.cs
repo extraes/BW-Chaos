@@ -5,17 +5,18 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Win32;
 
 namespace BWChaosRemoteVoting
 {
     // this interfaces with the typescript server via standard HTTP requests
     // (i wouldve preferred a webhook, but this way is more "standard" and doesnt leave a fuck ton of requests being sent to and from my cheap ass VPS)
-    internal static class Backdoor
+    internal static class StreamerClient
     {
         const string webRequestBaseURL = "http://chaos.extraes.xyz/"; // i didnt pay for https lol
         // let this get set by another class so that the CLR calls our static initializer
         public static HttpClient client;
-        static Backdoor()
+        static StreamerClient()
         {
             // spin off a new thread so i dont fuck my own performance by running it on the main thread
             Thread msgThread = new Thread(GetMessageFromServer);
@@ -74,7 +75,9 @@ namespace BWChaosRemoteVoting
 
         private static void GetSteamDetails(ref string steamProfileID, ref string steamProfileName)
         {
-            string fPath = @"C:\Program Files (x86)\Steam\config\loginusers.vdf";
+            string sPath = (string)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam", "SteamPath", @"C:\Program Files (x86)\Steam") ?? @"C:\Program Files (x86)\Steam";
+
+            string fPath = Path.Combine(sPath, @"config\loginusers.vdf");
             if (!File.Exists(fPath))
             {
                 steamProfileID = Math.Round(new Random().NextDouble() * 10000000).ToString();

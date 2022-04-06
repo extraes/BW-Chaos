@@ -8,9 +8,9 @@ using WatsonWebsocket;
 
 namespace BWChaos
 {
-    internal static class Constants
+    internal static class Const
     {
-        public const int Vector3Size = sizeof(float) * 3;
+        public const int SizeV3 = sizeof(float) * 3;
         public const float FPI = (float)System.Math.PI;
     }
 }

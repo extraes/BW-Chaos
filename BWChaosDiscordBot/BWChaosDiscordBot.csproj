@@ -7,6 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="DSharpPlus" Version="4.1.0" />
+    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="TwitchLib" Version="3.2.0" />
     <PackageReference Include="TwitchLib.Api" Version="3.3.0" />
     <PackageReference Include="TwitchLib.Api.Core" Version="3.3.0" />
