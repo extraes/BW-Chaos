@@ -302,7 +302,7 @@ namespace BWChaos.Effects
             if (!Chaos.isSteamVer)
             {
                 SpawnAd("alright im done");
-                EffectHandler.AllEffects.Remove(Name); // This effect is annoying if ran multiple times.
+                EffectHandler.allEffects.Remove(Name); // This effect is annoying if ran multiple times.
                 ForceEnd();
                 yield break; // Stop here if this isn't the steam version.
             }
@@ -444,6 +444,32 @@ namespace BWChaos.Effects
                 yield return new Wait(10f);
             }
 
+            // furry shades of gay
+            if (SteamUser.UserHasLicenseForApp(userID, new AppId_t((uint)1399930)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
+            {
+                if (ownsAmorous)
+                {
+                    SpawnAd("so you own 2 furry porn games?");
+                    yield return new Wait(4f);
+                    SpawnAd("i implore you to touch grass");
+                    // use DuckDuckGo's bangs because i dont want to paste an amazon URL that could doxx me lol
+                    Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+grass");
+                    Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+grass");
+                    Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+plant");
+                    Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+succulent+plant");
+                    Application.OpenURL("https://duckduckgo.com/?t=ffab&q=how+to+stop+being+a+degenerate"); // use ddg because i dont want google fucking with peoples shit thinking they searched it
+                    yield return new Wait(6f);
+                    SpawnAd("please take this advice to heart");
+                    yield return new Wait(2.5f);
+                }
+                SpawnAd("mf owns furry shades of gay");
+                yield return new Wait(6.5f);
+                SpawnAd("let me take a wild guess, your friend bought it for you? as a <i>'joke'</i>");
+                yield return new Wait(2.5f);
+                SpawnAd("Cap.");
+                yield return new Wait(10f);
+            }
+
             #endregion
 
             #region Check for other games
@@ -476,16 +502,16 @@ namespace BWChaos.Effects
                 SpawnAd("Frankly, I'm surprised. Unless you're on a quest 2, in which case come back when you're 13, but im surprised otherwise.");
             }
             else SpawnAd("alright im done");
-            EffectHandler.AllEffects.Remove(Name); // This effect is annoying if ran multiple times.
+            EffectHandler.allEffects.Remove(Name); // This effect is annoying if ran multiple times.
 
             ForceEnd();
         }
 
-        public override void HandleNetworkMessage(byte[] data)
+        public override void HandleNetworkMessage(byte[][] data)
         {
-            string text = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size * 2, data.Length - GlobalVariables.Vector3Size * 2);
+            string text = Encoding.ASCII.GetString(data[1]);
             var ad = Utilities.SpawnAd(text);
-            ad.transform.DeserializePosRot(data, true);
+            ad.transform.DeserializePosRot(data[0]);
         }
 
         private GameObject SpawnAd(string text, bool __caught_pleaseignore = true)
@@ -497,7 +523,7 @@ namespace BWChaos.Effects
             ad.transform.position = phead.position + phead.forward.normalized;
             ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
 
-            SendNetworkData(ad.transform.SerializePosRot().Concat(Encoding.ASCII.GetBytes(text)).ToArray());
+            SendNetworkData(ad.transform.SerializePosRot(), Encoding.ASCII.GetBytes(text));
             return ad;
         }
     }

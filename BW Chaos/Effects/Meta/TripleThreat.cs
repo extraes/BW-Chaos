@@ -16,7 +16,7 @@ namespace BWChaos.Effects
 
             while (Active)
             { 
-                EffectBase og = EffectHandler.AllEffects.Values.Random();
+                EffectBase og = EffectHandler.allEffects.Values.Random();
                 EffectBase newie = (EffectBase)Activator.CreateInstance(og.GetType());
                 newie.Run();
 

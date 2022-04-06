@@ -24,7 +24,7 @@ namespace BWChaos.Effects
                 if (!Active) yield break;
                 if (eName == Name) continue; // avoid infinite loop
 
-                if (EffectHandler.AllEffects.TryGetValue(eName, out EffectBase original))
+                if (EffectHandler.allEffects.TryGetValue(eName, out EffectBase original))
                 {
                     EffectBase effect = (EffectBase)Activator.CreateInstance(original.GetType());
                     effect.Run();
