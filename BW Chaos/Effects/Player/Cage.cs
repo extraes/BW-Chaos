@@ -18,7 +18,6 @@ namespace BWChaos.Effects
         {
             cagePrefab = GlobalVariables.EffectResources.LoadAsset<GameObject>("Assets/Cage/cage.prefab");
             cagePrefab.hideFlags = HideFlags.DontUnloadUnusedAsset;
-            GameObject.DontDestroyOnLoad(cagePrefab);
         }
 
         public override void HandleNetworkMessage(byte[] data)
