@@ -1,4 +1,5 @@
 ﻿using MelonLoader;
+using ModThatIsNotMod.Nullables;
 using StressLevelZero.AI;
 using StressLevelZero.Pool;
 using System;
@@ -14,28 +15,17 @@ namespace BWChaos.Effects
         public EnemyGauntlet() : base("Enemy gauntlet", 120) { }
         [RangePreference(0,1, 0.05f)] static float volume = 0.3f;
 
-        private static AudioSource soundPlayer = null;
+        private static AudioClip clip;
         public override void OnEffectStart()
         {
-            // Load sound asset and play it
-            if (soundPlayer == null) soundPlayer = GlobalVariables.Player_PhysBody.rbHead.gameObject.AddComponent<AudioSource>();
+            clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/thecybergrind.mp3");
 
-            if (soundPlayer.clip == null) soundPlayer.clip = GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/thecybergrind.mp3");
-
-            soundPlayer.bypassListenerEffects = true;
-            soundPlayer.bypassEffects = true;
-            soundPlayer.bypassReverbZones = true;
-            soundPlayer.ignoreListenerVolume = true;
-            soundPlayer.ignoreListenerPause = true;
-            soundPlayer.loop = false;
-            soundPlayer.volume = volume;
-            soundPlayer.outputAudioMixerGroup = GlobalVariables.MusicMixer;
-            soundPlayer.Play();
+            GlobalVariables.MusicPlayer.Play(clip, null, volume, false, null, null);
         }
 
         public override void OnEffectEnd()
         {
-            soundPlayer?.Stop();
+            GlobalVariables.MusicPlayer.Stop();
         }
 
         [AutoCoroutine]
@@ -55,8 +45,8 @@ namespace BWChaos.Effects
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
                 float theta = (i / 8f) * 360;
-                float x = Mathf.Cos(theta * Constants.FPI / 180);
-                float y = Mathf.Sin(theta * Constants.FPI / 180);
+                float x = Mathf.Cos(theta * Const.FPI / 180);
+                float y = Mathf.Sin(theta * Const.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
@@ -73,8 +63,8 @@ namespace BWChaos.Effects
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
                 float theta = (i / 8f) * 360;
-                float x = Mathf.Cos(theta * Constants.FPI / 180);
-                float y = Mathf.Sin(theta * Constants.FPI / 180);
+                float x = Mathf.Cos(theta * Const.FPI / 180);
+                float y = Mathf.Sin(theta * Const.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
@@ -91,8 +81,8 @@ namespace BWChaos.Effects
                 if (i % entangleChange != 0) continue;
                 var playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
                 float theta = (i / 8f) * 360;
-                float x = Mathf.Cos(theta * Constants.FPI / 180);
-                float y = Mathf.Sin(theta * Constants.FPI / 180);
+                float x = Mathf.Cos(theta * Const.FPI / 180);
+                float y = Mathf.Sin(theta * Const.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
@@ -102,11 +92,8 @@ namespace BWChaos.Effects
                 yield return new WaitForSeconds(5f);
             }
 
-            yield return new WaitForSeconds(10f);
-            soundPlayer.volume = 0.1f;
-            yield return new WaitForSeconds(10f);
-            soundPlayer.volume = 0.05f;
-            soundPlayer.Stop();
+            yield return new WaitForSeconds(15f);
+            GlobalVariables.MusicPlayer.Stop();
             ForceEnd();
         }
     }

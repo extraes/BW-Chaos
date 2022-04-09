@@ -15,12 +15,10 @@ namespace BWChaos.Effects
         [RangePreference(0.25f, 10, 0.25f)] static float forceMultiplier = 2f;
 
         private static Transform target;
-        private static AudioSource aSource;
+        private static AudioClip clip;
         public override void OnEffectStart()
         {
-            if (aSource == null) aSource = Player.GetPlayerHead().GetComponent<AudioSource>() ?? Player.GetPlayerHead().AddComponent<AudioSource>();
-            if (aSource.clip == null) aSource.clip = GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/fart with extra reverb.mp3");
-            
+            clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/fart with extra reverb.mp3");
             target = GlobalVariables.Player_PhysBody.transform;
 
             var rbs = GameObject.FindObjectsOfType<Rigidbody>().ToList();
@@ -45,7 +43,7 @@ namespace BWChaos.Effects
             Chaos.Log("Finished starting coroutines in " + sw.ElapsedMilliseconds + "ms");
 #endif
 
-            aSource.Play();
+            GlobalVariables.SFXPlayer.Play(clip);
         }
 
         private IEnumerator ApplyForces(IEnumerable<Rigidbody> rbs)
