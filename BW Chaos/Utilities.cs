@@ -58,6 +58,7 @@ namespace BWChaos
             return new string[] { arg, argg };
         }
 
+        [Obsolete("Stringing Vector3's is data inefficient - use the byte utilties like " + nameof(DebyteV3) + " and the extension " + nameof(Extensions.ToBytes) + " instead")]
         public static Vector3 DestringV3(string vecStr, char delimiter = ',')
         {
             string[] vs = vecStr.Split(delimiter);
@@ -68,7 +69,7 @@ namespace BWChaos
         public static Vector3 DebyteV3(byte[] bytes, int startIdx = 0)
         {
 #if DEBUG
-            if (startIdx == 0 && bytes.Length != GlobalVariables.Vector3Size) Chaos.Warn($"Trying to debyte a Vector3 of length {bytes.Length}, this is not the expected {sizeof(float) * 3} bytes!");
+            if (startIdx == 0 && bytes.Length != Const.SizeV3) Chaos.Warn($"Trying to debyte a Vector3 of length {bytes.Length}, this is not the expected {Const.SizeV3} bytes!");
             if (startIdx + (sizeof(float) * 3) > bytes.Length) Chaos.Warn($"{bytes.Length} is too short for the given index of {startIdx}");
 #endif
             return new Vector3(

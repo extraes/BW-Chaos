@@ -81,6 +81,12 @@ namespace BWChaos
             return sequence.ElementAt(UnityEngine.Random.Range(0, sequence.Count()));
         }
 
+        // Random w/ IEnumerable doesn't check for arrays, only ICollection
+        public static T Random<T>(this T[] sequence)
+        {
+            return sequence[UnityEngine.Random.Range(0, sequence.Length)];
+        }
+
         public static string GetFullPath(this Transform t)
         {
             string path = "/" + t.name;
@@ -110,7 +116,6 @@ namespace BWChaos
             };
             return bytess.Flatten();
         }
-
 
         public static IEnumerable<T> Flatten<T>(this IEnumerable<IEnumerable<T>> arrarr)
         { //                                                         DAMN DANIEL ^
@@ -154,10 +159,10 @@ namespace BWChaos
 
         public static byte[] SerializePosRot(this Transform t)
         {
-            byte[] res = new byte[sizeof(float) * 3 * 2];
+            byte[] res = new byte[Const.SizeV3 * 2];
 
             t.position.ToBytes().CopyTo(res, 0);
-            t.rotation.eulerAngles.ToBytes().CopyTo(res, sizeof(float) * 3);
+            t.rotation.eulerAngles.ToBytes().CopyTo(res, Const.SizeV3);
 
             return res;
         }
@@ -165,7 +170,7 @@ namespace BWChaos
         public static void DeserializePosRot(this Transform t, byte[] serializedPosRot, bool dontWarn = false)
         {
 #if DEBUG
-            if (!dontWarn) if (serializedPosRot.Length != sizeof(float) * 3 * 2) Chaos.Warn("Deserializing posrot of unexpected length " + serializedPosRot.Length + "!!! This could be bad!!!");
+            if (!dontWarn) if (serializedPosRot.Length != Const.SizeV3 * 2) Chaos.Warn("Deserializing posrot of unexpected length " + serializedPosRot.Length + "!!! This could be bad!!!");
 #endif
             t.position = Utilities.DebyteV3(serializedPosRot);
             t.rotation = Quaternion.Euler(Utilities.DebyteV3(serializedPosRot, sizeof(float) * 3));
