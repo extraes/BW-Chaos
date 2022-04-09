@@ -130,8 +130,11 @@
     <Compile Include="Effects\Guns\RandomizeGunSpeeds.cs" />
     <Compile Include="Effects\Guns\ExplosiveGuns.cs" />
     <Compile Include="Effects\Guns\InaccurateGuns.cs" />
+    <Compile Include="Effects\Guns\NoAmmo.cs" />
+    <Compile Include="Effects\Guns\WrongMag.cs" />
     <Compile Include="Effects\Guns\UpNAtomize.cs" />
     <Compile Include="Effects\Meta\SlowTimer.cs" />
+    <Compile Include="Effects\Meta\MassEffect.cs" />
     <Compile Include="Effects\Misc\SonicSpeed.cs" />
     <Compile Include="Effects\Misc\SlowmoPunch.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
@@ -157,6 +160,7 @@
     <Compile Include="Effects\Misc\MyMemeFolder.cs" />
     <Compile Include="Effects\Meta\TripleThreat.cs" />
     <Compile Include="Effects\Misc\RandomMesh.cs" />
+    <Compile Include="Effects\Misc\SimonSays.cs" />
     <Compile Include="Effects\Player\GhostWorld.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
@@ -213,6 +217,8 @@
     <Compile Include="Effects\World\Ejected.cs" />
     <Compile Include="Effects\World\LockRigidBodies.cs" />
     <Compile Include="Effects\World\Fold.cs" />
+    <Compile Include="Effects\World\LowGravity.cs" />
+    <Compile Include="Effects\World\PeepTheHorror.cs" />
     <Compile Include="Effects\World\UnbakeLights.cs" />
     <Compile Include="Effects\World\TextureSwap.cs" />
     <Compile Include="Effects\World\VideoTextures.cs" />
@@ -221,7 +227,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Extras\Attributes.cs" />
     <Compile Include="Extras\EntanglementSyncHandler.cs" />
-    <Compile Include="Constants.cs" />
+    <Compile Include="Const.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
     <Compile Include="Prefs.cs" />
@@ -247,6 +253,9 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\BWChaosDiscordBot.zip" />
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="WatsonWebsocket\WWSLICENSE.md" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

@@ -312,6 +312,30 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
 
 ### Changelog
 
+- New in 2.2.1
+
+  - Minor fixes in the remote voter
+
+  - Fixes for Entanglement sync
+  
+    - Change loading order so Chaos loads last
+
+    - Create InjectEffect so the module's effects persist after effect reload (who all makin custom chaos effects???)
+
+    - Add syncing to some effects
+
+  - Add 7 new effects, No Ammo, Simon Says, Peep the Horror, Wrong Mag, Mass Effect, Low Gravity, and Cage
+
+  - Add bag randomizer (I haven't tested it much, but it makes sense in my head)
+
+  - Fixed slowmo punch
+
+  - Centralized audio playing (mostly) & tied other audio players to mixers
+
+    - This should fix things like MyMemeFolder being too loud, or ignoring your audio mixer settings
+
+  - Add stats for myself and other mod makers
+
 - New in 2.2.0
 
   - Something something webserver. Just know that if you're a streamer, I might say hi :)
