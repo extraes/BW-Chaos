@@ -11,7 +11,7 @@ namespace BWChaos.Effects
     internal class SlowmoPunch : EffectBase
     {
         public SlowmoPunch() : base("SlowMo Punch", 60) { }
-        [RangePreference(0, 5f, 0.01f)] static float returnTime = 1f;
+        [RangePreference(0, 5f, 0.05f)] static float returnTime = 1f;
         float YieldTime => returnTime / 20;
 
         public override void OnEffectStart() => OnPunch += RunSlowmo;
@@ -21,7 +21,7 @@ namespace BWChaos.Effects
         public void RunSlowmo() => MelonCoroutines.Start(Slowmo_OnPunch());
 
         public static event Action OnPunch;
-        [HarmonyPatch(typeof(HandSFX), "PunchAttack")]
+        [HarmonyPatch(typeof(HandSFX), nameof(HandSFX.PunchAttack))]
         public static class PunchPatch
         {
             // Hopefully prevent this from throwing nullrefs
@@ -30,9 +30,12 @@ namespace BWChaos.Effects
 
         private IEnumerator Slowmo_OnPunch()
         {
+#if DEBUG
+            Chaos.Log($"Started {nameof(Slowmo_OnPunch)}, waiting {YieldTime}s 20 times until {returnTime} passes and time hits 1 again");
+#endif
             Time.timeScale = 0.05f;
             
-            while (Time.timeScale < 1f && !Active)
+            while (Time.timeScale < 1f && Active)
             {
                 Time.timeScale += 0.05f;
                 yield return new WaitForSecondsRealtime(YieldTime);
