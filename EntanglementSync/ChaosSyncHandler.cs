@@ -7,7 +7,7 @@ namespace BWChaos.Sync
 {
     public class ChaosSyncHandler : EntanglementModule
     {
-        public static readonly byte mIndex = 99; // 99 because c in binary is 99 :^)
+        public const byte mIndex = 99; // 99 because c in binary is 99 :^)
         public static byte[] thisVersion = new byte[3];
         public static bool alreadyVersionWarned;
 
@@ -24,7 +24,7 @@ namespace BWChaos.Sync
 
             Chaos.InjectEffect<EntangleEffect>();
             Chaos.InjectEffect<PlayerRepresenting>();
-            Chaos.InjectEffect<PlayerRepresenting>();
+            Chaos.InjectEffect<EntanglementJoins>();
 
             Chaos.OnEffectRan += OnEffectRan;
             EffectBase._sendData += SendEffectData;

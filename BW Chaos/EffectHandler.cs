@@ -15,13 +15,15 @@ namespace BWChaos
     {
         public EffectHandler(IntPtr ptr) : base(ptr) { }
 
-        public static Dictionary<string, EffectBase> AllEffects = new Dictionary<string, EffectBase>();
+        public static Dictionary<string, EffectBase> allEffects = new Dictionary<string, EffectBase>();
+        public static Dictionary<string, EffectBase> bag = new Dictionary<string, EffectBase>();
         public static EffectHandler Instance;
         public static bool advanceTimer = false;
 
         private int secondsEachEffect = 30;
         private int currentTimerValue;
         private int numberFlip = 0;
+        private string hiddenEffectName = "Immortality";
 
         private object timerToken;
 
@@ -93,6 +95,7 @@ namespace BWChaos
 
             // Start the timer immediately
             timerToken = MelonCoroutines.Start(Timer());
+            CopyAllToBag();
             ResetEffectCandidates();
         }
 
@@ -114,6 +117,7 @@ namespace BWChaos
             GlobalVariables.ActiveEffects.Clear();
             GlobalVariables.CandidateEffects.Clear();
             GlobalVariables.PreviousEffects.Clear();
+            bag.Clear();
         }
 
         public void Update()
@@ -137,8 +141,8 @@ namespace BWChaos
 
             overlayText.text = newString;
             // Hide all hidden effects, replace them with Immortality (because its relatively hard to discover)
-            //todo: replace immortality with a randomized effect name
-            wristText.text = Regex.Replace(newString, @".*HIDDEN", "Immortality", RegexOptions.Compiled | RegexOptions.ECMAScript);
+            // this makes all of them change at the same time. dont care.
+            wristText.text = Regex.Replace(newString, @".*HIDDEN", hiddenEffectName, RegexOptions.Compiled | RegexOptions.ECMAScript);
         }
 
         public void OnTriggerEnter(Collider col)
@@ -291,32 +295,45 @@ namespace BWChaos
             (int, int) voted = GetVotedEffect(accumulatedVotes); // format is (arrIndex, value)
 #if DEBUG
             Chaos.Log($"Voted effect: {(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].Name)} (of type '{(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].GetType().Name)}'), [{string.Join(", ", accumulatedVotes)}]");
-            if (voted.Item2 == 0) Chaos.Log("The voted effect has no votes... Should I run a random effect? " + randomOnNoVotes);
-            Chaos.Log("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !randomOnNoVotes));
+            if (voted.Item2 == 0) Chaos.Log("The voted effect has no votes... Should I run a random effect? " + Prefs.randomOnNoVotes.Value);
+            Chaos.Log("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !Prefs.randomOnNoVotes.Value));
 #endif
-            Type votedType;
+            // change the hidden effect name
+            hiddenEffectName = allEffects.Random().Key;
+
+            EffectBase votedEffect;
             // return if the top voted effect has no votes & modpref is set to not run on no votes
             if (voted.Item2 == 0 && !Prefs.RandomOnNoVotes) return;
             if (voted.Item1 == 4 || voted.Item2 == 0)
             {
                 // Get a random effect from the dictionary
-                EffectBase e = AllEffects.Random().Value;
-                Chaos.Log(e.Name + " (random) was chosen");
-                votedType = e.GetType();
+                votedEffect = allEffects.Random().Value;
+                Chaos.Log(votedEffect.Name + " (random) was chosen");
             }
             else
             {
-                EffectBase e = GlobalVariables.CandidateEffects[voted.Item1];
-                Chaos.Log(e.Name + " was chosen");
-                votedType = e.GetType();
+                votedEffect = GlobalVariables.CandidateEffects[voted.Item1];
+                Chaos.Log(votedEffect.Name + " was chosen");
             }
-            EffectBase eff = (EffectBase)Activator.CreateInstance(votedType);
+            if (Prefs.UseBagRandomizer) bag.Remove(votedEffect.Name);
+            EffectBase eff = (EffectBase)Activator.CreateInstance(votedEffect.GetType());
             eff.Run();
 
+
 #if DEBUG
+            Chaos.Log($"Bag contains {bag.Count} items after running {eff.Name}");
             if (!ranEffects.Contains(eff.Name)) ranEffects.Add(eff.Name);
-            Chaos.Log($"Out of {AllEffects.Count} enabled effects ({Chaos.asmEffects.Count} in assembly), {ranEffects.Count} have been ran so far. ({AllEffects.Count - ranEffects.Count} to go)");
+            Chaos.Log($"Out of {allEffects.Count} enabled effects ({Chaos.asmEffects.Count} in assembly), {ranEffects.Count} have been ran so far. ({allEffects.Count - ranEffects.Count} to go)");
 #endif
+
+            if (bag.Count > 8)
+            {
+#if DEBUG
+                Chaos.Log("Bag has too few items, resetting!");
+#endif
+                bag.Clear();
+                allEffects.ForEach(kv => bag.Add(kv.Key, kv.Value));
+            }
 
             // Sometimes the timer/wristcanvas gets fucky with its offsets, so reinforce them here
             wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -328,7 +345,7 @@ namespace BWChaos
         {
             // Perform a null check to make sure 
             if (GlobalVariables.WatsonClient == null) return new int[] { 0, 0, 0, 0, 0 };
-            string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult();
+            string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult(); // BLOCKING CALLS POG
             return Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
         }
 
@@ -406,12 +423,15 @@ namespace BWChaos
 
             for (int i = 0; i < 4; i++)
             {
+                // use bag or alleffects
+                var collection = Prefs.UseBagRandomizer ? bag : allEffects;
+
                 // Get a random effect from the list
-                EffectBase effect = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
+                EffectBase effect = collection.Values.Random();
 
                 // Make sure the effect is unique in the list
                 while (GlobalVariables.CandidateEffects.Contains(effect))
-                    effect = AllEffects[AllEffects.Keys.ElementAt(UnityEngine.Random.Range(0, AllEffects.Keys.Count))];
+                    effect = collection.Values.Random();
                 GlobalVariables.CandidateEffects.Add(effect);
 
                 // Add 1 because humans don't like zero based indices (FUCK LUA)
@@ -434,6 +454,12 @@ namespace BWChaos
                 candidateText.text = string.Empty;
                 if (!advanceTimer) overlayImage.rectTransform.anchoredPosition = overlayImagePos_NoCandidates;
             }
+        }
+
+        public void CopyAllToBag()
+        {
+            bag.Clear();
+            allEffects.ForEach(kv => bag.Add(kv.Key, kv.Value));
         }
     }
 }

@@ -2,6 +2,7 @@
 using MelonLoader;
 using MelonLoader.ICSharpCode.SharpZipLib.Core;
 using MelonLoader.ICSharpCode.SharpZipLib.Zip;
+using ModThatIsNotMod;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -23,8 +24,6 @@ namespace BWChaos
         public const string Version = "2.2.1";
         public const string DownloadLink = "https://boneworks.thunderstore.io/package/BWChaosDevs/BW_Chaos/";
     }
-
-
 
     public class Chaos : MelonMod
     {
@@ -54,7 +53,6 @@ namespace BWChaos
 
             #region MelonPref Setup
 
-            MelonPreferences.CreateCategory("BW_Chaos", "BW_Chaos");
             // If MP's are gotten before they're registered in ML, an error is thrown.
             Prefs.Init();
             Prefs.Get();
@@ -143,7 +141,7 @@ namespace BWChaos
 
             allSW.Stop();
             // go straight to loggerinstance because it lets me use pretty colors :^)
-            LoggerInstance.Msg(ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.AllEffects.Count} to be used in Chaos.");
+            LoggerInstance.Msg(ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.allEffects.Count} to be used in Chaos.");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect initialization: {effectSW.ElapsedMilliseconds}ms");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect resource loading: {resSW.ElapsedMilliseconds}ms");
             LoggerInstance.Msg(ConsoleColor.Blue, $" - Misc startup tasks: {miscSW.ElapsedMilliseconds}ms");
@@ -168,7 +166,7 @@ namespace BWChaos
         public override void OnSceneWasInitialized(int buildIndex, string sceneName)
         {
             // you already know what the fuck goin on
-            if (EffectHandler.AllEffects.Count < 1) while (true) { }
+            if (EffectHandler.allEffects.Count < 1) while (true) { }
 
 #if DEBUG
             var sw = Stopwatch.StartNew();
@@ -191,6 +189,22 @@ namespace BWChaos
                 GameObject.Find("[RigManager (Default Brett)]/[SkeletonRig (GameWorld Brett)]/Head/FollowCamera").GetComponent<Camera>();
             GlobalVariables.Cameras =
                 GameObject.FindObjectsOfType<Camera>().Where(c => c.name.StartsWith("Camera (")).ToArray();
+
+            GameObject pHead = Player.GetPlayerHead();
+
+            GameObject musicPlayer = new GameObject("ChaosMusicPlayer");
+            musicPlayer.transform.parent = pHead.transform;
+            GlobalVariables.MusicPlayer = musicPlayer.AddComponent<AudioPlayer>();
+            GlobalVariables.MusicPlayer._source = musicPlayer.AddComponent<AudioSource>();
+            GlobalVariables.MusicPlayer.source.outputAudioMixerGroup = GlobalVariables.MusicMixer;
+            GlobalVariables.MusicPlayer.source.volume = 0.1f;
+
+            GameObject sfxPlayer = new GameObject("ChaosMusicPlayer");
+            sfxPlayer.transform.parent = pHead.transform;
+            GlobalVariables.SFXPlayer = sfxPlayer.AddComponent<AudioPlayer>();
+            GlobalVariables.SFXPlayer._source = sfxPlayer.AddComponent<AudioSource>();
+            GlobalVariables.SFXPlayer.source.outputAudioMixerGroup = GlobalVariables.SFXMixer;
+            GlobalVariables.SFXPlayer.source.volume = 0.25f;
 
             new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
             EffectHandler.advanceTimer = sceneName != "scene_mainMenu" && sceneName != "scene_introStart";
@@ -231,35 +245,35 @@ namespace BWChaos
         public override void OnGUI()
         {
             if (!Prefs.enableIMGUI) return;
+            Dictionary<string, EffectBase> effectCollection = Prefs.IMGUIUseBag ? EffectHandler.allEffects : EffectHandler.bag;
 
             var horizOffset = horizStart;
             // because otherwise, it clips into unityexplorers top bar lol
             var vertOffset = vertStart;
-            for (int i = 0; i < EffectHandler.AllEffects.Count; i++)
+            for (int i = 0; i < effectCollection.Count; i++)
             {
                 if (vertOffset + height + gap > Screen.height)
                 {
                     vertOffset = vertStart;
                     horizOffset += width + gap;
                 }
-                var e = EffectHandler.AllEffects.Values.ElementAt(i);
+                var e = effectCollection.Values.ElementAt(i);
                 if (GUI.Button(new Rect(horizOffset, vertOffset, width, height), e.Name)) e.Run();
                 vertOffset += height + gap;
             }
-
 
             // IDC if this looks like dogshit, its not going in release builds, so suck it up
             prevNetsim = GUI.TextField(new Rect(Screen.width - horizStart - width * 2, Screen.height - gap - height, width * 2, height), prevNetsim);
             if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 2 * (gap + height), width * 2, height), "Send (idx>data) (ONLY sends NetMsgType.STRING data)"))
             {
                 string[] nsdata = prevNetsim.Split('>');
-                if (EffectBase._dataRecieved == null) Warn("There are no listeners for network data active right now");
+                if (EffectBase._dataRecieved == null) Warn("There are no listeners for network data active right now, this will error");
                 else EffectBase._dataRecieved.Invoke(NetMsgType.STRING, byte.Parse(nsdata[0]), Encoding.ASCII.GetBytes(nsdata[1]));
             }
             if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 3 * (gap + height), width * 2, height), "Start server"))
             {
                 // not my fault if the user doesnt have entanglement. dont use debug builds maybe lol
-                Assembly entanglementAssembly = AppDomain.CurrentDomain.GetAssemblies().FirstOrDefault(asm => asm.GetName().Name == "Entanglement");
+                Assembly entanglementAssembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name == "Entanglement");
                 entanglementAssembly.GetType("Entanglement.Network.Server").GetMethod("StartServer", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
             }
         }
@@ -359,7 +373,7 @@ namespace BWChaos
 
         private static void PopulateEffects()
         {
-            if (EffectHandler.AllEffects.Count == 0)
+            if (EffectHandler.allEffects.Count == 0)
             {
                 // Get all effects from the assembly
                 asmEffects = (from t in Assembly.GetTypes()
@@ -372,16 +386,27 @@ namespace BWChaos
             }
             else
             {
-                EffectHandler.AllEffects.Clear();
+                EffectHandler.allEffects.Clear();
+                EffectHandler.bag.Clear();
                 Prefs.Get();
             }
 
             // Actually populate the effects list
             foreach (var e in FilterEffects(asmEffects))
             {
-                EffectHandler.AllEffects.Add(e.Name, e);
+                if (!Prefs.ForceDisabledEffects.Contains(e.Name)) EffectHandler.allEffects.Add(e.Name, e);
+#if DEBUG
+                else Chaos.Log($"{nameof(Prefs.ForceDisabledEffects)} has this effect {e.Name}, refusing to add it"); // haha nameof nameof nameof nameof nameof nameof nameof
+#endif
             }
 
+#if DEBUG
+            Chaos.Log($"{nameof(Prefs.ForceDisabledEffects)} has {Prefs.ForceDisabledEffects.Count} things");
+            foreach (var disabled in Prefs.ForceDisabledEffects)
+            {
+                Chaos.Log($" - {disabled}");
+            }
+#endif
 
             foreach (var str in Prefs.ForceEnabledEffects)
             {
@@ -389,7 +414,7 @@ namespace BWChaos
                 Chaos.Log("Force enabling effect '" + str + "' because it was in the melonprefs array");
 #endif
 
-                if (EffectHandler.AllEffects.Keys.Contains(str)) continue; // we dont want it in the list twice
+                if (EffectHandler.allEffects.Keys.Contains(str)) continue; // we dont want it in the list twice
 
                 EffectBase effect = asmEffects.FirstOrDefault(e => e.Name == str); // firstordefault my beloved
 
@@ -407,7 +432,7 @@ namespace BWChaos
                     continue;
                 }
 
-                EffectHandler.AllEffects.Add(str, effect);
+                EffectHandler.allEffects.Add(str, effect);
             }
 
             #region Local function because fuck you
@@ -416,8 +441,7 @@ namespace BWChaos
             {
                 return from e in effects
                        where e.Types == EffectTypes.NONE || // is this optimization?
-                       (IsEffectViable(e.Types) &&
-                       !Prefs.ForceDisabledEffects.Contains(e.Name))
+                       IsEffectViable(e.Types)
                        select e;
             }
 
@@ -436,7 +460,8 @@ namespace BWChaos
             // I'm not sure what this would do, but it probably doesn't hurt...
             EffectHandler.Instance?.gameObject.SetActive(false);
             PopulateEffects();
-            foreach (var e in GlobalVariables.ActiveEffects.Where(e => !IsEffectViable(e.Types))) e.ForceEnd();
+            foreach (var e in GlobalVariables.ActiveEffects.Where(e => !IsEffectViable(e.Types))) e.ForceEnd(); // linqlinqlinqlinqlinqlinqlinqlinq
+            EffectHandler.Instance?.CopyAllToBag();
             EffectHandler.Instance?.gameObject.SetActive(true);
         }
 
@@ -444,18 +469,22 @@ namespace BWChaos
 
         public static void InjectEffect<T>() where T : EffectBase
         {
-            var e = Activator.CreateInstance<T>();
-            asmEffects.Add(e);
-            EffectHandler.AllEffects.Add(e.Name, e);
-            if (Instance.started) e.GetPreferencesFromAttrs();
+            InjectEffect(typeof(T));
         }
 
         public static void InjectEffect(Type type)
         {
             if (type.BaseType != typeof(EffectBase)) throw new InvalidOperationException($"Supplied type {type.Name} does not extend {nameof(EffectBase)} - it must do so in order to be injected into Chaos");
             var e = (EffectBase)Activator.CreateInstance(type);
+#if DEBUG
+            Chaos.Log($"Injecting effect {e.Name} (type {type.Name}) into the effect collections");
+#endif
             asmEffects.Add(e);
-            EffectHandler.AllEffects.Add(e.Name, e);
+            if (IsEffectViable(e.Types))
+            {
+                EffectHandler.allEffects.Add(e.Name, e);
+                EffectHandler.bag.Add(e.Name, e);
+            }
             if (Instance.started) e.GetPreferencesFromAttrs();
         }
 

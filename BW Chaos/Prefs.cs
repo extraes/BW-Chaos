@@ -42,6 +42,7 @@ namespace BWChaos
         internal static List<string> ForceDisabledEffects { get; private set; } = new List<string>();
 #if DEBUG
         internal static bool enableIMGUI = false;
+        internal static bool IMGUIUseBag = false;
 #endif
 
         internal static void Init()
@@ -53,8 +54,8 @@ namespace BWChaos
             randomOnNoVotes = category.CreateEntry("randomEffectOnNoVotes", true);
             useGravityEffects = category.CreateEntry("useGravityEffects", false);
             useSteamProfileEffects = category.CreateEntry("useSteamProfileEffects", false);
-            useLaggyEffects = category.CreateEntry("useLaggyEffects", UseLaggyEffects);
-            useMetaEffects = category.CreateEntry("useMetaEffects", UseMetaEffects);
+            useLaggyEffects = category.CreateEntry("useLaggyEffects", false);
+            useMetaEffects = category.CreateEntry("useMetaEffects", true);
             // voteprefs
             showCandidatesOnScreen = category.CreateEntry("showCandidatesOnScreen", true);
             scrollCandidates = category.CreateEntry("scrollCandidates", true);
@@ -66,13 +67,15 @@ namespace BWChaos
             // end voteprefs :^)
             syncEffects = category.CreateEntry("syncEffectsViaEntanglement", false);
             useBagRandomizer = category.CreateEntry("useBagRandomizer", false);
-            MelonPreferences.CreateEntry(CATEGORY_NAME, "forceEnabledEffects", ForceEnabledEffects.ToArray(), "forceEnabledEffects");
-            MelonPreferences.CreateEntry(CATEGORY_NAME, "forceDisabledEffects", ForceDisabledEffects.ToArray(), "forceDisabledEffects");
+            category.CreateEntry("forceEnabledEffects", ForceEnabledEffects.ToArray());
+            category.CreateEntry("forceDisabledEffects", ForceDisabledEffects.ToArray());
             
 #if DEBUG
             MelonPreferences.CreateEntry(CATEGORY_NAME, "enableIMGUI", enableIMGUI, "enableIMGUI");
+            MelonPreferences.CreateEntry(CATEGORY_NAME, "IMGUIUseBag", IMGUIUseBag, "IMGUIUseBag");
 #endif
-            MelonPreferences.Save();
+            category.SaveToFile();
+            category.LoadFromFile();
         }
 
         public static void Get()
@@ -81,6 +84,7 @@ namespace BWChaos
             ForceDisabledEffects = MelonPreferences.GetEntryValue<string[]>(CATEGORY_NAME, "forceDisabledEffects").ToList();
 #if DEBUG
             enableIMGUI = MelonPreferences.GetEntryValue<bool>(CATEGORY_NAME, "enableIMGUI");
+            IMGUIUseBag = MelonPreferences.GetEntryValue<bool>(CATEGORY_NAME, "IMGUIUseBag");
 #endif
 
             Chaos.eTypesToPrefs.Clear();
