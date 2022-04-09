@@ -19,10 +19,10 @@ namespace BWChaos.Effects
         static GameObject vidParent;
 
 
-        public override void HandleNetworkMessage(byte[] data)
+        public override void HandleNetworkMessage(byte[][] data)
         {
             // get the data we need out of the byte array array (lol)
-            string vidPath = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size, data.Length - GlobalVariables.Vector3Size);
+            string vidPath = Encoding.ASCII.GetString(data[1]);
 
             #region Anti fuckup checks
 
@@ -43,13 +43,14 @@ namespace BWChaos.Effects
 
             var sign = Utilities.SpawnAd("");
             // flip it upside down because the render texture is upside down
-            sign.transform.DeserializePosRot(data, true);
+            sign.transform.DeserializePosRot(data[0]);
 
             var rend = sign.GetComponentInChildren<MeshRenderer>();
             rend.material = CreateRTex(vid, out VideoPlayer plyr);
 
             var asource = sign.AddComponent<AudioSource>();
             asource.volume = 0.1f;
+            asource.outputAudioMixerGroup = GlobalVariables.SFXMixer;
             plyr.SetTargetAudioSource(0, asource);
             plyr.Play();
             MelonCoroutines.Start(StopVideo(plyr));
@@ -63,7 +64,7 @@ namespace BWChaos.Effects
             var sign = Utilities.SpawnAd("");
             // flip it upside down because the render texture is upside down
             sign.transform.rotation = Quaternion.Euler(sign.transform.rotation.eulerAngles + new Vector3(0, 0, 180));
-            SendNetworkData(sign.transform.SerializePosRot().Concat(Encoding.ASCII.GetBytes(vidPath)).ToArray());
+            SendNetworkData(sign.transform.SerializePosRot(), Encoding.ASCII.GetBytes(vidPath));
 
             var vid = GlobalVariables.EffectResources.LoadAsset<VideoClip>(vidPath);
             
@@ -72,6 +73,7 @@ namespace BWChaos.Effects
 
             var asource = sign.AddComponent<AudioSource>();
             asource.volume = 0.1f;
+            asource.outputAudioMixerGroup = GlobalVariables.SFXMixer;
             plyr.SetTargetAudioSource(0, asource);
             plyr.Play();
             MelonCoroutines.Start(StopVideo(plyr));

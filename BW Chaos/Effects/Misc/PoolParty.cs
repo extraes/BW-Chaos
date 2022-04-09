@@ -25,26 +25,26 @@ namespace BWChaos.Effects
                 var pool = pools.Random();
                 var spawned = pool.InstantiatePoolee();
                 Utilities.MoveAndFacePlayer(spawned.gameObject);
-                SendNetworkData(spawned.transform.position.ToBytes(), spawned.transform.rotation.eulerAngles.ToBytes(), Encoding.ASCII.GetBytes(pool.name));
+                SendNetworkData(spawned.transform.SerializePosRot(), Encoding.ASCII.GetBytes(pool.name));
                 spawned.gameObject.SetActive(true);
                 yield return new WaitForSeconds(5);
             }
         }
 
-        public override void HandleNetworkMessage(byte[] data)
+        public override void HandleNetworkMessage(byte[][] data)
         {
-            string poolName = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size * 2, data.Length - GlobalVariables.Vector3Size * 2);
+            string poolName = Encoding.ASCII.GetString(data[1]);
 
             Pool pool = pools.FirstOrDefault(p => p.name == poolName);
             if (pool == null)
             {
-                Chaos.Log("Pool not found in client - " + poolName);
+                Chaos.Warn("Pool not found in client - " + poolName);
                 return;
             }
 
             var poolee = pool.InstantiatePoolee();
             poolee.gameObject.SetActive(true);
-            poolee.transform.DeserializePosRot(data, true);
+            poolee.transform.DeserializePosRot(data[0]);
         }
     }
 }

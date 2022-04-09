@@ -22,7 +22,7 @@ namespace BWChaos.Effects
             ushort signID = (ushort)UnityEngine.Random.Range(0, ushort.MaxValue);
             signs.Add(signID, sign);
             myID = signID;
-            SendNetworkData(BitConverter.GetBytes(signID).Concat(sign.transform.position.ToBytes()).ToArray());
+            SendNetworkData(BitConverter.GetBytes(signID), sign.transform.position.ToBytes());
 
             GameObject.Destroy(sign.GetComponent<StressLevelZero.Props.ObjectDestructable>());
             GameObject.Destroy(sign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
@@ -39,16 +39,16 @@ namespace BWChaos.Effects
                 if (sign == null) return; // In case something goes wrong
                 sign.transform.position = pHead.position + Vector3.up * 2;
                 sign.transform.rotation = Quaternion.LookRotation(Vector3.up);
-                if (Time.frameCount % 4 == 0) SendNetworkData(BitConverter.GetBytes(myID).Concat(sign.transform.position.ToBytes()).ToArray());
+                if (Time.frameCount % 4 == 0) SendNetworkData(BitConverter.GetBytes(myID), sign.transform.position.ToBytes());
             }
         }
 
         // fucking overbuilt shit to support multiple gullible signs
 
-        public override void HandleNetworkMessage(byte[] data)
+        public override void HandleNetworkMessage(byte[][] data)
         {
-            ushort id = BitConverter.ToUInt16(data, 0);
-            Vector3 pos = Utilities.DebyteV3(data, sizeof(ushort));
+            ushort id = BitConverter.ToUInt16(data[0], 0);
+            Vector3 pos = Utilities.DebyteV3(data[1]);
 
             if (!signs.TryGetValue(id, out var sign))
             {

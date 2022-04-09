@@ -13,10 +13,10 @@ namespace BWChaos.Effects
     {
         public RandomForces() : base("Random Forces", 5, EffectTypes.LAGGY) { }
 
-        public override void HandleNetworkMessage(byte[] data) 
+        public override void HandleNetworkMessage(byte[][] data) 
         {
-            Vector3 vec = Utilities.DebyteV3(data);
-            string path = Encoding.ASCII.GetString(data, GlobalVariables.Vector3Size, data.Length - GlobalVariables.Vector3Size);
+            Vector3 vec = Utilities.DebyteV3(data[0]);
+            string path = Encoding.ASCII.GetString(data[1]);
 
 
             var rb = GameObject.Find(path)?.GetComponent<Rigidbody>();
@@ -33,7 +33,7 @@ namespace BWChaos.Effects
             foreach (var rb in GameObject.FindObjectsOfType<Rigidbody>())
             {
                 Vector3 vec = Random.onUnitSphere;
-                SendNetworkData(vec.ToBytes().Concat(Encoding.ASCII.GetBytes(rb.transform.GetFullPath())).ToArray());
+                SendNetworkData(vec.ToBytes(), Encoding.ASCII.GetBytes(rb.transform.GetFullPath()));
                 rb.AddForce(vec * 10, ForceMode.VelocityChange);
                 if (stagger = !stagger) yield return new WaitForFixedUpdate();
             }

@@ -117,16 +117,16 @@ namespace BWChaos.Effects
             }
         }
 
-        public override void HandleNetworkMessage(byte[] data)
+        public override void HandleNetworkMessage(byte[][] data)
         {
             float[] colors = new float[] {
-                BitConverter.ToSingle(data, 0),
-                BitConverter.ToSingle(data, sizeof(float) * 1),
-                BitConverter.ToSingle(data, sizeof(float) * 2),
-                BitConverter.ToSingle(data, sizeof(float) * 3),
+                BitConverter.ToSingle(data[0], 0),
+                BitConverter.ToSingle(data[0], sizeof(float) * 1),
+                BitConverter.ToSingle(data[0], sizeof(float) * 2),
+                BitConverter.ToSingle(data[0], sizeof(float) * 3),
             };
-            string path = Encoding.ASCII.GetString(data, sizeof(float) * 4, data.Length - sizeof(float) * 4);
-            Color col = new Color(colors[0], colors[1], colors[2]);
+            string path = Encoding.ASCII.GetString(data[1]);
+            Color col = new Color(colors[0], colors[1], colors[2], colors[3]);
 
             var mesh = GameObject.Find(path)?.GetComponent<MeshRenderer>();
             if (mesh == null)
