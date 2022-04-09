@@ -13,12 +13,11 @@ namespace BWChaos.Effects
     internal class CrabletCircle : EffectBase
     {
         public CrabletCircle() : base("Crablet Circle") { }
-        Pool pool;
-        const float FPI = (float)Math.PI;
+        static Pool pool;
 
         public override void OnEffectStart()
         {
-            pool = pool ?? GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
+            pool = pool != null ? pool : GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
             if (isNetworked) return;
             if (pool == null) return;
             Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
@@ -26,8 +25,8 @@ namespace BWChaos.Effects
             for (int i = 0; i < 8; i++)
             {
                 float theta = (i / 8f) * 360;
-                float x = Mathf.Cos(theta * FPI / 180);
-                float y = Mathf.Sin(theta * FPI / 180);
+                float x = Mathf.Cos(theta * Const.FPI / 180);
+                float y = Mathf.Sin(theta * Const.FPI / 180);
 
                 Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
                 var spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));

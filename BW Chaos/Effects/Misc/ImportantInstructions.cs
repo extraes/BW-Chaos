@@ -70,7 +70,7 @@ namespace BWChaos.Effects
 #endif
 
             // Create/get audiosource
-            var source = sign.GetComponent<AudioSource>() ?? sign.AddComponent<AudioSource>();
+            var source = sign.AddComponent<AudioSource>();
             source.volume = 0f;
             source.rolloffFactor = 0.75f;
             source.rolloffMode = AudioRolloffMode.Logarithmic;

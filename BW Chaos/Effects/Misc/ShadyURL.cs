@@ -8,6 +8,7 @@ namespace BWChaos.Effects
     internal class ShadyURL : EffectBase
     {
         public ShadyURL() : base("Shady URL", 15) { }
+        [EffectPreference] static bool showInSteamOverlayIfAvailable = true;
 
         // todo: use chaos.extraes.xyz/shady/ as a shortener instead of 5z8.info (also add that functionality to the streamer server)
         private string[] shadyURLs = new string[] {
@@ -28,6 +29,7 @@ namespace BWChaos.Effects
         [AutoCoroutine]
         public System.Collections.IEnumerator CoRun ()
         {
+            if (isNetworked) yield break;
             var pickedURL = shadyURLs.Random();
             SendNetworkData(pickedURL);
             yield return CoShow(pickedURL);
@@ -39,7 +41,7 @@ namespace BWChaos.Effects
             yield return new WaitForSeconds(4f);
             SpawnAd(url);
 
-            if (Chaos.isSteamVer)
+            if (Chaos.isSteamVer && showInSteamOverlayIfAvailable)
             {
                 yield return new WaitForSeconds(5f);
                 SpawnAd("Why don't I show you :^)");

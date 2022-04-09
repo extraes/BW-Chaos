@@ -10,7 +10,7 @@ namespace BWChaos.Effects
     internal class FakeCrash : EffectBase
     {
         public FakeCrash() : base("Fake crash", 7, EffectTypes.HIDDEN) { }
-        private static AudioSource soundPlayer = null;
+        private static AudioSource soundPlayer;
         private static bool alreadyRan = false;
         private int sleepLength;
         public override void OnEffectStart()

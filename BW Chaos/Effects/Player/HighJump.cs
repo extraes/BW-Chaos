@@ -43,7 +43,7 @@ namespace BWChaos.Effects
         [HarmonyPatch(typeof(ControllerRig), "Jump")]
         public class ControllerRigJumpPatch
         {
-            public static void Postfix(ControllerRig __instance)
+            public static void Postfix()
             {
                 var physGrounder = GameObject.FindObjectOfType<PhysGrounder>();
 
@@ -53,9 +53,7 @@ namespace BWChaos.Effects
                     OnJump?.Invoke();
                 }
             }
-
         }
-
     }
 }
 

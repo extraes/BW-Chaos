@@ -17,7 +17,7 @@ namespace BWChaos.Effects
         
         public override void OnEffectStart()
         {
-            trp = trp ?? GameObject.Find("PlayerTrigger").GetComponent<TriggerRefProxy>();
+            trp = trp != null ? trp : GameObject.Find("PlayerTrigger").GetComponent<TriggerRefProxy>();
             // try catch because despite the ?. it still nullrefs. idk why
             try
             {
