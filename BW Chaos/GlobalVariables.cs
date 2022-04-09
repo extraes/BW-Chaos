@@ -29,6 +29,8 @@ namespace BWChaos
 
         public static AudioMixerGroup MusicMixer;
         public static AudioMixerGroup SFXMixer;
+        public static AudioPlayer MusicPlayer;
+        public static AudioPlayer SFXPlayer;
 
         public static AssetBundle EffectResources;
         public static IReadOnlyList<string> ResourcePaths;
