@@ -27,7 +27,15 @@ namespace BWChaos.Sync
         {
             for (int i = 0; i < reps.Capacity; i++)
             {
-                reps[i] = new PlayerRepresentation("Him", i);
+                reps.Add(new PlayerRepresentation("Him", i));
+            }
+        }
+
+        public override void OnEffectEnd()
+        {
+            foreach (var rep in reps)
+            {
+                GameObject.Destroy(rep.repTransforms[0].root.gameObject);
             }
         }
 

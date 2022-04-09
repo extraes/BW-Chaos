@@ -11,7 +11,7 @@ namespace BWChaos.Sync
 {
     public class ChaosMessageHandler : NetworkMessageHandler
     {
-        public override byte? MessageIndex { get; } = ChaosSyncHandler.mIndex;
+        public override byte? MessageIndex => ChaosSyncHandler.mIndex;
 
         public override NetworkMessage CreateMessage(NetworkMessageData data)
         {
@@ -53,7 +53,7 @@ namespace BWChaos.Sync
                         var name = "ID" + sender.ToString();
                         if (res == Result.Ok) name = user.Username;
 
-                        string verMismatch1 = $"BW Chaos version mismatch (you: {string.Join(",", ChaosSyncHandler.thisVersion)}, {name}: {string.Join(",", msgVer)})";
+                        string verMismatch1 = $"BW Chaos version mismatch (you: {string.Join(".", ChaosSyncHandler.thisVersion)}, {name}: {string.Join(".", msgVer)})";
                         string verMismatch2 = $"This causes a mismatch with effect syncing! Do not expect this to function properly!";
                         Notifications.SendNotification(verMismatch1, 8);
                         Notifications.SendNotification(verMismatch2, 5);
@@ -90,7 +90,7 @@ namespace BWChaos.Sync
             {
                 case EffectBase.NetMsgType.START:
                     var eName = Encoding.ASCII.GetString(data);
-                    if (EffectHandler.AllEffects.TryGetValue(eName, out EffectBase eObj))
+                    if (EffectHandler.allEffects.TryGetValue(eName, out EffectBase eObj))
                     {
                         var eToRun = (EffectBase)Activator.CreateInstance(eObj.GetType());
                         eToRun.isNetworked = true;
