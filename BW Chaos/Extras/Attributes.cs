@@ -11,7 +11,12 @@ namespace BWChaos
     public sealed class AutoCoroutine : Attribute { }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
-    public sealed class EffectPreference : Attribute { }
+    public sealed class EffectPreference : Attribute 
+    {
+        public string desc = "";
+        public EffectPreference() { desc = ""; }
+        public EffectPreference(string description) { desc = description; }
+    }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false, AllowMultiple = false)]
     public sealed class RangePreference : Attribute 

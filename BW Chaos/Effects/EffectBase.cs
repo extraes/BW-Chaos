@@ -80,7 +80,6 @@ namespace BWChaos.Effects
             Duration = eDuration;
             Types = eTypes;
 
-            // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
             autoCRMethod = FindAutoCR();
         }
 
@@ -97,10 +96,12 @@ namespace BWChaos.Effects
 
         private MethodInfo FindAutoCR()
         {
+            // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
             return (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
                     where method.ReturnType == typeof(IEnumerator) &&
                           method.GetCustomAttribute<AutoCoroutine>() != null
                     select method).FirstOrDefault();
+            // I LOVE LINQ YEAHHHHHHHHH LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQ
         }
 
         // gets called from BoneMenu.cs after the effect's subcategory has been created and set up
@@ -125,7 +126,8 @@ namespace BWChaos.Effects
 
             foreach (FieldInfo field in staticFields)
             {
-                if (field.GetCustomAttribute<EffectPreference>() == null) continue;
+                var ep = field.GetCustomAttribute<EffectPreference>();
+                if (ep == null) continue;
 #if DEBUG
                 Chaos.Log($"Found effect preference on {myType.Name}.{field.Name}");
 #endif
@@ -135,21 +137,24 @@ namespace BWChaos.Effects
                 var readableName = Utilities.GetReadableStringFromMemberName(field.Name);
                 if (type == typeof(string))
                 {
-                    var entry = SetEntry(field, out string toSet);
-                    MenuElement.CreateStringElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; });
+                    var entry = SetEntry(field, out string toSet, ep.desc);
+                    MenuElement.CreateStringElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
                 }
                 else if (type == typeof(bool))
                 {
-                    var entry = SetEntry(field, out bool toSet);
-                    MenuElement.CreateBoolElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; });
+                    var entry = SetEntry(field, out bool toSet, ep.desc);
+                    MenuElement.CreateBoolElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
                 }
                 else if (type == typeof(Color))
                 {
-                    var entry = SetEntry(field, out Color toSet);
-                    MenuElement.CreateColorElement(readableName, toSet, val => { field.SetValue(null, val); entry.Value = val; });
+                    var entry = SetEntry(field, out Color toSet, ep.desc);
+                    MenuElement.CreateColorElement(readableName, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
                 }
                 else if (type.IsEnum)
                 {
+#if DEBUG
+                    if (!string.IsNullOrEmpty(ep.desc)) Chaos.Warn($"Descriptions are not allowed for enum preferences - the description '{ep.desc}' on {myType.Name}.{field.Name} will not be put in ChaosConfig.cfg");
+#endif
                     Enum dv = (Enum)field.GetValue(null);
                     var entry = chaosConfigCategory.CreateEntry<string>(field.Name, dv.ToString(), description: $"Options: {string.Join(", ", Enum.GetNames(type))}");
                     Enum toSet = dv; // if the two are different
@@ -163,7 +168,7 @@ namespace BWChaos.Effects
                         Chaos.Warn("Replacing it with its default value of " + dv);
                         entry.Value = dv.ToString();
                     }
-                    MenuElement.CreateEnumElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val.ToString(); });
+                    MenuElement.CreateEnumElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val.ToString(); chaosConfigCategory.SaveToFile(false); });
                 }
 #if DEBUG
                 else
@@ -200,12 +205,12 @@ namespace BWChaos.Effects
                 if (field.FieldType == typeof(int))
                 {
                     var entry = SetEntry(field, out int toSet, $"{rp.low} to {rp.high}");
-                    MenuElement.CreateIntElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; }, (int)rp.inc, (int)rp.low, (int)rp.high);
+                    MenuElement.CreateIntElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, (int)rp.inc, (int)rp.low, (int)rp.high);
                 }
                 else if (field.FieldType == typeof(float))
                 {
                     var entry = SetEntry(field, out float toSet, $"{rp.low} to {rp.high}");
-                    MenuElement.CreateFloatElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; }, rp.inc, rp.low, rp.high);
+                    MenuElement.CreateFloatElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, rp.inc, rp.low, rp.high);
                 }
 #if DEBUG
                 else
@@ -273,7 +278,7 @@ namespace BWChaos.Effects
         {
 #if DEBUG
             // If there's already an instance of this effect, abort immediately, the new effect system creates a new instance when ran. only IMGUI uses this, so it shouldnt be possible under normal circumstances
-            if (EffectHandler.AllEffects.Values.Contains(this))
+            if (EffectHandler.allEffects.Values.Contains(this))
             {
                 Chaos.Warn("The effect handler has an instance of this effect! This should not happen! Are you using IMGUI? Creating a new instance, running, then aborting!");
                 var newE = (EffectBase)Activator.CreateInstance(this.GetType());
@@ -375,11 +380,6 @@ namespace BWChaos.Effects
             _sendData?.Invoke(NetMsgType.STRING, myIndex, Encoding.ASCII.GetBytes(data));
         }
 
-        /// <summary>
-        /// This is the only method to get a summary because using bytes in this way is playing with fire. Do not use the 255/0xFF byte.
-        /// Debug builds have a check for 255.
-        /// </summary>
-        /// <param name="data"></param>
         protected void SendNetworkData(params byte[][] data)
         {
 #if DEBUG
