@@ -48,16 +48,16 @@ namespace BWChaos
                     e.Run();
                 });
 
-                ecat.CreateBoolElement("Force enable/disable", Color.white, EffectHandler.AllEffects.ContainsKey(effect.Name), addEffect =>
+                ecat.CreateBoolElement("Force enable/disable", Color.white, EffectHandler.allEffects.ContainsKey(effect.Name), addEffect =>
                 {
 #if DEBUG
-                    Chaos.Log("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is " + (EffectHandler.AllEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
+                    Chaos.Log("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is " + (EffectHandler.allEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
 #endif
                     if (addEffect)
                     {
-                        if (!EffectHandler.AllEffects.ContainsKey(effect.Name))
+                        if (!EffectHandler.allEffects.ContainsKey(effect.Name))
                         {
-                            EffectHandler.AllEffects.Add(effect.Name, effect);
+                            EffectHandler.allEffects.Add(effect.Name, effect);
                             if (!Chaos.IsEffectViable(effect.Types)) Prefs.ForceEnabledEffects.Add(effect.Name);
                         }
                     }
@@ -67,10 +67,10 @@ namespace BWChaos
                         {
                             if (e.Name == effect.Name) e.ForceEnd();
                         }
-                        EffectHandler.AllEffects.Remove(effect.Name);
+                        EffectHandler.allEffects.Remove(effect.Name);
                         if (Chaos.IsEffectViable(effect.Types)) Prefs.ForceDisabledEffects.Add(effect.Name);
                     }
-                    (ecat.elements[1] as BoolElement).SetValue(EffectHandler.AllEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
+                    (ecat.elements[1] as BoolElement).SetValue(EffectHandler.allEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
                 });
 
                 ecat.CreateFunctionElement("Flags: " + effect.Types, Color.gray, () => { });
@@ -157,9 +157,9 @@ namespace BWChaos
             #region Populate debug category
 
             debugCategory.CreateFunctionElement("Log resource paths", Color.white, () => { GlobalVariables.ResourcePaths.ForEach(Chaos.Log); });
-            debugCategory.CreateFunctionElement("Log all enabled effects", Color.white, () => { EffectHandler.AllEffects.ForEach(e => Chaos.Log(e.Value.Name)); });
-            debugCategory.CreateFunctionElement("Log effect syncing indices", Color.white, () => { EffectHandler.AllEffects.ForEach(e => Chaos.Log($"{e.Value.Name}: {e.Value.EffectIndex}")); });
-            debugCategory.CreateFunctionElement("Log effect type names (useful for ChaosConfig)", Color.white, () => { EffectHandler.AllEffects.ForEach(e => Chaos.Log($"Effect '{e.Value.Name}' = type '{e.Value.GetType().Name}'")); });
+            debugCategory.CreateFunctionElement("Log all enabled effects", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log(e.Value.Name)); });
+            debugCategory.CreateFunctionElement("Log effect syncing indices", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"{e.Value.Name}: {e.Value.EffectIndex}")); });
+            debugCategory.CreateFunctionElement("Log effect type names (useful for ChaosConfig)", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"Effect '{e.Value.Name}' = type '{e.Value.GetType().Name}'")); });
             debugCategory.CreateFunctionElement("Log all preferences (w/o token & channel)", Color.white, () =>
             {
                 foreach (var prop in typeof(Prefs).GetProperties(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
@@ -178,6 +178,12 @@ namespace BWChaos
                     }
                 }
             });
+
+#if DEBUG
+            // why put this in chaos? fucking beats me
+            Action act = new Action(() => GameObject.FindObjectOfType<HotKeyEnable>().Spawn());
+            debugCategory.CreateFunctionElement("UIRig.popUpMenu.addFunMenu", Color.gray, () => GameObject.FindObjectOfType<StressLevelZero.Rig.UIRig>().popUpMenu.AddDevMenu(act));
+#endif
 
             var logMethods = new HarmonyMethod[]
             {
