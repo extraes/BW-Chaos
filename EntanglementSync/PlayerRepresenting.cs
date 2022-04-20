@@ -1,12 +1,6 @@
-﻿using Discord;
-using Entanglement.Network;
-using System;
-using System.Collections.Generic;
+﻿using Entanglement.Representation;
 using System.Collections;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Entanglement.Representation;
+using System.Collections.Generic;
 using UnityEngine;
 
 namespace BWChaos.Sync
@@ -15,11 +9,11 @@ namespace BWChaos.Sync
     {
         public PlayerRepresenting() : base("The Entities...", 60) { }
 
-        List<PlayerRepresentation> reps = new List<PlayerRepresentation>(16);
+        readonly List<PlayerRepresentation> reps = new List<PlayerRepresentation>(16);
         public override void HandleNetworkMessage(byte[][] data)
         {
-            int idx = (int)data[1][0];
-            var transform = reps[idx].repTransforms[0].root.transform;
+            int idx = data[1][0];
+            Transform transform = reps[idx].repTransforms[0].root.transform;
             transform.DeserializePosRot(data[0]);
         }
 
@@ -33,7 +27,7 @@ namespace BWChaos.Sync
 
         public override void OnEffectEnd()
         {
-            foreach (var rep in reps)
+            foreach (PlayerRepresentation rep in reps)
             {
                 GameObject.Destroy(rep.repTransforms[0].root.gameObject);
             }
@@ -51,11 +45,11 @@ namespace BWChaos.Sync
             {
                 int reali = i % reps.Count;
                 Utilities.MoveAndFacePlayer(reps[reali].repTransforms[0].root.gameObject);
-                var posrot = reps[reali].repTransforms[0].root.transform.SerializePosRot();
+                byte[] posrot = reps[reali].repTransforms[0].root.transform.SerializePosRot();
                 SendNetworkData(posrot, new byte[] { (byte)reali });
                 yield return new WaitForSeconds(3);
             }
         }
     }
-    
+
 }

@@ -1,31 +1,22 @@
-﻿using System;
+﻿using PuppetMasta;
 using UnityEngine;
-using MelonLoader;
-using ModThatIsNotMod;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using Random = UnityEngine.Random;
-using StressLevelZero.AI;
-using PuppetMasta;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class Fold : EffectBase
 {
-    internal class Fold : EffectBase
-    {
-        public Fold() : base("<b>Fold.</b>") { }
+    public Fold() : base("<b>Fold.</b>") { }
 
-        public override void OnEffectStart()
+    public override void OnEffectStart()
+    {
+        try
         {
-            try
+            foreach (PuppetMaster pm in GameObject.FindObjectsOfType<PuppetMaster>())
             {
-                foreach (var pm in GameObject.FindObjectsOfType<PuppetMaster>())
-                {
-                    pm.Kill();
-                }
+                pm.Kill();
             }
-            catch { }
         }
-        
+        catch { }
     }
+
 }

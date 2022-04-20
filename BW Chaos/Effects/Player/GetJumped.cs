@@ -1,45 +1,43 @@
 ﻿using StressLevelZero.Pool;
-using System;
 using System.Linq;
 using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class GetJumped : EffectBase
 {
-    internal class GetJumped : EffectBase
+    public GetJumped() : base("Get Jumped") { }
+    Pool pool;
+
+    public override void OnEffectStart()
     {
-        public GetJumped() : base("Get Jumped") { }
-        Pool pool;
+        pool = pool != null ? pool : GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
+        if (isNetworked) return;
+        if (pool == null) return;
+        Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
 
-        public override void OnEffectStart()
+        for (int i = 0; i < 8; i++)
         {
-            pool = pool != null ? pool : GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
-            if (isNetworked) return;
-            if (pool == null) return;
-            Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
+            float theta = (i / 8f) * 360;
+            float x = Mathf.Cos(theta * Const.FPI / 180);
+            float y = Mathf.Sin(theta * Const.FPI / 180);
 
-            for (int i = 0; i < 8; i++)
-            {
-                float theta = (i / 8f) * 360;
-                float x = Mathf.Cos(theta * Const.FPI / 180);
-                float y = Mathf.Sin(theta * Const.FPI / 180);
-
-                Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
-                var spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-                var spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
-                spawnedNB.gameObject.SetActive(true);
-                spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
-                SendNetworkData(spawnedNB.transform.SerializePosRot());
-            }
-        }
-
-        public override void HandleNetworkMessage(byte[] data)
-        {
-            if (pool == null) return;
-
-            var spawnedNB = pool.InstantiatePoolee();
-            spawnedNB.transform.DeserializePosRot(data);
+            Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
+            Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
+            Poolee spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
             spawnedNB.gameObject.SetActive(true);
             spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+            SendNetworkData(spawnedNB.transform.SerializePosRot());
         }
+    }
+
+    public override void HandleNetworkMessage(byte[] data)
+    {
+        if (pool == null) return;
+
+        Poolee spawnedNB = pool.InstantiatePoolee();
+        spawnedNB.transform.DeserializePosRot(data);
+        spawnedNB.gameObject.SetActive(true);
+        spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
     }
 }

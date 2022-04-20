@@ -1,27 +1,25 @@
 ﻿using ModThatIsNotMod;
-using StressLevelZero.Interaction;
-using StressLevelZero.Player;
 using StressLevelZero.Props.Weapons;
 using UnityEngine;
 
-//todo: this is broken, it crashes the game iirc
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class FuckYourItem : EffectBase
 {
-    internal class FuckYourItem : EffectBase
+    public FuckYourItem() : base("Fuck Your Items") { }
+
+    public override void OnEffectStart()
     {
-        public FuckYourItem() : base("Fuck Your Items") { }
+#pragma warning disable UNT0008 // Null propagation on Unity objects
+        Player.GetObjectInHand(Player.leftHand)?.SetActive(false);
+        Player.GetObjectInHand(Player.rightHand)?.SetActive(false);
+#pragma warning restore UNT0008 // Null propagation on Unity objects
 
-        public override void OnEffectStart()
+        foreach (HandWeaponSlotReciever rec in GameObject.FindObjectsOfType<HandWeaponSlotReciever>())
         {
-            Player.GetObjectInHand(Player.leftHand)?.SetActive(false);
-            Player.GetObjectInHand(Player.rightHand)?.SetActive(false);
-
-            foreach (HandWeaponSlotReciever rec in GameObject.FindObjectsOfType<HandWeaponSlotReciever>())
+            if (rec.m_SlottedWeapon)
             {
-                if (rec.m_SlottedWeapon)
-                {
-                    rec.m_SlottedWeapon.gameObject.SetActive(false);
-                }
+                rec.m_SlottedWeapon.gameObject.SetActive(false);
             }
         }
     }

@@ -29,7 +29,7 @@ namespace BWChaos.Sync
             Chaos.OnEffectRan += OnEffectRan;
             EffectBase._sendData += SendEffectData;
         }
-        
+
 
         private void OnEffectRan(EffectBase effect)
         {
@@ -44,13 +44,13 @@ namespace BWChaos.Sync
             }
 
             // send data
-            var cmd = new ChaosMessageData 
-            { 
-                type = EffectBase.NetMsgType.START, 
+            ChaosMessageData cmd = new ChaosMessageData
+            {
+                type = EffectBase.NetMsgType.START,
                 effectIndex = 0, // starting an effect doesnt need an index cause the effect is found via its name
-                syncData = Encoding.ASCII.GetBytes(effect.Name) 
+                syncData = Encoding.ASCII.GetBytes(effect.Name)
             };
-            var msg = NetworkMessage.CreateMessage(mIndex, cmd);
+            NetworkMessage msg = NetworkMessage.CreateMessage(mIndex, cmd);
             ModuleLogger.Msg("Telling Entanglement to sync effect: " + effect.Name);
             Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
@@ -64,7 +64,7 @@ namespace BWChaos.Sync
         private static void SendEffectData(EffectBase.NetMsgType msgType, byte index, byte[] data)
         {
             if (Node.activeNode.connectedUsers.Count == 0) return;
-            var msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { type = msgType, effectIndex = index, syncData = data });
+            NetworkMessage msg = NetworkMessage.CreateMessage(mIndex, new ChaosMessageData { type = msgType, effectIndex = index, syncData = data });
             Node.activeNode.BroadcastMessage(NetworkChannel.Reliable, msg.GetBytes());
         }
     }

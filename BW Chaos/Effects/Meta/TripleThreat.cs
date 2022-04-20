@@ -2,26 +2,25 @@
 using System.Collections;
 using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class TripleThreat : EffectBase
 {
-    internal class TripleThreat : EffectBase
+    public TripleThreat() : base("Triple threat", 15, EffectTypes.META) { }
+
+    [AutoCoroutine]
+    public IEnumerator CoRun()
     {
-        public TripleThreat() : base("Triple threat", 15, EffectTypes.META) { }
+        if (isNetworked) yield break;
+        yield return null;
 
-        [AutoCoroutine]
-        public IEnumerator CoRun()
+        while (Active)
         {
-            if (isNetworked) yield break;
-            yield return null;
+            EffectBase og = EffectHandler.allEffects.Values.Random();
+            EffectBase newie = (EffectBase)Activator.CreateInstance(og.GetType());
+            newie.Run();
 
-            while (Active)
-            { 
-                EffectBase og = EffectHandler.allEffects.Values.Random();
-                EffectBase newie = (EffectBase)Activator.CreateInstance(og.GetType());
-                newie.Run();
-
-                yield return new WaitForSecondsRealtime(5f);
-            }
+            yield return new WaitForSecondsRealtime(5f);
         }
     }
 }

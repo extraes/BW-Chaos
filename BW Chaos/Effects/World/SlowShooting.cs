@@ -1,45 +1,42 @@
-﻿using System;
-using System.Collections;
-
-using UnityEngine;
-using MelonLoader;
+﻿using MelonLoader;
 using ModThatIsNotMod;
 using StressLevelZero.Props.Weapons;
+using System.Collections;
+using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class SlowShooting : EffectBase
 {
-    internal class SlowShooting : EffectBase
+    public SlowShooting() : base("SUPERSHOT", 90) { }
+
+    private object coroutine;
+
+    public override void OnEffectStart()
     {
-        public SlowShooting() : base("SUPERSHOT", 90) { }
+        Hooking.OnPostFireGun += OnPostGunFire;
+    }
 
-        private object coroutine;
+    private void OnPostGunFire(Gun obj)
+    {
+        // avoid conflicting coroutines
+        if (coroutine != null) MelonCoroutines.Stop(coroutine);
+        coroutine = MelonCoroutines.Start(BringBackTime());
+    }
 
-        public override void OnEffectStart()
+    private IEnumerator BringBackTime()
+    {
+        Time.timeScale = 0.05f;
+        while (Time.timeScale < 1f && Active)
         {
-            Hooking.OnPostFireGun += OnPostGunFire;
+            Time.timeScale += 0.05f;
+            yield return new WaitForSeconds(0.05f);
         }
+        Time.timeScale = 1;
+    }
 
-        private void OnPostGunFire(Gun obj)
-        {
-            // avoid conflicting coroutines
-            if (coroutine != null) MelonCoroutines.Stop(coroutine);
-            coroutine = MelonCoroutines.Start(BringBackTime());
-        }
-
-        private IEnumerator BringBackTime()
-        {
-            Time.timeScale = 0.05f;
-            while (Time.timeScale < 1f && Active)
-            {
-                Time.timeScale += 0.05f;
-                yield return new WaitForSeconds(0.05f);
-            }
-            Time.timeScale = 1;
-        }
-
-        public override void OnEffectEnd()
-        {
-            Hooking.OnPostFireGun -= OnPostGunFire;
-        }
+    public override void OnEffectEnd()
+    {
+        Hooking.OnPostFireGun -= OnPostGunFire;
     }
 }

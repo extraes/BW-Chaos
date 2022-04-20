@@ -1,29 +1,21 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using ModThatIsNotMod;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using Random = UnityEngine.Random;
+﻿using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class FreezeAll : EffectBase
 {
-    internal class FreezeAll : EffectBase
-    {
-        public FreezeAll() : base("Freeze Everything") { }
+    public FreezeAll() : base("Freeze Everything") { }
 
-        public override void OnEffectStart()
+    public override void OnEffectStart()
+    {
+        try
         {
-            try
+            foreach (Rigidbody rb in GameObject.FindObjectsOfType<Rigidbody>())
             {
-                foreach (var rb in GameObject.FindObjectsOfType<Rigidbody>())
-                {
-                    if (rb == null || rb.transform.IsChildOfRigManager()) continue;
-                    rb?.Sleep();
-                }
+                if (rb == null || rb.transform.IsChildOfRigManager()) continue;
+                rb?.Sleep();
             }
-            catch { }
         }
+        catch { }
     }
 }

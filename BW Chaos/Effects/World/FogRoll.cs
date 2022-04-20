@@ -1,61 +1,58 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using ModThatIsNotMod;
+﻿using MelonLoader;
+using System;
 using System.Collections;
-using Random = UnityEngine.Random;
+using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class FogRoll : EffectBase
 {
-    internal class FogRoll : EffectBase
+    public FogRoll() : base("Fog Roll", 60) { }
+
+    public override void OnEffectStart()
     {
-        public FogRoll() : base("Fog Roll", 60) { }
-
-        public override void OnEffectStart()
+        UnhollowerBaseLib.Il2CppArrayBase<ValveFog> fogs = GameObject.FindObjectsOfType<ValveFog>();
+        foreach (ValveFog fog in fogs)
         {
-            var fogs = GameObject.FindObjectsOfType<ValveFog>();
-            foreach (var fog in fogs)
-            {
-                MelonCoroutines.Start(ManipFog(fog));
-            }
-            //if (fogs.Length == 0)
+            MelonCoroutines.Start(ManipFog(fog));
         }
-        private IEnumerator ManipFog(ValveFog fog)
-        {
-            yield return null;
+        //if (fogs.Length == 0)
+    }
+    private IEnumerator ManipFog(ValveFog fog)
+    {
+        yield return null;
 #if DEBUG
-            Chaos.Log("Manipulating fog - " + fog.name);
+        Log("Manipulating fog - " + fog.name);
 #endif
-            float s = fog.startDistance;
-            float e = fog.endDistance;
-            float t = fog.heightFogThickness;
+        float s = fog.startDistance;
+        float e = fog.endDistance;
+        float t = fog.heightFogThickness;
 
-            fog.startDistance = 0.1f;
-            fog.endDistance = 10f;
+        fog.startDistance = 0.1f;
+        fog.endDistance = 10f;
+        fog.UpdateConstants();
+
+        const float cycleLength = 2;
+        float startTime = 0;
+        (float, float) minmax = (0.1f, 20f);
+        (float, float) mmDelta = (0.01f, 10f);
+        while (Active)
+        {
+            startTime += Time.deltaTime;
+
+            float ct = Math.Abs((startTime % cycleLength) - (cycleLength / 2)) * 2;
+            float cur = minmax.Interpolate(ct);
+            float delta = mmDelta.Interpolate(ct);
+            fog.startDistance = cur;
+            fog.endDistance = delta;
+            //fog.startDistance = delta;
             fog.UpdateConstants();
 
-            const float cycleLength = 2;
-            float startTime = 0;
-            (float, float) minmax = (0.1f, 20f);
-            (float, float) mmDelta = (0.01f, 10f);
-            while (Active)
-            {
-                startTime += Time.deltaTime;
-
-                float ct = Math.Abs((startTime % cycleLength) - (cycleLength / 2)) * 2;
-                var cur = minmax.Interpolate(ct);
-                var delta = mmDelta.Interpolate(ct);
-                fog.startDistance = cur;
-                fog.endDistance = delta;
-                //fog.startDistance = delta;
-                fog.UpdateConstants();
-
-                yield return null;
-            }
-
-            fog.startDistance = s;
-            fog.endDistance = e;
-            fog.UpdateConstants();
+            yield return null;
         }
+
+        fog.startDistance = s;
+        fog.endDistance = e;
+        fog.UpdateConstants();
     }
 }
