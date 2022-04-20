@@ -1,18 +1,15 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WatsonWebsocket;
-using TwitchLib;
-using TwitchLib.Api;
 using static BWChaosRemoteVoting.GlobalVariables;
 
 namespace BWChaosRemoteVoting
 {
     internal class Program
-    {   
+    {
         private static string botToken;
         private static string channelIdOrName;
 

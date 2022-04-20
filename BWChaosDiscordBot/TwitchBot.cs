@@ -1,14 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
-using TwitchLib.Api.V5;
 using TwitchLib.Client;
 using TwitchLib.Client.Events;
-using TwitchLib.Client.Extensions;
 using TwitchLib.Client.Models;
-using TwitchLib.Communication.Events;
-using WatsonWebsocket;
 using static BWChaosRemoteVoting.GlobalVariables;
 
 namespace BWChaosRemoteVoting
@@ -27,7 +21,7 @@ namespace BWChaosRemoteVoting
                 twitchClient.JoinChannel(channelName);
 
                 twitchClient.OnChatCommandReceived += TwitchClient_OnChatCommandReceived;
-                for (int i=0; i<9; i++) 
+                for (int i = 0; i < 9; i++)
                     twitchClient.AddChatCommandIdentifier((char)(i + 49));
 
 
@@ -58,6 +52,6 @@ namespace BWChaosRemoteVoting
             }
         }
 
-        
+
     }
 }

@@ -1,6 +1,5 @@
 ﻿using Entanglement.Modularity;
 using System.Reflection;
-using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following
@@ -11,7 +10,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("EntanglementSync")]
-[assembly: AssemblyCopyright("Copyright ©  2021")]
+[assembly: AssemblyCopyright("Copyright © extraes 2021")] // no rights reserved (is this comment legally binding?)
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -46,4 +45,4 @@ using System.Runtime.InteropServices;
 // 4 = the author
 // 5 = the abbreviation, basically what it's logged as (optional)
 
-[assembly: EntanglementModuleInfo(typeof(BWChaos.Sync.ChaosSyncHandler), "BWChaos", "2.2.1", "extraes", "Chaos")]
+[assembly: EntanglementModuleInfo(typeof(BWChaos.Sync.ChaosSyncHandler), "BWChaos", "2.2.1", "extraes", "Chaos")] 

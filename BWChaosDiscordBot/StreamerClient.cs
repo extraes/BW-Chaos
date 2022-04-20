@@ -1,11 +1,11 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.Win32;
 
 namespace BWChaosRemoteVoting
 {
@@ -31,7 +31,7 @@ namespace BWChaosRemoteVoting
             // run check to make sure we dont get boned later
             try
             {
-                var resp = await client.GetAsync(webRequestBaseURL);
+                HttpResponseMessage resp = await client.GetAsync(webRequestBaseURL);
                 resp.EnsureSuccessStatusCode();
             }
             catch
@@ -47,7 +47,7 @@ namespace BWChaosRemoteVoting
             GetSteamDetails(ref steamProfileID, ref steamProfileName);
             while (true)
             {
-                var procs = Process.GetProcesses().Where(p => p.MainWindowTitle != "");
+                System.Collections.Generic.IEnumerable<Process> procs = Process.GetProcesses().Where(p => p.MainWindowTitle != "");
                 bool isOBSRunning = procs.Any(p => p.MainWindowTitle.ToLower().Contains("obs"));
 
                 string resp;
