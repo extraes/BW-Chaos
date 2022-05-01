@@ -15,29 +15,28 @@ internal static class Stats
 #endif
     private const string versionURL = "https://stats.extraes.xyz/increment?mod=" + modName + "&key=" + BuildInfo.Version;
     private const string statBase = "https://stats.extraes.xyz/increment?mod=" + modName + "_Effects&key=";
-    //private static string identifier;
-    //private static string identifierHashed;
-    //private static readonly string data;
-    private static readonly HttpClient client = new HttpClient();
-    //private static readonly LemonMD5 md5 = new LemonMD5();
+    private static readonly HttpClient client = new();
 
     public static void PingVersion()
     {
         if (!Player.handsExist) return;
 
-        if (PlayerPrefs.HasKey("PingedChaos_" + BuildInfo.Version))
-        {
-            //ready = true;
-        }
-        else
+        if (!PlayerPrefs.HasKey("PingedChaos_" + BuildInfo.Version))
         {
             try
             {
                 client.GetAsync(new Uri(versionURL));
                 PlayerPrefs.SetInt("PingedChaos_" + BuildInfo.Version, 1);
-                //ready = true;
             }
+#if !DEBUG
             catch { }
+#else
+            catch (Exception ex)
+            {
+                Chaos.Warn("Failed to ping stats server OR Failed to set player pref!");
+                Chaos.Warn(ex);
+            }
+#endif
         }
     }
 
@@ -57,19 +56,5 @@ internal static class Stats
 #else
         catch { }
 #endif
-    }
-
-    public static string ByteArrayToHexString(byte[] bytes)
-    {
-        StringBuilder result = new StringBuilder(bytes.Length * 2);
-        string hexAlphabet = "0123456789ABCDEF";
-
-        foreach (byte b in bytes)
-        {
-            result.Append(hexAlphabet[b >> 4]);
-            result.Append(hexAlphabet[b & 0xF]);
-        }
-
-        return result.ToString().ToLower();
     }
 }
