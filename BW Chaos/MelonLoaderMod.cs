@@ -136,6 +136,8 @@ public class Chaos : MelonMod
         BoneMenu.Register();
         started = true;
         miscSW.Stop();
+        if (EffectHandler.allEffects.TryGetValue(Prefs.EffectOnSceneLoad, out EffectBase effect))
+            Stats.EffectCalledManuallyCallback(effect);
         // basically just allow http connections. why? uhhhh.... testing necessitated it? i dont think it breaks anything so uhhhh cool ig
         ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
@@ -201,14 +203,18 @@ public class Chaos : MelonMod
         GlobalVariables.MusicPlayer = musicPlayer.AddComponent<AudioPlayer>();
         GlobalVariables.MusicPlayer._source = musicPlayer.AddComponent<AudioSource>();
         GlobalVariables.MusicPlayer.source.outputAudioMixerGroup = GlobalVariables.MusicMixer;
+        GlobalVariables.MusicPlayer._defaultVolume = 0.1f;
         GlobalVariables.MusicPlayer.source.volume = 0.1f;
+        GlobalVariables.MusicPlayer.enabled = true;
 
-        GameObject sfxPlayer = new GameObject("ChaosMusicPlayer");
+        GameObject sfxPlayer = new GameObject("ChaosSFXPlayer");
         sfxPlayer.transform.parent = pHead.transform;
         GlobalVariables.SFXPlayer = sfxPlayer.AddComponent<AudioPlayer>();
         GlobalVariables.SFXPlayer._source = sfxPlayer.AddComponent<AudioSource>();
         GlobalVariables.SFXPlayer.source.outputAudioMixerGroup = GlobalVariables.SFXMixer;
+        GlobalVariables.SFXPlayer._defaultVolume = 0.25f;
         GlobalVariables.SFXPlayer.source.volume = 0.25f;
+        GlobalVariables.SFXPlayer.enabled = true;
 
         new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
         EffectHandler.advanceTimer = sceneName != "scene_mainMenu" && sceneName != "scene_introStart";
@@ -222,13 +228,40 @@ public class Chaos : MelonMod
         Chaos.Log("Found all globalvar's in " + sw.ElapsedMilliseconds + "ms");
 #endif
         Physics.gravity = new Vector3(0, -9.81f, 0);
+
+        
+        // get the effect from effectonsceneload and run it
+        if (!EffectHandler.advanceTimer) return;
+
+        if (EffectHandler.allEffects.TryGetValue(Prefs.EffectOnSceneLoad, out EffectBase effect))
+        {
+            Type t = effect.GetType();
+            EffectBase e = (EffectBase)Activator.CreateInstance(t);
+            Chaos.Log($"Running effect '{e.Name}' (from preference) on scene load");
+            e.Run();
+        }
+        else if (!string.IsNullOrWhiteSpace(Prefs.EffectOnSceneLoad))
+        {
+            Chaos.Warn($"{nameof(Prefs.effectOnSceneLoad)} value '{Prefs.EffectOnSceneLoad}' wasn't found in the effect dictionary! Check to make sure you matched the spelling and case of the effect name!");
+            
+            // check for effects that have the same name but different capitalization, or maybe they left a space at the end
+            foreach(string name in EffectHandler.allEffects.Select(e => e.Key.ToLower()))
+            {
+                if (name == Prefs.EffectOnSceneLoad.Trim())
+                {
+                    Chaos.Warn($"It seems like you were trying to choose '{name}' as the effect to be ran on scene load, but either had whitespace or incorrect capitalization");
+                    GUIUtility.systemCopyBuffer = name;
+                    Chaos.Log($"Copied '{name}' to your clipboard so you can replace the value in MelonPreferences if you want.");
+                }
+            }
+        }
     }
 
     public override void OnUpdate()
     {
         foreach (EffectBase effect in GlobalVariables.ActiveEffects)
             effect.OnEffectUpdate();
-        Extras.WebResponseHandler.Callback(); // bitchass unity doesnt like me doing shit from the websocket method so here we are
+        Extras.WebResponseHandler.Callback(); // bitchass unity doesnt like me doing shit from the websocket thread so here we are
     }
 
     // If MelonPreferences.cfg is saved while the game is open, make sure the changes are reflected in real time.
@@ -267,6 +300,12 @@ public class Chaos : MelonMod
             if (GUI.Button(new Rect(horizOffset, vertOffset, width, height), e.Name)) e.Run();
             vertOffset += height + gap;
         }
+
+        try
+        {
+            GUI.Box(new Rect(Screen.width - horizStart - width * 2, Screen.height - 5 * (gap + height), width * 2, height), $"Effect timer is {(EffectHandler.Instance.secondsEachEffect)} seconds");
+        }
+        catch { }
 
         // IDC if this looks like dogshit, its not going in release builds, so suck it up
         prevNetsim = GUI.TextField(new Rect(Screen.width - horizStart - width * 2, Screen.height - gap - height, width * 2, height), prevNetsim);
@@ -527,19 +566,4 @@ public class Chaos : MelonMod
     internal static void Error(object obj) => Instance.LoggerInstance.Error(obj?.ToString() ?? "null");
 
     #endregion
-}
-
-internal class ChaosModStartupException : Exception
-{
-    public ChaosModStartupException() : base($"Illegal environment path '{MelonUtils.GameDirectory}'", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
-}
-
-internal class ChaosModRuntimeException : ChaosModStartupException
-{
-    public ChaosModRuntimeException() : base() { }
-}
-
-internal class ChaosModDependencyFailedException : Exception
-{
-    public ChaosModDependencyFailedException(string expected, string got) : base($"A dependency failed to return an expected value (exptcted \"{expected}\", got \"{got}\")") { }
 }

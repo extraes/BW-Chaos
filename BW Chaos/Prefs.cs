@@ -23,6 +23,9 @@ public static class Prefs
     internal static MelonPreferences_Entry<bool> enableRemoteVoting;
     internal static MelonPreferences_Entry<bool> syncEffects;
     internal static MelonPreferences_Entry<bool> useBagRandomizer;
+    internal static MelonPreferences_Entry<bool> modulateEffectTime;
+    internal static MelonPreferences_Entry<string> effectOnSceneLoad;
+    internal static MelonPreferences_Entry<int> maxActiveEffects;
 
     internal static bool RandomOnNoVotes => randomOnNoVotes.Value;
     internal static bool UseLaggyEffects => useLaggyEffects.Value;
@@ -38,6 +41,9 @@ public static class Prefs
     internal static bool EnableRemoteVoting => enableRemoteVoting.Value;
     internal static bool SyncEffects => syncEffects.Value;
     internal static bool UseBagRandomizer => useBagRandomizer.Value;
+    internal static bool ModulateEffectTime => modulateEffectTime.Value;
+    internal static string EffectOnSceneLoad => effectOnSceneLoad.Value;
+    internal static int MaxActiveEffects => maxActiveEffects.Value;
     internal static List<string> ForceEnabledEffects { get; private set; } = new List<string>();
     internal static List<string> ForceDisabledEffects { get; private set; } = new List<string>();
 #if DEBUG
@@ -67,6 +73,9 @@ public static class Prefs
         // end voteprefs :^)
         syncEffects = category.CreateEntry("syncEffectsViaEntanglement", false);
         useBagRandomizer = category.CreateEntry("useBagRandomizer", false);
+        modulateEffectTime = category.CreateEntry("modulateEffectTime", false);
+        effectOnSceneLoad = category.CreateEntry("effectOnSceneLoad", "");
+        maxActiveEffects = category.CreateEntry("maxActiveEffects", 10);
         category.CreateEntry("forceEnabledEffects", ForceEnabledEffects.ToArray());
         category.CreateEntry("forceDisabledEffects", ForceDisabledEffects.ToArray());
 
