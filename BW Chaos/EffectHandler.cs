@@ -19,9 +19,11 @@ public class EffectHandler : MonoBehaviour
     public static Dictionary<string, EffectBase> bag = new Dictionary<string, EffectBase>();
     public static EffectHandler Instance;
     public static bool advanceTimer = false;
+    public float secondsEachEffect = 30;
 
-    private readonly int secondsEachEffect = 30;
-    private int currentTimerValue;
+    private float updateRate = 0.25f;
+    private int effectsRan = 0;
+    private float currentTimerValue;
     private int numberFlip = 0;
     private string hiddenEffectName = "Immortality";
 
@@ -162,7 +164,7 @@ public class EffectHandler : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSecondsRealtime(1);
+            yield return new WaitForSecondsRealtime(updateRate);
             // Timescale being 0 usually means the player is in the steamvr menu, we dont want anything happening then.
             if (!advanceTimer || Time.timeScale == 0 || Time.deltaTime > 0.1f) continue;
 
@@ -185,8 +187,8 @@ public class EffectHandler : MonoBehaviour
 
             wristCanvas.gameObject.SetActive(Prefs.ShowWristUI);
 
-            currentTimerValue += 1;
-            float fillAmount = (float)currentTimerValue / secondsEachEffect;
+            currentTimerValue += updateRate;
+            float fillAmount = currentTimerValue / secondsEachEffect;
 
             MelonCoroutines.Start(SlerpUICirle(overlayImage, fillAmount));
             MelonCoroutines.Start(SlerpUICirle(wristImage, fillAmount));
@@ -213,6 +215,8 @@ public class EffectHandler : MonoBehaviour
 
                 ResetEffectCandidates();
                 voteText.text = string.Empty;
+
+                if (Prefs.ModulateEffectTime) secondsEachEffect = 20 + Mathf.Cos(effectsRan * 0.25f) * 10;
             }
         }
     }
@@ -318,7 +322,10 @@ public class EffectHandler : MonoBehaviour
         if (Prefs.UseBagRandomizer) bag.Remove(votedEffect.Name);
         EffectBase eff = (EffectBase)Activator.CreateInstance(votedEffect.GetType());
         eff.Run();
+        effectsRan++;
 
+        if (GlobalVariables.ActiveEffects.Count > Prefs.MaxActiveEffects)
+            GlobalVariables.ActiveEffects.OrderBy(e => e.StartTime).ToList().First().ForceEnd();
 
 #if DEBUG
         Chaos.Log($"Bag contains {bag.Count} items after running {eff.Name}");
@@ -328,9 +335,7 @@ public class EffectHandler : MonoBehaviour
 
         if (bag.Count <= 8)
         {
-#if DEBUG
             Chaos.Log("Bag has too few items, resetting!");
-#endif
             bag.Clear();
             allEffects.ForEach(kv => bag.Add(kv.Key, kv.Value));
         }
