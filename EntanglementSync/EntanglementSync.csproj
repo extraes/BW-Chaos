@@ -78,7 +78,11 @@
     <Compile Include="EntanglementJoins.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\BW Chaos\BWChaos.csproj" />
+    <!-- -->
+    <ProjectReference Include="..\BW Chaos\BWChaos.csproj">
+      <Project>{C33921DC-5778-4EEC-A2D0-E0AE522CC701}</Project>
+      <Name>BWChaos</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

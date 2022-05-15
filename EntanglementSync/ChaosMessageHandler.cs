@@ -11,21 +11,21 @@ namespace BWChaos.Sync
 {
     public class ChaosMessageHandler : NetworkMessageHandler
     {
-        public override byte? MessageIndex { get; } = ChaosSyncHandler.mIndex;
+        public override byte? MessageIndex => ChaosSyncHandler.mIndex;
 
         public override NetworkMessage CreateMessage(NetworkMessageData data)
         {
             if (!(data is ChaosMessageData)) throw new Exception("Unexpected msgdata type");
-            var cmd = data as ChaosMessageData;
+            ChaosMessageData cmd = data as ChaosMessageData;
 
-            byte[] bytes = new byte[][] 
+            byte[] bytes = new byte[][]
             {
                 ChaosSyncHandler.thisVersion,
                 new byte[] { (byte)cmd.type, cmd.effectIndex },
                 cmd.syncData,
             }.Flatten();
 
-            var msg = new NetworkMessage
+            NetworkMessage msg = new NetworkMessage
             {
                 messageType = MessageIndex.Value,
                 messageData = bytes,
@@ -41,7 +41,7 @@ namespace BWChaos.Sync
         public override void HandleMessage(NetworkMessage message, long sender)
         {
             // Makes sure same bw chaos version
-            var msgVer = message.messageData.Take(3);
+            System.Collections.Generic.IEnumerable<byte> msgVer = message.messageData.Take(3);
             if (!msgVer.SequenceEqual(ChaosSyncHandler.thisVersion))
             {
                 if (!ChaosSyncHandler.alreadyVersionWarned)
@@ -50,10 +50,10 @@ namespace BWChaos.Sync
 
                     DiscordIntegration.userManager.GetUser(sender, (Result res, ref User user) =>
                     {
-                        var name = "ID" + sender.ToString();
+                        string name = "ID" + sender.ToString();
                         if (res == Result.Ok) name = user.Username;
 
-                        string verMismatch1 = $"BW Chaos version mismatch (you: {string.Join(",", ChaosSyncHandler.thisVersion)}, {name}: {string.Join(",", msgVer)})";
+                        string verMismatch1 = $"BW Chaos version mismatch (you: {string.Join(".", ChaosSyncHandler.thisVersion)}, {name}: {string.Join(".", msgVer)})";
                         string verMismatch2 = $"This causes a mismatch with effect syncing! Do not expect this to function properly!";
                         Notifications.SendNotification(verMismatch1, 8);
                         Notifications.SendNotification(verMismatch2, 5);
@@ -78,7 +78,7 @@ namespace BWChaos.Sync
                 {
                     (Node.activeNode as Server).BroadcastMessageExcept(NetworkChannel.Reliable, message.messageData, sender);
                 }
-                
+
             }
 
 #if DEBUG
@@ -89,10 +89,10 @@ namespace BWChaos.Sync
             switch (type)
             {
                 case EffectBase.NetMsgType.START:
-                    var eName = Encoding.ASCII.GetString(data);
-                    if (EffectHandler.AllEffects.TryGetValue(eName, out EffectBase eObj))
+                    string eName = Encoding.ASCII.GetString(data);
+                    if (EffectHandler.allEffects.TryGetValue(eName, out EffectBase eObj))
                     {
-                        var eToRun = (EffectBase)Activator.CreateInstance(eObj.GetType());
+                        EffectBase eToRun = (EffectBase)Activator.CreateInstance(eObj.GetType());
                         eToRun.isNetworked = true;
                         eToRun.Run();
                     }

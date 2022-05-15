@@ -1,29 +1,21 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using ModThatIsNotMod;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using Random = UnityEngine.Random;
+﻿using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class UnbakeLights : EffectBase
 {
-    internal class UnbakeLights : EffectBase
+    // "fuck you" *unbakes your lights*
+    public UnbakeLights() : base("Unbake Lights", 60) { }
+    LightmapData[] lightmapData;
+
+    public override void OnEffectStart()
     {
-        // "fuck you" *unbakes your lights*
-        public UnbakeLights() : base("Unbake Lights", 60) { }
-        LightmapData[] lightmapData;
+        lightmapData = LightmapSettings.lightmaps;
+        LightmapSettings.lightmaps = new LightmapData[0];
+    }
 
-        public override void OnEffectStart()
-        {
-            lightmapData = LightmapSettings.lightmaps;
-            LightmapSettings.lightmaps = new LightmapData[0];
-        }
-
-        public override void OnEffectEnd()
-        {
-            LightmapSettings.lightmaps = lightmapData;
-        }
+    public override void OnEffectEnd()
+    {
+        LightmapSettings.lightmaps = lightmapData;
     }
 }

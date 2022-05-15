@@ -10,6 +10,7 @@
     <RootNamespace>BWChaos</RootNamespace>
     <AssemblyName>BWChaos</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <LangVersion>10</LangVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
     <TargetFrameworkProfile />
@@ -39,6 +40,9 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="0Harmony">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\0Harmony.dll</HintPath>
+    </Reference>
     <Reference Include="Assembly-CSharp">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\Assembly-CSharp.dll</HintPath>
     </Reference>
@@ -50,7 +54,7 @@
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\Il2Cppmscorlib.dll</HintPath>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\MelonLoader.dll</HintPath>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\MelonLoader.dll</HintPath>
     </Reference>
     <Reference Include="ModThatIsNotMod">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\Mods\ModThatIsNotMod.dll</HintPath>
@@ -64,9 +68,13 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Drawing.dll</HintPath>
     </Reference>
+    <Reference Include="System.Net.Http" />
     <Reference Include="TextMeshPro-1.0.55.2017.2.0b12, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\TextMeshPro-1.0.55.2017.2.0b12.dll</HintPath>
+    </Reference>
+    <Reference Include="Tomlet">
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Tomlet.dll</HintPath>
     </Reference>
     <Reference Include="UnhollowerBaseLib">
       <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONEWORKS\BONEWORKS\MelonLoader\Managed\UnhollowerBaseLib.dll</HintPath>
@@ -120,6 +128,8 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Extras\Exceptions.cs" />
+    <Compile Include="Stats.cs" />
     <Compile Include="EffectConfig.cs" />
     <Compile Include="EffectHandler.cs" />
     <Compile Include="Effects\EffectBase.cs" />
@@ -130,8 +140,11 @@
     <Compile Include="Effects\Guns\RandomizeGunSpeeds.cs" />
     <Compile Include="Effects\Guns\ExplosiveGuns.cs" />
     <Compile Include="Effects\Guns\InaccurateGuns.cs" />
+    <Compile Include="Effects\Guns\NoAmmo.cs" />
+    <Compile Include="Effects\Guns\WrongMag.cs" />
     <Compile Include="Effects\Guns\UpNAtomize.cs" />
     <Compile Include="Effects\Meta\SlowTimer.cs" />
+    <Compile Include="Effects\Meta\MassEffect.cs" />
     <Compile Include="Effects\Misc\SonicSpeed.cs" />
     <Compile Include="Effects\Misc\SlowmoPunch.cs" />
     <Compile Include="Effects\Misc\SpawnAds.cs" />
@@ -157,6 +170,7 @@
     <Compile Include="Effects\Misc\MyMemeFolder.cs" />
     <Compile Include="Effects\Meta\TripleThreat.cs" />
     <Compile Include="Effects\Misc\RandomMesh.cs" />
+    <Compile Include="Effects\Misc\SimonSays.cs" />
     <Compile Include="Effects\Player\GhostWorld.cs" />
     <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
     <Compile Include="Effects\Player\HighJump.cs" />
@@ -213,6 +227,8 @@
     <Compile Include="Effects\World\Ejected.cs" />
     <Compile Include="Effects\World\LockRigidBodies.cs" />
     <Compile Include="Effects\World\Fold.cs" />
+    <Compile Include="Effects\World\LowGravity.cs" />
+    <Compile Include="Effects\World\PeepTheHorror.cs" />
     <Compile Include="Effects\World\UnbakeLights.cs" />
     <Compile Include="Effects\World\TextureSwap.cs" />
     <Compile Include="Effects\World\VideoTextures.cs" />
@@ -221,7 +237,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Extras\Attributes.cs" />
     <Compile Include="Extras\EntanglementSyncHandler.cs" />
-    <Compile Include="Constants.cs" />
+    <Compile Include="Const.cs" />
     <Compile Include="GlobalVariables.cs" />
     <Compile Include="MelonLoaderMod.cs" />
     <Compile Include="Prefs.cs" />
@@ -247,7 +263,16 @@
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Resources\BWChaosDiscordBot.zip" />
+    <None Include="..\.editorconfig">
+      <Link>.editorconfig</Link>
+    </None>
     <None Include="WatsonWebsocket\WWSLICENSE.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <Analyzer Include="..\..\..\..\..\..\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
+  </ItemGroup>
+  <ItemGroup>
+    <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>

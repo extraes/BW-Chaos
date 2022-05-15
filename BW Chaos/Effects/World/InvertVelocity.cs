@@ -1,28 +1,26 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
+﻿using MelonLoader;
 using System.Collections;
+using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class InvertVelocity : EffectBase
 {
-    internal class InvertVelocity : EffectBase
+    public InvertVelocity() : base("Invert velocity of everything") { }
+
+    public override void OnEffectStart()
     {
-        public InvertVelocity() : base("Invert velocity of everything") { }
+        MelonCoroutines.Start(CoRun());
+    }
 
-        public override void OnEffectStart()
+    private IEnumerator CoRun()
+    {
+        bool stagger = false;
+        foreach (Rigidbody rb in GameObject.FindObjectsOfType<Rigidbody>())
         {
-            MelonCoroutines.Start(CoRun());
-        }
-
-        private IEnumerator CoRun ()
-        {
-            bool stagger = false;
-            foreach (var rb in GameObject.FindObjectsOfType<Rigidbody>())
-            {
-                if (rb.IsSleeping()) continue; // I don't fuck with the lames
-                rb.velocity = -rb.velocity;
-                if (stagger = !stagger) yield return new WaitForFixedUpdate();
-            }
+            if (rb.IsSleeping()) continue; // I don't fuck with the lames
+            rb.velocity = -rb.velocity;
+            if (stagger = !stagger) yield return new WaitForFixedUpdate();
         }
     }
 }

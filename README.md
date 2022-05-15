@@ -15,6 +15,12 @@ It's essentially ChaosModV, but for a VR Physics game. This mod has various "eff
 
 It will run these effects every 30 seconds (if you want it to), and you can customize the effects that run, depending on if your computer is powerful or if you've felt the touch of a non-familial woman if you're playing a campaign map or if you're boring, and if you're playing with friends using Entanglement or if you're lonely.
 
+---
+
+## [What's new?](#changelog)
+
+---
+
 ## Installation
 
 Drag BWChaos.dll into your mods folder, that's basically it. If you'd like to know more about this mod, keep reading.
@@ -311,6 +317,52 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
 ---
 
 ### Changelog
+
+- New in 2.2.2
+
+  - Critical fix for remote voter's Discord support (update dependencies)
+
+  - Uhhhhhh
+
+  - Add 2.2.1's preferences to BoneMenu (and rectify some pasted code)
+
+  - Yeah that's about it. I think I've done all there is to be done with Chaos. If you have any suggestions or bug reports, I'll still look at 'em and fix 'em if I can, but I don't think there's much else to od.
+
+- New in 2.2.1
+
+  - Minor fixes in the remote voter
+
+  - Fixes for Entanglement sync
+  
+    - Change loading order so Chaos loads last
+
+    - Create InjectEffect so the module's effects persist after effect reload (who all makin custom chaos effects???)
+
+    - Add syncing to some effects
+
+  - Add 7 new effects, No Ammo, Simon Says, Peep the Horror, Wrong Mag, Mass Effect, Low Gravity, and Cage
+
+  - Added 4 new preferences
+  
+      - Bag Randomizer: Effects are removed from rotation when selected until under 8 are still in rotation, at which point the effects in rotation are reset.
+
+      - Effect on Scene Load: Runs the effect when a scene is loaded. Use 'Mass Effect' with this to run multiple effects on scene load.
+
+      - Max Active Effects: Stops the oldest effect if the most recent effect causes the number of active effects to exceed the maximum. Useful for performance maybe? Doesn't affect manually running effects tho.
+
+      - Modulate Effect Time: Makes the time per effect change from 10 to 30 over time.
+
+  - Fixed slowmo punch
+
+  - Centralized audio playing (mostly) & tied other audio players to mixers
+
+    - This should fix things like FartWithReverb being too loud, or ignoring your audio mixer settings
+
+  - Add stats to the webserver for myself and other mod makers, and make Chaos the first to implement it/
+
+  - Increased the update rate of the effect timer
+
+  - Just a quick heads up, this release hasn't been tested as thoroughly as I would normally like, but I've been sitting on it for months, and I've been waiting to release ItemSync alongside it, so here's both of 'em.
 
 - New in 2.2.0
 

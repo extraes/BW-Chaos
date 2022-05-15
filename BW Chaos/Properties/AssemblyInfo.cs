@@ -20,4 +20,4 @@ using System.Runtime.InteropServices;
 [assembly: MelonInfo(typeof(BWChaos.Chaos), BWChaos.BuildInfo.Name, BWChaos.BuildInfo.Version, BWChaos.BuildInfo.Author, BWChaos.BuildInfo.DownloadLink)]
 //[assembly: MelonColor(System.ConsoleColor.Yellow)]
 // [assembly: VerifyLoaderVersion("0.5.3", true)] // theres nothing to really warrant it aside from the comments in chaosconfig
-[assembly: MelonGame("Stress Level Zero", "BONEWORKS")]
+[assembly: MelonGame("Stress Level Zero", "BONEWORKS")] 

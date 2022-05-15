@@ -1,42 +1,33 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using ModThatIsNotMod;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using Random = UnityEngine.Random;
+﻿using UnityEngine;
 
-namespace BWChaos.Effects
+namespace BWChaos.Effects;
+
+internal class Cage : EffectBase
 {
-    internal class Cage : EffectBase
+    public Cage() : base("Cage", 15) { }
+    static readonly GameObject cagePrefab;
+    GameObject cage;
+    static Cage()
     {
-        public Cage() : base("Cage", 15) { }
-        static GameObject cagePrefab;
-        GameObject cage;
-        static Cage()
-        {
-            cagePrefab = GlobalVariables.EffectResources.LoadAsset<GameObject>("Assets/Cage/cage.prefab");
-            cagePrefab.hideFlags = HideFlags.DontUnloadUnusedAsset;
-            GameObject.DontDestroyOnLoad(cagePrefab);
-        }
+        cagePrefab = GlobalVariables.EffectResources.LoadAsset<GameObject>("Assets/Cage/cage.prefab");
+        cagePrefab.hideFlags = HideFlags.DontUnloadUnusedAsset;
+    }
 
-        public override void HandleNetworkMessage(byte[] data)
-        {
-            cage.transform.position = Utilities.DebyteV3(data);
-        }
+    public override void HandleNetworkMessage(byte[] data)
+    {
+        cage.transform.position = Utilities.DebyteV3(data);
+    }
 
-        public override void OnEffectStart()
-        {
-            cage = GameObject.Instantiate(cagePrefab);
-            if (isNetworked) return;
-            cage.transform.position = GlobalVariables.Player_PhysBody.rbFeet.position;
-            SendNetworkData(cage.transform.position.ToBytes());
-        }
+    public override void OnEffectStart()
+    {
+        cage = GameObject.Instantiate(cagePrefab);
+        if (isNetworked) return;
+        cage.transform.position = GlobalVariables.Player_PhysBody.rbFeet.position;
+        SendNetworkData(cage.transform.position.ToBytes());
+    }
 
-        public override void OnEffectEnd()
-        {
-            cage.Destroy();
-        }
+    public override void OnEffectEnd()
+    {
+        cage.Destroy();
     }
 }

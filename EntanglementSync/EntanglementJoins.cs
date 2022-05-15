@@ -1,10 +1,6 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using ModThatIsNotMod;
+﻿using ModThatIsNotMod;
 using System.Collections;
-using System.Linq;
-using System.Text;
+using UnityEngine;
 using Random = UnityEngine.Random;
 
 namespace BWChaos.Effects
@@ -12,7 +8,7 @@ namespace BWChaos.Effects
     internal class EntanglementJoins : EffectBase
     {
         public EntanglementJoins() : base("Popularity Contest", 120, EffectTypes.HIDDEN) { }
-        
+
         readonly string[] names =
         {
             "adamdev",
@@ -34,7 +30,7 @@ namespace BWChaos.Effects
             "You left the server.",
         };
         const float minTime = 4;
-        static float maxExtraTime = 10;
+        static readonly float maxExtraTime = 10;
 
         [AutoCoroutine]
         public IEnumerator CoRun()
@@ -46,10 +42,10 @@ namespace BWChaos.Effects
                 string template = templates.Random();
                 string name = names.Random();
                 string formatted = string.Format(template, name);
-                
+
                 // no SendNetworkData because its funnier/better if everyone experiences different things
                 Notifications.SendNotification(formatted, 4);
-                
+
                 yield return new WaitForSeconds(minTime + Random.value * maxExtraTime);
             }
         }

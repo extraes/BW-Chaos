@@ -1,18 +1,15 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using WatsonWebsocket;
-using TwitchLib;
-using TwitchLib.Api;
 using static BWChaosRemoteVoting.GlobalVariables;
 
 namespace BWChaosRemoteVoting
 {
     internal class Program
-    {   
+    {
         private static string botToken;
         private static string channelIdOrName;
 
@@ -48,7 +45,7 @@ namespace BWChaosRemoteVoting
         {
             // wait until we have token and channel id
             while (string.IsNullOrEmpty(channelIdOrName)) await Task.Delay(250);
-            Backdoor.client = new System.Net.Http.HttpClient();
+            StreamerClient.client = new System.Net.Http.HttpClient();
 
             // Discord 
             if (ulong.TryParse(channelIdOrName, out ulong idUlong)) await DiscordBot.Init(botToken, idUlong);
