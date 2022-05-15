@@ -318,6 +318,16 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
 
 ### Changelog
 
+- New in 2.2.2
+
+  - Critical fix for remote voter's Discord support (update dependencies)
+
+  - Uhhhhhh
+
+  - Add 2.2.1's preferences to BoneMenu (and rectify some pasted code)
+
+  - Yeah that's about it. I think I've done all there is to be done with Chaos. If you have any suggestions or bug reports, I'll still look at 'em and fix 'em if I can, but I don't think there's much else to od.
+
 - New in 2.2.1
 
   - Minor fixes in the remote voter

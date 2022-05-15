@@ -23,16 +23,17 @@ public static class BuildInfo
     public const string Name = "BWChaos";
     public const string Author = "extraes, trev";
     public const string Company = null;
-    public const string Version = "2.2.1";
+    public const string Version = "2.2.2";
     public const string DownloadLink = "https://boneworks.thunderstore.io/package/BWChaosDevs/BW_Chaos/";
 }
 
 public class Chaos : MelonMod
 {
+    public Chaos() : base() => _instance = this;
     internal static bool isSteamVer = !File.Exists(Path.Combine(Application.dataPath, "..", "Boneworks_Oculus_Windows64.exe"));
     internal static new readonly Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
     private static Chaos _instance;
-    public static Chaos Instance => _instance;
+    public static Chaos Instance => _instance; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
     internal static List<EffectBase> asmEffects = new List<EffectBase>();
     internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)>();
     public static Action<EffectBase> OnEffectRan;
@@ -42,7 +43,6 @@ public class Chaos : MelonMod
 
     public override void OnApplicationStart()
     {
-        _instance = this; // so that we can access some instanced fields, like harmonylib for easy patching & unpatching
         Stopwatch allSW = Stopwatch.StartNew();
 
         #region Check datapath

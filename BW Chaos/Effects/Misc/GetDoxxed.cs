@@ -54,7 +54,7 @@ internal class GetDoxxed : EffectBase
         if (dist > Const.FPI) sign.transform.rotation = Quaternion.Euler(new Vector3(x * 360, y * 360, 0));
         else
         {
-            if (wasFarLastFrame) GlobalVariables.SFXPlayer.Play(clip);
+            if (wasFarLastFrame) GlobalVariables.SFXPlayer.PlayClip(clip);
             sign.transform.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(headT.forward, Vector3.up));
         }
         wasFarLastFrame = dist > Const.FPI; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 

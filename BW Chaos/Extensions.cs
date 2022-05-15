@@ -171,4 +171,9 @@ public static class Extensions
         t.position = Utilities.DebyteV3(serializedPosRot);
         t.rotation = Quaternion.Euler(Utilities.DebyteV3(serializedPosRot, sizeof(float) * 3));
     }
+
+    public static void PlayClip(this AudioPlayer player, AudioClip clip, float? volume = null)
+    {
+        ModThatIsNotMod.Nullables.NullableMethodExtensions.Play(player, clip, player._source.outputAudioMixerGroup, volume, null, null, null);
+    }
 }

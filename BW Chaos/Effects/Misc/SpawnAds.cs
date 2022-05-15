@@ -511,5 +511,8 @@ internal class SpawnAds : EffectBase
         "i wonder if the sock will ask for child support",
         "1-703-697-1001",
         "192.168.182.73\nthis u bro?",
+        "thinkin abt that one DAW plugin that was a synth with a cat meowing the sound the synth was making",
+        "GO Bank (collaboration heist with Counter Strike: Global Offensive) from Payday 2 (sequel to Payday: The Heist)",
+        "I SIP.\nPURE.\n<i>WOCK.</i>",
     };
 }

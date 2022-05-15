@@ -38,7 +38,7 @@ internal class DontLetHimGrabYou : EffectBase
     {
         if (enabled)
         {
-            hand.rb.AddForce(dir * 5 * forceMultiplier, ForceMode.VelocityChange);
+            hand.rb.AddForce(8 * forceMultiplier * dir, ForceMode.VelocityChange);
         }
     }
 }

@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
+using ModThatIsNotMod.Nullables;
 
 namespace BWChaos.Effects;
 
@@ -41,7 +42,7 @@ internal class FartWithReverb : EffectBase
         Log("Finished starting coroutines in " + sw.ElapsedMilliseconds + "ms");
 #endif
 
-        GlobalVariables.SFXPlayer.Play(clip);
+        GlobalVariables.SFXPlayer.PlayClip(clip, 0.2f);
     }
 
     private IEnumerator ApplyForces(IEnumerable<Rigidbody> rbs)

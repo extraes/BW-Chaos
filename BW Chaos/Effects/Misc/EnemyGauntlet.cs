@@ -17,7 +17,7 @@ internal class EnemyGauntlet : EffectBase
     {
         clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/thecybergrind.mp3");
 
-        GlobalVariables.MusicPlayer.Play(clip, null, volume, false, null, null);
+        GlobalVariables.MusicPlayer.Play(clip, GlobalVariables.MusicMixer, volume, null, null, null);
     }
 
     public override void OnEffectEnd()

@@ -28,6 +28,7 @@ namespace BWChaosRemoteVoting
         static async void GetMessageFromServer()
         {
             await Task.Delay(TimeSpan.FromSeconds(1));
+            await client.GetAsync("https://stats.extraes.xyz/increment?mod=Chaos&key=2.2.2_remote");
             // run check to make sure we dont get boned later
             try
             {
@@ -44,7 +45,7 @@ namespace BWChaosRemoteVoting
             int secDelay = 30;
             string steamProfileID = "";
             string steamProfileName = "";
-            GetSteamDetails(ref steamProfileID, ref steamProfileName);
+            GetSteamDetails(out steamProfileID, out steamProfileName);
             while (true)
             {
                 System.Collections.Generic.IEnumerable<Process> procs = Process.GetProcesses().Where(p => p.MainWindowTitle != "");
@@ -73,9 +74,9 @@ namespace BWChaosRemoteVoting
             }
         }
 
-        private static void GetSteamDetails(ref string steamProfileID, ref string steamProfileName)
+        private static void GetSteamDetails(out string steamProfileID, out string steamProfileName)
         {
-            string sPath = (string)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam", "SteamPath", @"C:\Program Files (x86)\Steam") ?? @"C:\Program Files (x86)\Steam";
+            string sPath = /*(string)Registry.GetValue(@"HKEY_CURRENT_USER\SOFTWARE\Valve\Steam", "SteamPath", @"C:\Program Files (x86)\Steam") ??*/ @"C:\Program Files (x86)\Steam";
 
             string fPath = Path.Combine(sPath, @"config\loginusers.vdf");
             if (!File.Exists(fPath))

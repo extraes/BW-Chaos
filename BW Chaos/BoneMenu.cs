@@ -129,6 +129,30 @@ public static class BoneMenu
             Chaos.LiveUpdateEffects();
         });
 
+        preferencesCategory.CreateBoolElement("Modulate effect time", Color.white, Prefs.UseLaggyEffects, b =>
+        {
+            Prefs.modulateEffectTime.Value = b;
+            Prefs.modulateEffectTime.Save();
+        });
+
+        preferencesCategory.CreateBoolElement("Use bag randomizer", Color.white, Prefs.UseLaggyEffects, b =>
+        {
+            Prefs.useBagRandomizer.Value = b;
+            Prefs.useBagRandomizer.Save();
+        });
+
+        preferencesCategory.CreateIntElement("Max active effects", Color.white, Prefs.MaxActiveEffects, i =>
+        {
+            Prefs.maxActiveEffects.Value = i;
+            Prefs.maxActiveEffects.Save();
+        });
+
+        preferencesCategory.CreateStringElement("Effect on scene load", Color.white, Prefs.EffectOnSceneLoad, i =>
+        {
+            Prefs.effectOnSceneLoad.Value = i;
+            Prefs.effectOnSceneLoad.Save();
+        });
+
         if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use Steam profile effects", Color.white, Prefs.UseSteamProfileEffects, b =>
         {
             Prefs.useSteamProfileEffects.Value = b;
@@ -136,20 +160,20 @@ public static class BoneMenu
             Chaos.LiveUpdateEffects();
         });
 
-        if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.UseMetaEffects, b =>
+        preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.UseMetaEffects, b =>
         {
             Prefs.useMetaEffects.Value = b;
             Prefs.useMetaEffects.Save();
             Chaos.LiveUpdateEffects();
         });
 
-        if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.ShowWristUI, b =>
+        preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.ShowWristUI, b =>
         {
             Prefs.showWristUI.Value = b;
             Prefs.showWristUI.Save();
         });
 
-        if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
+        preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
         {
             Prefs.showCandidatesOnScreen.Value = b;
             Prefs.showCandidatesOnScreen.Save();
