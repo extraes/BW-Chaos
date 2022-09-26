@@ -15,15 +15,19 @@ namespace BWChaos;
 public static class BoneMenu
 {
     internal static MenuCategory boneMenuEntry;
+    internal static MenuCategory recentCategory;
     internal static MenuCategory effectsCategory;
     internal static MenuCategory preferencesCategory;
     internal static MenuCategory debugCategory;
 
     public static void Register()
     {
+        Chaos.OnEffectRan += UpdateRecentEffect;
+
         if (boneMenuEntry == null)
         {
             boneMenuEntry = MenuManager.CreateCategory("Chaos", Color.white);
+            recentCategory = boneMenuEntry.CreateSubCategory("Recent Effects", Color.white);
             boneMenuEntry.CreateFunctionElement("Reset/refilter effects", Color.white, Chaos.LiveUpdateEffects);
             preferencesCategory = boneMenuEntry.CreateSubCategory("Preferences", Color.white);
             effectsCategory = boneMenuEntry.CreateSubCategory("Effects", Color.gray);
@@ -238,6 +242,13 @@ public static class BoneMenu
         });
 
         #endregion
+    }
+
+    // shortcut to recently ran effects
+    private static void UpdateRecentEffect(EffectBase effect)
+    {
+        recentCategory.RemoveElement(effect.Name);
+        recentCategory.AddElement(effect.MenuElement);
     }
 
     private static NotificationData lastNotif;

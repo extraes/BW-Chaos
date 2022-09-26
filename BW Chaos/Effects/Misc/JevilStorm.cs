@@ -1,4 +1,5 @@
-﻿using StressLevelZero.Pool;
+﻿using ModThatIsNotMod.Nullables;
+using StressLevelZero.Pool;
 using System;
 using System.Collections.Generic;
 using UnityEngine;
@@ -19,9 +20,7 @@ internal class JevilStorm : EffectBase
         Pool pool = GameObject.Find("pool - Jevil").GetComponent<Pool>();
         for (int i = 0; i < jevilAmount; i++)
         {
-            GameObject poolee = pool.InstantiatePoolee().gameObject;
-            //poolee.transform.SetParent(GlobalVariables.Player_PhysBody.rbPelvis.transform);
-            poolee.SetActive(true);
+            GameObject poolee = pool.Spawn(Vector3.one, Quaternion.identity, null, true);
             // dont assault ears (too much)
             poolee.GetComponent<AudioSource>().Stop();
             Rigidbody rb = poolee.GetComponent<Rigidbody>();

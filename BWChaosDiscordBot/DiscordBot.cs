@@ -1,6 +1,7 @@
 ﻿using DSharpPlus;
 using DSharpPlus.Entities;
 using DSharpPlus.EventArgs;
+using DSharpPlus.SlashCommands;
 using System;
 using System.Threading.Tasks;
 using static BWChaosRemoteVoting.GlobalVariables;
@@ -22,10 +23,12 @@ namespace BWChaosRemoteVoting
                     TokenType = TokenType.Bot,
                     Intents = DiscordIntents.AllUnprivileged
                 });
-                discordClient.MessageCreated += DiscordMessageSent;
+                //discordClient.MessageCreated += DiscordMessageSent;
                 discordClient.ClientErrored += ClientErrored;
                 discordClient.SocketErrored += SocketErrored;
                 await discordClient.ConnectAsync();
+                var slashExtension = discordClient.UseSlashCommands();
+                slashExtension.RegisterCommands<DiscordBotCommands>();
                 discordChannel = await discordClient.GetChannelAsync(channelId);
                 await watsonServer.SendAsync(currentClientIpPort, "log:Connected to Discord and fetched the channel.");
             }

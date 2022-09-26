@@ -47,8 +47,7 @@ internal class EnemyGauntlet : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            Poolee spawnedNB = nbPool.InstantiatePoolee(spawnPos, spawnRot);
-            spawnedNB.gameObject.SetActive(true);
+            GameObject spawnedNB = nbPool.Spawn(spawnPos, spawnRot, null, true);
             yield return new WaitForSeconds(5f);
         }
 
@@ -65,8 +64,7 @@ internal class EnemyGauntlet : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            Poolee spawnedCrab = crabPool.InstantiatePoolee(spawnPos, spawnRot);
-            spawnedCrab.gameObject.SetActive(true);
+            GameObject spawnedCrab = crabPool.Spawn(spawnPos, spawnRot, null, true);
             yield return new WaitForSeconds(5f);
         }
 
@@ -83,9 +81,8 @@ internal class EnemyGauntlet : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            Poolee spawnedEE = eePool.InstantiatePoolee(spawnPos, spawnRot); //todo: change to earlyexit that can throw stuff
+            GameObject spawnedEE = eePool.Spawn(spawnPos, spawnRot, null, true); //todo: change to earlyexit that can throw stuff
             //spawnedEE.GetComponent<AIBrain>().behaviour.enableThrowAttack = true;
-            spawnedEE.gameObject.SetActive(true);
             yield return new WaitForSeconds(5f);
         }
 

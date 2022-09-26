@@ -1,4 +1,6 @@
-﻿using StressLevelZero.AI;
+﻿using ModThatIsNotMod.Nullables;
+using PuppetMasta;
+using StressLevelZero.AI;
 using StressLevelZero.Pool;
 using System.Linq;
 using UnityEngine;
@@ -18,12 +20,13 @@ internal class PunchingBagNullbody : EffectBase
             return;
         }
 
-        Poolee nullbody = pool.InstantiatePoolee();
+        GameObject nullbody = pool.Spawn(Vector3.zero, Quaternion.identity, null, false);
+        PuppetMaster pm = nullbody.GetComponentInChildren<PuppetMaster>();
         Utilities.MoveAndFacePlayer(nullbody.gameObject);
-        nullbody.gameObject.SetActive(true);
+        nullbody.SetActive(true);
         // im not sure _why_ kinematic punching-bag-ify's it, but im not complaining 
         nullbody.transform.DeserializePosRot(data);
-        nullbody.StartCoroutine(nullbody.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+        pm.StartCoroutine(pm.DisabledToActive());
         nullbody.GetComponent<AIBrain>().behaviour.health.cur_hp = int.MaxValue;
     }
 
@@ -37,12 +40,13 @@ internal class PunchingBagNullbody : EffectBase
             return;
         }
 
-        Poolee nullbody = pool.InstantiatePoolee();
-        Utilities.MoveAndFacePlayer(nullbody.gameObject);
+        GameObject nullbody = pool.Spawn(Vector3.zero, Quaternion.identity, null, false);
+        Utilities.MoveAndFacePlayer(nullbody);
         SendNetworkData(nullbody.transform.SerializePosRot());
         nullbody.gameObject.SetActive(true);
         // im not sure _why_ kinematic punching-bag-ify's it, but im not complaining 
-        nullbody.StartCoroutine(nullbody.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+        PuppetMaster pm = nullbody.GetComponentInChildren<PuppetMaster>();
+        pm.StartCoroutine(pm.DisabledToActive());
         nullbody.GetComponent<AIBrain>().behaviour.health.cur_hp = int.MaxValue;
 
     }

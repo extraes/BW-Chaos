@@ -128,6 +128,19 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Effects\Guns\DupeGun.cs" />
+    <Compile Include="Effects\Guns\ZipGun.cs" />
+    <Compile Include="Effects\Misc\UseTheForce.cs" />
+    <Compile Include="Effects\World\BouncyHouse.cs" />
+    <Compile Include="Effects\World\ReloadLevel.cs" />
+    <Compile Include="Effects\World\GorillaGrip.cs" />
+    <Compile Include="Effects\World\Teflon.cs" />
+    <Compile Include="Effects\World\LightBlowout.cs" />
+    <Compile Include="Effects\World\DistantSound.cs" />
+    <Compile Include="Effects\World\RandomGravity.cs" />
+    <Compile Include="Effects\World\DestroyLevel.cs" />
+    <Compile Include="Effects\World\RandomTeleport.cs" />
+    <Compile Include="Effects\World\InTheHeadlights.cs" />
     <Compile Include="Extras\Exceptions.cs" />
     <Compile Include="Stats.cs" />
     <Compile Include="EffectConfig.cs" />

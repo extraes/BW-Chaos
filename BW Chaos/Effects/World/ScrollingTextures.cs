@@ -9,7 +9,7 @@ internal class ScrollingTextures : EffectBase
     public ScrollingTextures() : base("IN YOUR WALLS.", 5) { }
     [RangePreference(0, 1, 0.0125f)] static readonly float scrollSpeedX = 0.025f;
     [RangePreference(0, 1, 0.0125f)] static readonly float scrollSpeedY = 0.05f;
-    [RangePreference(0, 1, 0.02f)] static readonly float swapChance = 0.2f;
+    [RangePreference(0, 1, 0.05f)] static readonly float swapChance = 0.2f;
 
     [AutoCoroutine]
     public IEnumerator CoRun()

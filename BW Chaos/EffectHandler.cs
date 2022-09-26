@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 using System.Text.RegularExpressions;
 using UnityEngine;
 using UnityEngine.UI;
@@ -417,7 +418,8 @@ public class EffectHandler : MonoBehaviour
 
         UpdateVoteBars(new int[] { 0, 0, 0, 0, 0 });
 
-        string botMesssage = "-- New Candidate Effects --";
+        StringBuilder botMesssageBuilder = new StringBuilder("-- New Candidate Effects *(vote using **/vote**)* --\n");
+        string botMsg;
 
         GlobalVariables.CandidateEffects.Clear();
 
@@ -440,16 +442,18 @@ public class EffectHandler : MonoBehaviour
             GlobalVariables.CandidateEffects.Add(effect);
 
             // Add 1 because humans don't like zero based indices (FUCK LUA)
-            botMesssage += $"\n{numberFlip + i + 1}: {effect.Name}";
+            botMesssageBuilder.AppendLine($"{numberFlip + i + 1}: {effect.Name}");
         }
 
-        botMesssage += $"\n{5 + numberFlip}: Random Effect";
+        botMesssageBuilder.AppendLine($"{5 + numberFlip}: Random Effect");
 
-        if (Prefs.SendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMesssage);
+        botMsg = botMesssageBuilder.ToString();
+
+        if (Prefs.SendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMsg);
 
         if (Prefs.ShowCandidatesOnScreen && advanceTimer)
         {
-            string[] lines = botMesssage.Split('\n').Skip(1).ToArray();
+            string[] lines = botMsg.Split('\n').Skip(1).ToArray();
             if (Prefs.ScrollCandidates) MelonCoroutines.Start(ScrollNewCandidates(lines));
             else candidateText.text = string.Join("\n", lines);
             overlayImage.rectTransform.anchoredPosition = overlayImagePos_Candidates;

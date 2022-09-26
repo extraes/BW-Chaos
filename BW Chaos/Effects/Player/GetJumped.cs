@@ -1,4 +1,6 @@
-﻿using StressLevelZero.Pool;
+﻿using ModThatIsNotMod.Nullables;
+using PuppetMasta;
+using StressLevelZero.Pool;
 using System.Linq;
 using UnityEngine;
 
@@ -24,9 +26,10 @@ internal class GetJumped : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            Poolee spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
+            GameObject spawnedNB = pool.Spawn(spawnPos, spawnRot, null, true);
+            PuppetMaster pm = spawnedNB.GetComponentInChildren<PuppetMaster>();
             spawnedNB.gameObject.SetActive(true);
-            spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+            pm.StartCoroutine(pm.DisabledToActive());
             SendNetworkData(spawnedNB.transform.SerializePosRot());
         }
     }
@@ -35,9 +38,10 @@ internal class GetJumped : EffectBase
     {
         if (pool == null) return;
 
-        Poolee spawnedNB = pool.InstantiatePoolee();
+        GameObject spawnedNB = pool.Spawn(Vector3.zero, Quaternion.identity, null, false);
+        PuppetMaster pm = spawnedNB.GetComponentInChildren<PuppetMaster>();
         spawnedNB.transform.DeserializePosRot(data);
-        spawnedNB.gameObject.SetActive(true);
-        spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+        spawnedNB.SetActive(true);
+        pm.StartCoroutine(pm.DisabledToActive());
     }
 }

@@ -1,4 +1,6 @@
-﻿using StressLevelZero.Pool;
+﻿using ModThatIsNotMod.Nullables;
+using PuppetMasta;
+using StressLevelZero.Pool;
 using System.Linq;
 using UnityEngine;
 
@@ -24,9 +26,9 @@ internal class CrabletCircle : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            Poolee spawnedNB = pool.InstantiatePoolee(spawnPos, spawnRot);
-            spawnedNB.gameObject.SetActive(true);
-            spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+            GameObject spawnedNB = pool.Spawn(spawnPos, spawnRot, null, true);
+            PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();
+            poppet.StartCoroutine(poppet.DisabledToActive());
 
             SendNetworkData(spawnedNB.transform.SerializePosRot());
         }
@@ -36,9 +38,10 @@ internal class CrabletCircle : EffectBase
     {
         if (pool == null) return;
 
-        Poolee spawnedNB = pool.InstantiatePoolee();
+        GameObject spawnedNB = pool.Spawn(Vector3.zero, Quaternion.identity, null, false); ;
         spawnedNB.transform.DeserializePosRot(data);
         spawnedNB.gameObject.SetActive(true);
-        spawnedNB.StartCoroutine(spawnedNB.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+        PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();
+        poppet.StartCoroutine(poppet.DisabledToActive());
     }
 }
