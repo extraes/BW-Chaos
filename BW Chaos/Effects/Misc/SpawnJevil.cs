@@ -1,4 +1,5 @@
 ﻿using ModThatIsNotMod;
+using ModThatIsNotMod.Nullables;
 using System.Linq;
 using UnityEngine;
 
@@ -22,11 +23,10 @@ internal class SpawnJevil : EffectBase
         soundSource.clip = GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/jevil_chaoschaos.wav");
 
         StressLevelZero.Pool.Pool pool = GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil");
-        GameObject jevil = pool.InstantiatePoolee(Vector3.zero, Quaternion.identity).gameObject;
+        GameObject jevil = pool.Spawn(Vector3.zero, Quaternion.identity, null, true);
 
         SendNetworkData(jevil.transform.SerializePosRot());
         Utilities.MoveAndFacePlayer(jevil);
-        jevil.SetActive(true);
         //jevil.GetComponent<AudioSource>().outputAudioMixerGroup = GlobalVariables.MusicMixer; // in case changing it on the pool prefab didn't fix it :shrump:
         soundSource.Play();
     }
@@ -35,7 +35,7 @@ internal class SpawnJevil : EffectBase
     {
         if (!isNetworked) SendNetworkData(data);
         StressLevelZero.Pool.Pool pool = GameObject.FindObjectsOfType<StressLevelZero.Pool.Pool>().FirstOrDefault(p => p.name == "pool - Jevil");
-        GameObject jevil = pool.InstantiatePoolee(Vector3.zero, Quaternion.identity).gameObject;
+        GameObject jevil = pool.Spawn(Vector3.zero, Quaternion.identity, null, true);
         jevil.transform.DeserializePosRot(data);
     }
 

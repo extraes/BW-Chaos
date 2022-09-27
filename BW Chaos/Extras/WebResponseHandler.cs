@@ -1,4 +1,5 @@
 ﻿using BWChaos.Effects;
+using ModThatIsNotMod.Nullables;
 using StressLevelZero.Pool;
 using System;
 using System.Linq;
@@ -49,11 +50,10 @@ internal static class WebResponseHandler
                     Chaos.Warn("admin sent incorrect pool name " + data);
                     return;
                 }
-                Poolee poolee = pool.InstantiatePoolee(Vector3.one, Quaternion.identity);
-                poolee.gameObject.SetActive(true);
-                Utilities.MoveAndFacePlayer(poolee.gameObject);
+                GameObject poolee = pool.Spawn(Vector3.one, Quaternion.identity, null, true);
+                Utilities.MoveAndFacePlayer(poolee);
 #if DEBUG
-                Chaos.Log($"Spawned {poolee.name} at {poolee.transform.position}, active = {poolee.isActiveAndEnabled}");
+                Chaos.Log($"Spawned {poolee.name} at {poolee.transform.position}, active = {poolee.activeInHierarchy}");
 #endif
                 break;
             case "runeffect":

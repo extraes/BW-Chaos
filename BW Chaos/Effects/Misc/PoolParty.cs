@@ -1,4 +1,5 @@
-﻿using StressLevelZero.Pool;
+﻿using ModThatIsNotMod.Nullables;
+using StressLevelZero.Pool;
 using System.Collections;
 using System.Linq;
 using System.Text;
@@ -23,10 +24,10 @@ internal class PoolParty : EffectBase
         while (Active)
         {
             Pool pool = pools.Random();
-            Poolee spawned = pool.InstantiatePoolee();
-            Utilities.MoveAndFacePlayer(spawned.gameObject);
+            GameObject spawned = pool.Spawn(Vector3.zero, Quaternion.identity, null, false);
+            Utilities.MoveAndFacePlayer(spawned);
             SendNetworkData(spawned.transform.SerializePosRot(), Encoding.ASCII.GetBytes(pool.name));
-            spawned.gameObject.SetActive(true);
+            spawned.SetActive(true);
             yield return new WaitForSeconds(5);
         }
     }

@@ -1,4 +1,6 @@
 ﻿using ModThatIsNotMod;
+using ModThatIsNotMod.Nullables;
+using PuppetMasta;
 using StressLevelZero.Pool;
 using System.Collections;
 using System.Linq;
@@ -23,8 +25,9 @@ internal class CrabletRain : EffectBase
             Player.GetPlayerHead().transform.position +
             new Vector3((Random.value - 0.5f) * 5, 10, (Random.value - 0.5f) * 5);
 
-        Poolee c = pool.InstantiatePoolee(spawnPos, Quaternion.identity);
-        c.gameObject.SetActive(true);
-        c.StartCoroutine(c.GetComponentInChildren<PuppetMasta.PuppetMaster>().DisabledToActive());
+        
+        GameObject c = pool.Spawn(spawnPos, Quaternion.identity, null, true);
+        PuppetMaster poppet = c.GetComponentInChildren<PuppetMaster>();
+        poppet.StartCoroutine(poppet.DisabledToActive());
     }
 }

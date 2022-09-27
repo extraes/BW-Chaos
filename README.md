@@ -318,6 +318,42 @@ I don't have a code of coduct or anything, so feel free to evade taxes and stuff
 
 ### Changelog
 
+- New in 2.2.3
+
+  - Hype for BONELAB
+
+  - Add new strings in SpawnAds (of course)
+
+  - Actually use BW's pooling. (shoutouts MTINM)
+
+  - Add 13 new effects
+
+    - Teflon: Du Pont's nonstick poison!
+
+    - ReloadLevel: Finish the stage in 5 minutes or have your progress reset
+
+    - RandomTeleport: Teleport to a random walkable location
+
+    - RandomGravity: What it says
+
+    - LightBlowout: Discord light theme
+
+    - InTheHeadlights: Like a deer in the... You get it.
+
+    - GorillaGrip: She wasn't lying, that PhysicMaterial do have high static and dynamic friction values
+
+    - DistantSound: Did someone hear that?
+
+    - DestroyLevel: Disable random parts of the level. Try not to get caught out!
+
+    - BouncyHouse: Something something restitution factor... Stretch a balloon over something and bounce a pingpong ball on it.
+
+    - UseTheForce: Observe as they all avoid you... The items ingame too.
+
+    - DupeGun: (Untested) Duplicates anything you shoot
+
+    - ZipGun: (Also untested) Go to wherever you shoot.
+
 - New in 2.2.2
 
   - Critical fix for remote voter's Discord support (update dependencies)

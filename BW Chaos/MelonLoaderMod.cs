@@ -23,7 +23,7 @@ public static class BuildInfo
     public const string Name = "BWChaos";
     public const string Author = "extraes, trev";
     public const string Company = null;
-    public const string Version = "2.2.2";
+    public const string Version = "2.2.3";
     public const string DownloadLink = "https://boneworks.thunderstore.io/package/BWChaosDevs/BW_Chaos/";
 }
 
@@ -410,11 +410,11 @@ public class Chaos : MelonMod
             byte[] buffer = new byte[4096];
 
             // holy fucking shit i love using
-            // no but fr zip the bot because it makes it significantly (~40mb) smaller, even with the dogwater deflate algorithm, and do all this in memory to avoid writing to disk
-            using (ZipFile zipFile = new ZipFile(stream))
-            using (Stream zipStream = zipFile.GetInputStream(zipFile[0]))
-            using (Stream fsOut = File.Create(exePath))
-                StreamUtils.Copy(zipStream, fsOut, buffer);
+            // no but fr zip the bot because it makes it significantly (~40mb) smaller, even with the dogwater deflate algorithm, and do all this in memory to avoid writing temp files to disk
+            using ZipFile zipFile = new ZipFile(stream);
+            using Stream zipStream = zipFile.GetInputStream(zipFile[0]);
+            using Stream fsOut = File.Create(exePath);
+            StreamUtils.Copy(zipStream, fsOut, buffer);
             // using () using () using () using () using () using () using () using () using () 
         }
 
@@ -427,6 +427,8 @@ public class Chaos : MelonMod
         botProcess.StartInfo.WorkingDirectory = saveFolder;
         botProcess.StartInfo.UseShellExecute = true;
         botProcess.StartInfo.CreateNoWindow = true;
+        botProcess.OutputDataReceived += BotWritesToStdOut;
+        botProcess.ErrorDataReceived += BotWritesToStdErr;
         botProcess.Start();
 
         // the mod is the client because trying to create a WWS server didnt work, but a client did for some reason. mono moment i guess.
@@ -437,6 +439,16 @@ public class Chaos : MelonMod
         GlobalVariables.WatsonClient.Start();
 
         #endregion
+    }
+
+    private void BotWritesToStdOut(object sender, DataReceivedEventArgs e)
+    {
+        Log("[ChaosBotLog] " + e.Data);
+    }
+
+    private void BotWritesToStdErr(object sender, DataReceivedEventArgs e)
+    {
+        Error("[ChaosBotError] " + e.Data);
     }
 
     private static void PopulateEffects()
@@ -505,7 +517,7 @@ public class Chaos : MelonMod
 
         #region Local function because fuck you
 
-        IEnumerable<EffectBase> FilterEffects(IEnumerable<EffectBase> effects)
+        static IEnumerable<EffectBase> FilterEffects(IEnumerable<EffectBase> effects)
         {
             return from e in effects
                    where e.Types == EffectTypes.NONE || // is this optimization?
