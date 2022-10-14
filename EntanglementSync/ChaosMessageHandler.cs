@@ -1,4 +1,4 @@
-﻿using BWChaos.Effects;
+﻿using BLChaos.Effects;
 using Discord;
 using Entanglement.Modularity;
 using Entanglement.Network;
@@ -7,7 +7,7 @@ using System;
 using System.Linq;
 using System.Text;
 
-namespace BWChaos.Sync
+namespace BLChaos.Sync
 {
     public class ChaosMessageHandler : NetworkMessageHandler
     {

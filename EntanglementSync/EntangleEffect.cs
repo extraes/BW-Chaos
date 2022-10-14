@@ -3,7 +3,7 @@ using Entanglement.Network;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace BWChaos.Sync
+namespace BLChaos.Sync
 {
     internal class EntangleEffect : Effects.EffectBase
     {

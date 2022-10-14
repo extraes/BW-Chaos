@@ -1,9 +1,9 @@
-﻿using BWChaos.Effects;
+﻿using BLChaos.Effects;
 using Entanglement.Modularity;
 using Entanglement.Network;
 using System.Text;
 
-namespace BWChaos.Sync
+namespace BLChaos.Sync
 {
     public class ChaosSyncHandler : EntanglementModule
     {

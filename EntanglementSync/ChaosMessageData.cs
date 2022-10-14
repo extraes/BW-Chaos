@@ -1,7 +1,7 @@
-﻿using BWChaos.Effects;
+﻿using BLChaos.Effects;
 using Entanglement.Network;
 
-namespace BWChaos.Sync
+namespace BLChaos.Sync
 {
     public class ChaosMessageData : NetworkMessageData
     {

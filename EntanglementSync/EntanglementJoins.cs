@@ -3,7 +3,7 @@ using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
-namespace BWChaos.Effects
+namespace BLChaos.Effects
 {
     internal class EntanglementJoins : EffectBase
     {
