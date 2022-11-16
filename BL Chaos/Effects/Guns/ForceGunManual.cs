@@ -1,4 +1,7 @@
-﻿using ModThatIsNotMod;
+﻿
+
+using BoneLib;
+using SLZ.Props.Weapons;
 
 namespace BLChaos.Effects;
 
@@ -8,20 +11,18 @@ internal class ForceGunManual : EffectBase
 
     public override void OnEffectStart()
     {
-        StressLevelZero.Props.Weapons.Gun g = Player.GetGunInHand(Player.rightHand);
+        Gun g = Player.GetGunInHand(Player.rightHand);
         if (g != null)
         {
-            g.isManual = true;
-            g.isAutomatic = false;
-            g.slideState = StressLevelZero.Props.Weapons.Gun.SlideStates.LOCKED;
+            g.fireMode = Gun.FireMode.MANUAL;
+            g.slideState = Gun.SlideStates.LOCKED;
         }
 
         g = Player.GetGunInHand(Player.leftHand);
         if (g != null)
         {
-            g.isManual = true;
-            g.isAutomatic = false;
-            g.slideState = StressLevelZero.Props.Weapons.Gun.SlideStates.LOCKED;
+            g.fireMode = Gun.FireMode.MANUAL;
+            g.slideState = Gun.SlideStates.LOCKED;
         }
     }
 

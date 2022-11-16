@@ -1,6 +1,8 @@
-﻿using ModThatIsNotMod.Nullables;
+﻿using BoneLib.Nullables;
+using Jevil;
+using Jevil.Spawning;
 using PuppetMasta;
-using StressLevelZero.Pool;
+using SLZ.Marrow.Pool;
 using System.Linq;
 using UnityEngine;
 
@@ -9,14 +11,12 @@ namespace BLChaos.Effects;
 internal class CrabletCircle : EffectBase
 {
     public CrabletCircle() : base("Crablet Circle") { }
-    static Pool pool;
 
-    public override void OnEffectStart()
+    public override async void OnEffectStart()
     {
-        pool = pool != null ? pool : GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
+        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
         if (isNetworked) return;
-        if (pool == null) return;
-        Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
+        Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
 
         for (int i = 0; i < 8; i++)
         {
@@ -26,7 +26,8 @@ internal class CrabletCircle : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            GameObject spawnedNB = pool.Spawn(spawnPos, spawnRot, null, true);
+            AssetPoolee spawnedNB = await pool.Spawn(spawnPos, spawnRot, null, true).ToTask();
+            Utilities.ReMain();
             PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();
             poppet.StartCoroutine(poppet.DisabledToActive());
 
@@ -34,11 +35,11 @@ internal class CrabletCircle : EffectBase
         }
     }
 
-    public override void HandleNetworkMessage(byte[] data)
+    public override async void HandleNetworkMessage(byte[] data)
     {
-        if (pool == null) return;
+        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
 
-        GameObject spawnedNB = pool.Spawn(Vector3.zero, Quaternion.identity, null, false); ;
+        AssetPoolee spawnedNB = await pool.Spawn(Vector3.zero, Quaternion.identity, null, false).ToTask();
         spawnedNB.transform.DeserializePosRot(data);
         spawnedNB.gameObject.SetActive(true);
         PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();

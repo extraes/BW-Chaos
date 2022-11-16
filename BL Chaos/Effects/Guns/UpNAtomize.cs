@@ -1,12 +1,17 @@
 ﻿using MelonLoader;
-using ModThatIsNotMod;
-using StressLevelZero.Pool;
+using Jevil;
+using SLZ.Marrow.Pool;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
+using BoneLib;
+using SLZ.Props.Weapons;
+using SLZ.Combat;
+using Jevil.Patching;
+using static Interop;
 
 namespace BLChaos.Effects;
 
@@ -17,37 +22,29 @@ internal class UpNAtomize : EffectBase
     [RangePreference(0, 50, 0.5f)] static readonly float forceMultiplier = 1f;
     [RangePreference(1, 10, 1)] static readonly int rbsPerFrame = 4;
 
-    ProjectilePool pool;
-    Action<Collider, Vector3, Vector3> onBulletHit;
+    static Action<Collider, Vector3, Vector3> onBulletHit;
+
+    static UpNAtomize() => Hook.OntoMethod(typeof(Projectile).GetMethod(nameof(Projectile.OnEnable)), Projectile_OnEnable);
 
     public override void OnEffectStart()
     {
-        pool = GameObject.FindObjectOfType<ProjectilePool>();
-        Hooking.OnPostFireGun += Hooking_OnPostFireGun;
         onBulletHit += OnBulletHit;
     }
 
-
-    public override void OnEffectEnd()
-    {
-        Hooking.OnPostFireGun -= Hooking_OnPostFireGun;
-    }
-
-    private void Hooking_OnPostFireGun(StressLevelZero.Props.Weapons.Gun obj)
-    {
-        pool.lastSpawn.onCollision.AddListener(onBulletHit);
-        MelonCoroutines.Start(RemoveListener(pool.lastSpawn.onCollision));
-    }
-    private IEnumerator RemoveListener(UnityEvent<Collider, Vector3, Vector3> unityEvent)
+    private static IEnumerator RemoveListener(UnityEvent<Collider, Vector3, Vector3> unityEvent)
     {
         yield return new WaitForSeconds(1);
         unityEvent?.RemoveListener(onBulletHit);
     }
+
     private void OnBulletHit(Collider col, Vector3 pos, Vector3 normal)
     {
-        //Chaos.Log("Bullet collided with " + col.name);
-        //Chaos.Log("Vector3 argument 2 = " + pos.ToString());
-        //Chaos.Log("Vector3 argument 3 = " + normal.ToString());
+#if DEBUG
+        Chaos.Log("Bullet collided with " + col.name);
+        Chaos.Log("Vector3 argument 2 = " + pos.ToString());
+        Chaos.Log("Vector3 argument 3 = " + normal.ToString());
+#endif
+
         Collider[] cols = Physics.OverlapSphere(pos, radius * 1.25f);
         MelonCoroutines.Start(ApplyForces(cols.Take(cols.Length / 2), pos));
         MelonCoroutines.Start(ApplyForces(cols.Skip(cols.Length / 2), pos));
@@ -66,5 +63,9 @@ internal class UpNAtomize : EffectBase
         }
     }
 
-
+    private static void Projectile_OnEnable(Projectile projectile)
+    {
+        projectile.onCollision.AddListener(onBulletHit);
+        MelonCoroutines.Start(RemoveListener(projectile.onCollision));
+    }
 }

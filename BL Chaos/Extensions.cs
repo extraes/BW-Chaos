@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SLZ.Utilities;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -60,16 +61,11 @@ public static class Extensions
 
     public static void UseEmbeddedResource(this System.Reflection.Assembly assembly, string resourcePath, Action<byte[]> whatToDoWithResource)
     {
-        using (System.IO.Stream stream = assembly.GetManifestResourceStream(resourcePath))
-        {
-            // Don't overallocate memory to the mstream (?).
-            using (System.IO.MemoryStream mStream = new System.IO.MemoryStream((int)stream.Length))
-            {
-                // Copy the stream to a memorystream. Why? Don't know, ask .NET 4.7.2 designers.
-                stream.CopyTo(mStream);
-                whatToDoWithResource(mStream.ToArray());
-            }
-        }
+        using System.IO.Stream stream = assembly.GetManifestResourceStream(resourcePath);
+        using System.IO.MemoryStream mStream = new((int)stream.Length); // Don't overallocate memory to the mstream (?).
+        // Copy the stream to a memorystream. Why? Don't know, ask .NET 4.7.2 designers.
+        stream.CopyTo(mStream);
+        whatToDoWithResource(mStream.ToArray());
     }
 
     public static T Random<T>(this IEnumerable<T> sequence)
@@ -174,6 +170,6 @@ public static class Extensions
 
     public static void PlayClip(this AudioPlayer player, AudioClip clip, float? volume = null)
     {
-        ModThatIsNotMod.Nullables.NullableMethodExtensions.Play(player, clip, player._source.outputAudioMixerGroup, volume, null, null, null);
+        BoneLib.Nullables.NullableMethodExtensions.Play(player, clip, player._source.outputAudioMixerGroup, volume, null, null, null);
     }
 }

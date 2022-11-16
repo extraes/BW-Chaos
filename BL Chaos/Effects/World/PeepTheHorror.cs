@@ -1,5 +1,5 @@
-﻿using MelonLoader;
-using ModThatIsNotMod;
+﻿using BoneLib.RandomShit;
+using MelonLoader;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -60,24 +60,24 @@ internal class PeepTheHorror : EffectBase
     {
         didYouPeepIt.ToString(); // just so the compiler doesnt yell at me for unused variable
         if (Chaos.isSteamVer)
-            name = Steamworks.SteamFriends.GetPersonaName().Split(' ')[0]; // in case they have some goofball name like "fuxstik cs.money"
+            name = Steamworks.SteamClient.Name.Split(' ')[0]; // in case they have some goofball name like "fuxstik cs.money"
         else
             name = System.Security.Principal.WindowsIdentity.GetCurrent().Name; // https://stackoverflow.com/questions/1240373/how-do-i-get-the-current-username-in-net-using-c#1240379
 
-        clips = GlobalVariables.ResourcePaths.Where(p => p.Contains("sounds/giygas")).OrderBy(p => p.Substring(p.Length - 3).Last()).Select(GlobalVariables.EffectResources.LoadAsset<AudioClip>).ToArray();
+        clips = GlobalVariables.ResourcePaths.Where(p => p.Contains("sounds/giygas")).OrderBy(p => p.Substring(p.Length - 3).Last()).Select(GlobalVariables.EffectResources.LoadAsset).Select(a => a.Cast<AudioClip>()).ToArray();
 
         videoPlayer = new GameObject("Play the horror").AddComponent<VideoPlayer>();
-        videoPlayer.clip = GlobalVariables.EffectResources.LoadAsset<VideoClip>("Assets/MemeFolder/PeepTheHorror_1.mp4");
+        videoPlayer.clip = GlobalVariables.EffectResources.LoadAsset("Assets/MemeFolder/PeepTheHorror_1.mp4").Cast<VideoClip>();
         videoPlayer.clip.hideFlags = HideFlags.DontUnloadUnusedAsset;
         videoPlayer.playOnAwake = true;
         GameObject.DontDestroyOnLoad(videoPlayer);
 
-        RenderTexture tex = GlobalVariables.EffectResources.LoadAsset<RenderTexture>("Assets/MaterialTextures/PeepTheHorror.renderTexture");
-        mat = GlobalVariables.EffectResources.LoadAsset<Material>("Assets/Materials/PeepTheHorror.mat");
+        RenderTexture tex = GlobalVariables.EffectResources.LoadAsset("Assets/MaterialTextures/PeepTheHorror.renderTexture").Cast<RenderTexture>();
+        mat = GlobalVariables.EffectResources.LoadAsset("Assets/Materials/PeepTheHorror.mat").Cast<Material>();
         mat.hideFlags = HideFlags.DontUnloadUnusedAsset;
         GameObject.DontDestroyOnLoad(mat);
 
-        mat.mainTexture = tex;
+        mat.SetTexture(Const.URP_MAINTEX_NAME, tex);
         videoPlayer.targetTexture = tex;
         videoPlayer.isLooping = true;
     }
@@ -108,7 +108,7 @@ internal class PeepTheHorror : EffectBase
             players[i].maxDistance = 15f;
             players[i].minDistance = 0.01f;
             players[i].playOnAwake = true;
-            players[i].transform.position = GlobalVariables.Player_PhysBody.rbHead.position + Random.insideUnitSphere * 20;
+            players[i].transform.position = GlobalVariables.Player_PhysRig.torso.rbHead.position + Random.insideUnitSphere * 20;
             players[i].Play();
         }
 
@@ -144,9 +144,11 @@ internal class PeepTheHorror : EffectBase
         while (Active)
         {
             string formatted = string.Format(quotes.Random(), name);
-            NotificationData notif = Notifications.SendNotification(formatted, Random.Range(10, 15));
-            yield return new WaitForSecondsRealtime(notif.duration * Random.value);
-            notif.End();
+            GameObject popup = PopupBoxManager.CreateNewPopupBox(formatted);
+            //NotificationData notif = Notifications.SendNotification(formatted, Random.Range(10, 15));
+            yield return new WaitForSecondsRealtime(Random.Range(10, 15) * Random.value);
+            popup.Destroy();
+            //notif.End();
             yield return new WaitForSecondsRealtime(Random.Range(5, 20));
         }
     }
@@ -180,7 +182,7 @@ internal class PeepTheHorror : EffectBase
             {
                 Vector3 randomVec = Random.insideUnitSphere;
                 randomVec.y *= 0.125f;
-                player.transform.position = GlobalVariables.Player_PhysBody.rbHead.position + randomVec * 20;
+                player.transform.position = GlobalVariables.Player_PhysRig.torso.rbHead.position + randomVec * 20;
                 yield return new WaitForSecondsRealtime(Random.value * 3);
             }
         }

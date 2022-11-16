@@ -12,7 +12,7 @@ internal class VideoTextures : EffectBase
     static VideoPlayer[] videoPlayers;
     static RenderTexture[] textures;
     static Material[] materials;
-    static readonly Shader vrstandard = Shader.Find("Valve/vr_standard");
+    static readonly Shader vrstandard = Shader.Find(Const.URP_LIT_NAME);
     [RangePreference(0f, 1f, 0.01f)] static readonly float swapChance = 0.2f;
     // changing 2300 textures at once crashed my game (in sewers) lmao
     [RangePreference(25, 2000, 25)] static readonly int limit = 500; // lest the game crash once more
@@ -27,7 +27,7 @@ internal class VideoTextures : EffectBase
 
         videos = GlobalVariables.ResourcePaths
             .Where(a => a.Contains("/videoswap/"))
-            .Select(a => GlobalVariables.EffectResources.LoadAsset<VideoClip>(a))
+            .Select(a => GlobalVariables.EffectResources.LoadAsset(a).Cast<VideoClip>())
             .ToArray();
 
         videoPlayers = new VideoPlayer[videos.Length];

@@ -1,14 +1,15 @@
 ﻿using HarmonyLib;
-using ModThatIsNotMod;
-using StressLevelZero.Interaction;
-using StressLevelZero.Pool;
-using StressLevelZero.VRMK;
+using SLZ.VRMK;
+using SLZ.Interaction;
+using SLZ.Marrow.Pool;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using System.Text;
 using UnityEngine;
+using BoneLib;
+using BoneLib.RandomShit;
 
 namespace BLChaos;
 
@@ -17,16 +18,6 @@ public static class Utilities
     static readonly HarmonyMethod skipMethod = new HarmonyMethod(typeof(Utilities), nameof(Utilities.SkipMethod));
     static readonly MethodInfo slowMoMethod = typeof(Control_GlobalTime).GetMethod(nameof(Control_GlobalTime.DECREASE_TIMESCALE));
     static bool skipSlow = false;
-    public static GameObject GetPrefabOfPool(string objectName)
-    {
-        foreach (Il2CppSystem.Collections.Generic.KeyValuePair<string, Pool> dynamicPool in PoolManager.DynamicPools)
-        {
-            if (dynamicPool.Key == objectName)
-                return dynamicPool.Value.Prefab;
-        }
-
-        return null;
-    }
 
     public static Hand GetRandomPlayerHand()
     {
@@ -39,7 +30,7 @@ public static class Utilities
 
     public static GameObject SpawnAd(string str)
     {
-        GameObject ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(str);
+        GameObject ad = PopupBoxManager.CreateNewPopupBox(str);
         MoveAndFacePlayer(ad);
         return ad;
     }
@@ -77,6 +68,32 @@ public static class Utilities
             BitConverter.ToSingle(bytes, startIdx + sizeof(float) * 2));
     }
 
+    public static (Vector3, Quaternion) DebytePosRot(byte[] bytes, int startIdx = 0)
+    {
+#if DEBUG
+        if (startIdx == 0 && bytes.Length != Const.SizeV3 * 2) Chaos.Warn($"Trying to debyte a Vector3 of length {bytes.Length}, this is not the expected {Const.SizeV3 * 2} bytes!");
+        if (startIdx + (sizeof(float) * 6) > bytes.Length) Chaos.Warn($"{bytes.Length} is too short for the given index of {startIdx}");
+#endif
+        return 
+        (
+            new Vector3
+            (
+                BitConverter.ToSingle(bytes, startIdx),
+                BitConverter.ToSingle(bytes, startIdx + sizeof(float)),
+                BitConverter.ToSingle(bytes, startIdx + sizeof(float) * 2)
+            ),
+            Quaternion.Euler
+            (
+                new Vector3
+                (
+                    BitConverter.ToSingle(bytes, startIdx + Const.SizeV3),
+                    BitConverter.ToSingle(bytes, startIdx + Const.SizeV3 + sizeof(float)),
+                    BitConverter.ToSingle(bytes, startIdx + Const.SizeV3 + sizeof(float) * 2)
+                )
+            )
+        );
+    }
+
     public static Vector3[] DeserializeMesh(byte[] bytes)
     {
         int vecSize = (sizeof(float) * 3);
@@ -107,9 +124,10 @@ public static class Utilities
 
     public static void MoveAndFacePlayer(GameObject obj)
     {
-        Transform phead = GlobalVariables.Player_PhysBody.rbHead.transform;
-        obj.transform.position = phead.position + phead.forward.normalized * 2;
-        obj.transform.rotation = Quaternion.LookRotation(obj.transform.position - phead.position, Vector3.up);
+        Transform phead = GlobalVariables.Player_PhysRig.torso.rbHead.transform;
+        Vector3 pos = phead.position + phead.forward.normalized * 2;
+        Quaternion rot = Quaternion.LookRotation(obj.transform.position - phead.position, Vector3.up);
+        obj.transform.SetPositionAndRotation(pos, rot);
     }
 
     /* Input: [
@@ -258,4 +276,16 @@ public static class Utilities
         hand.dampening = 0.2f * mult;
         hand.maxTorque = 30f * torque;
     }
+
+    public static byte[] SerializeInFrontFacingPlayer()
+    {
+        byte[] res = new byte[Const.SizeV3 * 2];
+
+        GlobalVariables.inFrontOfPlayer.ToBytes().CopyTo(res, 0);
+        GlobalVariables.lookingAtPlayer.eulerAngles.ToBytes().CopyTo(res, Const.SizeV3);
+
+        return res;
+    }
+
+    public static void ReMain() => EffectHandler.Instance.EnsureRunningOnMainThread();
 }

@@ -1,5 +1,7 @@
-﻿using ModThatIsNotMod;
-using StressLevelZero.Props.Weapons;
+﻿using BoneLib;
+using SLZ.Interaction;
+using SLZ.Player;
+using SLZ.Props.Weapons;
 using UnityEngine;
 
 namespace BLChaos.Effects;
@@ -15,12 +17,9 @@ internal class FuckYourItem : EffectBase
         Player.GetObjectInHand(Player.rightHand)?.SetActive(false);
 #pragma warning restore UNT0008 // Null propagation on Unity objects
 
-        foreach (HandWeaponSlotReciever rec in GameObject.FindObjectsOfType<HandWeaponSlotReciever>())
+        foreach (SlotContainer container in GameObject.FindObjectOfType<Inventory>().bodySlots)
         {
-            if (rec.m_SlottedWeapon)
-            {
-                rec.m_SlottedWeapon.gameObject.SetActive(false);
-            }
+            container._inventorySlot.DespawnContents();
         }
     }
 }

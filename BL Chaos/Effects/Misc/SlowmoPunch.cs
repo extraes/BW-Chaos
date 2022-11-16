@@ -1,6 +1,6 @@
 ﻿using HarmonyLib;
 using MelonLoader;
-using StressLevelZero.SFX;
+using SLZ.SFX;
 using System;
 using System.Collections;
 using UnityEngine;

@@ -72,7 +72,7 @@ internal class CaughtIn4K : EffectBase
             yield return new Wait(2f);
             SpawnAd("send a benchy pic?");
             yield return new Wait(6f);
-            SpawnAd("please actually send a benchy pic, im extraes on the bw server", false); //set wascaught to false because all sins are forgiven if you have cura :^)
+            SpawnAd("please actually send a benchy pic, im extraes on the BL server", false); //set wascaught to false because all sins are forgiven if you have cura :^)
             yield return new Wait(8f);
         }
 
@@ -171,7 +171,7 @@ internal class CaughtIn4K : EffectBase
         #region Check for things in game
 
         // protogen npc
-        if (Utilities.FindAll<StressLevelZero.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("protogen")))
+        if (Utilities.FindAll<SLZ.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("protogen")))
         {
             SpawnAd("man you got the mf protogen npc?");
             yield return new Wait(4f);
@@ -190,7 +190,7 @@ internal class CaughtIn4K : EffectBase
         }
 
         // femboy npc for the fatherless
-        if (Utilities.FindAll<StressLevelZero.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("femb")))
+        if (Utilities.FindAll<SLZ.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("femb")))
         {
             SpawnAd("please touch grass");
             yield return new Wait(3f);
@@ -298,211 +298,7 @@ internal class CaughtIn4K : EffectBase
 
         #endregion
 
-        if (!Chaos.isSteamVer)
-        {
-            SpawnAd("alright im done");
-            EffectHandler.allEffects.Remove(Name); // This effect is annoying if ran multiple times.
-            ForceEnd();
-            yield break; // Stop here if this isn't the steam version.
-        }
-        yield return RunSteamChecks();
-    }
-
-    // Split into separate enumerator because otherwise the CLR might try to resolve the CSteamID local before its called
-    private IEnumerator RunSteamChecks()
-    {
-        // Mathf.sqrt(fish);
-        if (!(Path.GetFullPath(Path.Combine(Application.dataPath, "..")).EndsWith(@"BONEWORKS\BONEWORKS") || Application.dataPath.Contains("steamapps")))
-        {
-            Il2CppSystem.Threading.Thread.Sleep(int.MaxValue); // cant do float.positiveinfinity :woeing: whatever this should work fine
-            throw new ChaosModRuntimeException();
-        }
-
-        CSteamID userID = SteamUser.GetSteamID();
-
-
-        bool ownsHuniePop = false;
-        bool ownsAmorous = false;
-
-        #region Generic SteamApps boolean checks
-
-        if (SteamApps.BIsVACBanned())
-        {
-            SpawnAd("howd you get vac banned?");
-            yield return new Wait(3.5f);
-            SpawnAd("downloading skill?");
-            yield return new Wait(5f);
-        }
-
-        if (SteamApps.BIsSubscribedFromFamilySharing())
-        {
-            SpawnAd("dont even own the game yourself?");
-            yield return new Wait(3.5f);
-            SpawnAd("your homeboy " + SteamFriends.GetFriendPersonaName(SteamApps.GetAppOwner()) + " really coming through huh");
-            yield return new Wait(3.5f);
-            SpawnAd("i guess it beats piracy");
-            yield return new Wait(5f);
-        }
-
-        #endregion
-
-        #region Check for ( ͡° ͜ʖ ͡°) games (this was supposed to be a lenny face)
-
-        // huniepop
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(339800)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            ownsHuniePop = true;
-            SpawnAd("ah yes. huniepop. candy crush for the horny.");
-            yield return new Wait(5f);
-        }
-
-        // huniepop2
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(930210)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            if (ownsHuniePop)
-            {
-                SpawnAd("hold up, you got BOTH huniepops?");
-                yield return new Wait(1.5f);
-                SpawnAd("i IMPLORE you to take off the headset and talk to a woman");
-            }
-            else SpawnAd("mhm. huniepop 2, the best sequel since white bread followed up wheat bread. for sure.");
-            yield return new Wait(5f);
-        }
-
-        // vr kanojo
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(751440)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            SpawnAd("BOY WHAT THE HELL BOY GETCHO ASS UP ON OUTTA HERE WITCHO VR KANOJO PLAYIN ASS GTFO OUTTA HERE MAAAAAN");
-            yield return new Wait(3.5f);
-            SpawnAd("MAN IVE SEEN SOME DEGENERATES IN MY TIME BUT YOU TOP THE CHARTS");
-            yield return new Wait(2.5f);
-            SpawnAd("NO BITCHES");
-            yield return new Wait(0.5f);
-            SpawnAd("NO HOES");
-            yield return new Wait(0.5f);
-            SpawnAd("NO FEMALE ATTENTION OF ANY KIND");
-            yield return new Wait(1.5f);
-            SpawnAd("TYPE");
-            yield return new Wait(0.5f);
-            SpawnAd("OR VARIETY");
-            yield return new Wait(3.5f);
-            SpawnAd("TOUCH GRASS");
-            yield return new Wait(5f);
-        }
-
-        #endregion
-
-        #region Check for furry games
-
-        // amorous
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(778700)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            ownsAmorous = true;
-            SpawnAd("i see youre a furry...");
-            yield return new Wait(4f);
-            SpawnAd("so how was uhhh.... ");
-            yield return new Wait(5f);
-            SpawnAd("....... ");
-            yield return new Wait(6f);
-            SpawnAd("how was amorous");
-            yield return new Wait(2f);
-            SpawnAd("or how about the feeling of grass");
-            yield return new Wait(4f);
-            SpawnAd("please experience it");
-            yield return new Wait(8f);
-        }
-
-        // changed
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(814540)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            if (ownsAmorous)
-            {
-                SpawnAd("so you own amorous, and changed.");
-                yield return new Wait(4f);
-                SpawnAd("im just gonna take the liberty of opening a few tabs in your browser real quick");
-                // use DuckDuckGo's bangs because i dont want to paste an amazon URL that could doxx me lol
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+grass");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+grass");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+plant");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+succulent+plant");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=how+to+stop+being+a+degenerate"); // use ddg because i dont want google fucking with peoples shit thinking they searched it
-                yield return new Wait(6f);
-                SpawnAd("please take this advice to heart");
-                yield return new Wait(2.5f);
-                SpawnAd("owning a porn game and a fetish game\nfatherless behavior");
-                yield return new Wait(2.5f);
-            }
-            SpawnAd("let me guess, 'changed isnt a fetish game, it actually has good gameplay and an engaging story'");
-            yield return new Wait(6.5f);
-            SpawnAd("uh huh, yeah, sure, kid, tell it to the judge");
-            yield return new Wait(2.5f);
-            // Open steam overlay to judge image
-            SteamFriends.ActivateGameOverlayToWebPage("https://www.inquirer.com/resizer/UILgwAwPDUWh5sfpw4oNaWL37cc=/1400x932/smart/arc-anglerfish-arc2-prod-pmn.s3.amazonaws.com/public/K4OJHGLTGJHGFJQYDNAUFESFWQ.jpg",
-                EActivateGameOverlayToWebPageMode.k_EActivateGameOverlayToWebPageMode_Default);
-
-            yield return new Wait(10f);
-        }
-
-        // furry shades of gay
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(1399930)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            if (ownsAmorous)
-            {
-                SpawnAd("so you own 2 furry porn games?");
-                yield return new Wait(4f);
-                SpawnAd("i implore you to touch grass");
-                // use DuckDuckGo's bangs because i dont want to paste an amazon URL that could doxx me lol
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+grass");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+grass");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+indoor+plant");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=!amazon+succulent+plant");
-                Application.OpenURL("https://duckduckgo.com/?t=ffab&q=how+to+stop+being+a+degenerate"); // use ddg because i dont want google fucking with peoples shit thinking they searched it
-                yield return new Wait(6f);
-                SpawnAd("please take this advice to heart");
-                yield return new Wait(2.5f);
-            }
-            SpawnAd("mf owns furry shades of gay");
-            yield return new Wait(6.5f);
-            SpawnAd("let me take a wild guess, your friend bought it for you? as a <i>'joke'</i>");
-            yield return new Wait(2.5f);
-            SpawnAd("Cap.");
-            yield return new Wait(10f);
-        }
-
-        #endregion
-
-        #region Check for other games
-
-        // golira tag
-        if (SteamUser.UserHasLicenseForApp(userID, new AppId_t(1533390)) == EUserHasLicenseForAppResult.k_EUserHasLicenseResultHasLicense)
-        {
-            SpawnAd("yo gorilla tag user");
-            yield return new Wait(3f);
-            SpawnAd("ive got a request");
-            yield return new Wait(3f);
-            SpawnAd("from the heart");
-            yield return new Wait(4f);
-            SpawnAd("can you like");
-            yield return new Wait(5f);
-            SpawnAd("not shout slurs in the ingame voice chat");
-            yield return new Wait(6f);
-            SpawnAd("please");
-            yield return new Wait(3f);
-            SpawnAd("thanks");
-            yield return new Wait(8f);
-        }
-
-        #endregion
-
-        if (!wasCaught)
-        {
-            SpawnAd("I put a bunch of checks for porn games and stuff in this, and you managed to dodge them all.");
-            yield return new Wait(8f);
-            SpawnAd("Frankly, I'm surprised. Unless you're on a quest 2, in which case come back when you're 13, but im surprised otherwise.");
-        }
-        else SpawnAd("alright im done");
-        EffectHandler.allEffects.Remove(Name); // This effect is annoying if ran multiple times.
-
+        SpawnAd("alright im done");
         ForceEnd();
     }
 
@@ -517,8 +313,8 @@ internal class CaughtIn4K : EffectBase
     {
         wasCaught = __caught_pleaseignore;
         // this literally just creates an ad and puts it in front of the player. code is not pretty sometimes.
-        GameObject ad = ModThatIsNotMod.RandomShit.AdManager.CreateNewAd(text);
-        Transform phead = GlobalVariables.Player_PhysBody.rbHead.transform;
+        GameObject ad = BoneLib.RandomShit.PopupBoxManager.CreateNewPopupBox(text);
+        Transform phead = GlobalVariables.Player_PhysRig.torso.rbHead.transform;
         ad.transform.position = phead.position + phead.forward.normalized;
         ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
 

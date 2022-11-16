@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using UnityEngine;
-using ModThatIsNotMod.Nullables;
 
 namespace BLChaos.Effects;
 
@@ -17,8 +16,8 @@ internal class FartWithReverb : EffectBase
     private static AudioClip clip;
     public override void OnEffectStart()
     {
-        clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/fart with extra reverb.mp3");
-        target = GlobalVariables.Player_PhysBody.transform;
+        clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset("assets/sounds/fart with extra reverb.mp3").Cast<AudioClip>();
+        target = GlobalVariables.Player_PhysRig.transform;
 
         List<Rigidbody> rbs = GameObject.FindObjectsOfType<Rigidbody>().ToList();
         // match CPU count, not thread count, and higher numbers lag spike the game longer

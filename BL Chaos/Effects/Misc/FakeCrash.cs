@@ -13,9 +13,9 @@ internal class FakeCrash : EffectBase
     public override void OnEffectStart()
     {
         // Load sound asset and play it
-        if (soundPlayer == null) soundPlayer = GlobalVariables.Player_PhysBody.rbHead.gameObject.AddComponent<AudioSource>();
+        if (soundPlayer == null) soundPlayer = GlobalVariables.Player_PhysRig.torso.rbHead.gameObject.AddComponent<AudioSource>();
 
-        if (soundPlayer.clip == null) soundPlayer.clip = GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/windowsbackground.wav");
+        if (soundPlayer.clip == null) soundPlayer.clip = GlobalVariables.EffectResources.LoadAsset("assets/sounds/windowsbackground.wav").Cast<AudioClip>();
 
         sleepLength = UnityEngine.Random.RandomRange(4, 8) * 1000;
         SendNetworkData(BitConverter.GetBytes(sleepLength));

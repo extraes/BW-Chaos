@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
-using ModThatIsNotMod;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
@@ -34,7 +33,7 @@ internal class DistantSound : EffectBase
         {
             Vector3 playPosOffset = Random.onUnitSphere * (minPlayPos + Random.value * variationPlayPos);
             AudioClip clip = clips.Random();
-            AudioSource.PlayClipAtPoint(clip, GlobalVariables.Player_PhysBody.rbHead.transform.position + playPosOffset, volume);
+            AudioSource.PlayClipAtPoint(clip, GlobalVariables.Player_PhysRig.torso.rbHead.transform.position + playPosOffset, volume);
 
             yield return new WaitForSeconds(clip.length);
             yield return new WaitForSeconds(minWaitTime + Random.value * variationWaitTime);

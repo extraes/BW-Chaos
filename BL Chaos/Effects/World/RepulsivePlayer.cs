@@ -58,7 +58,7 @@ public class RepulseBehaviour : MonoBehaviour
     private object CToken;
     public void OnEnable()
     {
-        target = GlobalVariables.Player_PhysBody.transform;
+        target = GlobalVariables.Player_PhysRig.transform;
         rb = GetComponent<Rigidbody>();
         CToken = MelonCoroutines.Start(CheckDist());
     }

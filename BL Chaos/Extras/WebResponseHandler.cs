@@ -1,6 +1,8 @@
 ﻿using BLChaos.Effects;
-using ModThatIsNotMod.Nullables;
-using StressLevelZero.Pool;
+using BoneLib.Nullables;
+using Jevil;
+using Jevil.Spawning;
+using SLZ.Marrow.Pool;
 using System;
 using System.Linq;
 using System.Reflection;
@@ -20,7 +22,7 @@ internal static class WebResponseHandler
     public static void Callback()
     {
         if (WebResponseHandler.data == "none" || WebResponseHandler.data == "") return; // poor/unpopular bitch lol
-        if (GlobalVariables.Player_PhysBody == null) return; // dont do shit if the game's loading
+        if (GlobalVariables.Player_PhysRig.INOC()) return; // dont do shit if the game's loading
         Chaos.Log("Wow! You must be popular or something! The creator's taken notice of you playing their mod!");
 
         string[] args = Utilities.Argsify(WebResponseHandler.data, ':');
@@ -44,16 +46,15 @@ internal static class WebResponseHandler
                 break;
             case "spawnfrompool":
                 Chaos.Log("Trying to spawn an object from a pool called " + data);
-                Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name.ToLower() == data.ToLower());
-                if (pool == null)
+                if (!Enum.TryParse(data, out JevilBarcode barcode))
                 {
-                    Chaos.Warn("admin sent incorrect pool name " + data);
+                    Chaos.Warn("admin sent incorrect pool barcode " + data);
                     return;
                 }
-                GameObject poolee = pool.Spawn(Vector3.one, Quaternion.identity, null, true);
-                Utilities.MoveAndFacePlayer(poolee);
+                AssetPool pool = Barcodes.ToAssetPool(barcode);
+                pool.Spawn(GlobalVariables.inFrontOfPlayer, GlobalVariables.lookingAtPlayer, null, true);
 #if DEBUG
-                Chaos.Log($"Spawned {poolee.name} at {poolee.transform.position}, active = {poolee.activeInHierarchy}");
+                Chaos.Log($"Spawned {barcode} at {GlobalVariables.inFrontOfPlayer.ToString()}");
 #endif
                 break;
             case "runeffect":

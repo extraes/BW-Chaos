@@ -8,51 +8,34 @@ namespace BLChaos.Effects;
 internal class FogRoll : EffectBase
 {
     public FogRoll() : base("Fog Roll", 60) { }
+    [RangePreference(0.5f, 5, 0.5f)] static float interval = 2;
 
     public override void OnEffectStart()
     {
-        UnhollowerBaseLib.Il2CppArrayBase<ValveFog> fogs = GameObject.FindObjectsOfType<ValveFog>();
-        foreach (ValveFog fog in fogs)
-        {
-            MelonCoroutines.Start(ManipFog(fog));
-        }
-        //if (fogs.Length == 0)
+        if (isNetworked) return;
+
+        MelonCoroutines.Start(CoRun(interval));
+        SendNetworkData(BitConverter.GetBytes(interval));
     }
-    private IEnumerator ManipFog(ValveFog fog)
+
+    public override void HandleNetworkMessage(byte[] data)
+    {
+        float netInterval = BitConverter.ToSingle(data, 0);
+        MelonCoroutines.Start(CoRun(netInterval));
+    }
+
+    private IEnumerator CoRun(float interval)
     {
         yield return null;
-#if DEBUG
-        Log("Manipulating fog - " + fog.name);
-#endif
-        float s = fog.startDistance;
-        float e = fog.endDistance;
-        float t = fog.heightFogThickness;
+        VolumetricRendering volRen = GameObject.FindObjectOfType<VolumetricRendering>();
+        bool toggle = false;
 
-        fog.startDistance = 0.1f;
-        fog.endDistance = 10f;
-        fog.UpdateConstants();
-
-        const float cycleLength = 2;
-        float startTime = 0;
-        (float, float) minmax = (0.1f, 20f);
-        (float, float) mmDelta = (0.01f, 10f);
-        while (Active)
+        while(Active)
         {
-            startTime += Time.deltaTime;
+            if (toggle = !toggle) volRen.enable();
+            else volRen.disable();
 
-            float ct = Math.Abs((startTime % cycleLength) - (cycleLength / 2)) * 2;
-            float cur = minmax.Interpolate(ct);
-            float delta = mmDelta.Interpolate(ct);
-            fog.startDistance = cur;
-            fog.endDistance = delta;
-            //fog.startDistance = delta;
-            fog.UpdateConstants();
-
-            yield return null;
+            yield return new WaitForSeconds(interval);
         }
-
-        fog.startDistance = s;
-        fog.endDistance = e;
-        fog.UpdateConstants();
     }
 }

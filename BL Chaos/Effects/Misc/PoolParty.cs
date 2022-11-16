@@ -1,6 +1,11 @@
-﻿using ModThatIsNotMod.Nullables;
-using StressLevelZero.Pool;
+﻿
+using BoneLib.Nullables;
+using Cysharp.Threading.Tasks;
+using Jevil;
+using Jevil.Spawning;
+using SLZ.Marrow.Pool;
 using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using UnityEngine;
@@ -10,41 +15,37 @@ namespace BLChaos.Effects;
 internal class PoolParty : EffectBase
 {
     public PoolParty() : base("Pool Party", 60) { }
-    static Pool[] pools;
-
+    static IEnumerable<AssetPool> pools;
 
     [AutoCoroutine]
     public IEnumerator CoRun()
     {
         yield return null;
+
+        if (pools == null || pools.First() == null) pools = Instances.AllPools;
+
         if (isNetworked) yield break;
-
-        if (pools == null || pools[0] == null) pools = GameObject.FindObjectsOfType<Pool>().ToArray();
-
         while (Active)
         {
-            Pool pool = pools.Random();
-            GameObject spawned = pool.Spawn(Vector3.zero, Quaternion.identity, null, false);
-            Utilities.MoveAndFacePlayer(spawned);
-            SendNetworkData(spawned.transform.SerializePosRot(), Encoding.ASCII.GetBytes(pool.name));
-            spawned.SetActive(true);
+            AssetPool pool = pools.Random();
+            pool.Spawn(GlobalVariables.inFrontOfPlayer, GlobalVariables.lookingAtPlayer, null, true);
+            SendNetworkData(Utilities.SerializeInFrontFacingPlayer(), Encoding.ASCII.GetBytes(pool._crate.Barcode.ID));
             yield return new WaitForSeconds(5);
         }
     }
 
     public override void HandleNetworkMessage(byte[][] data)
     {
-        string poolName = Encoding.ASCII.GetString(data[1]);
+        string poolBarcode = Encoding.ASCII.GetString(data[1]);
 
-        Pool pool = pools.FirstOrDefault(p => p.name == poolName);
+        AssetPool pool = Barcodes.ToAssetPool(poolBarcode);
         if (pool == null)
         {
-            Chaos.Warn("Pool not found in client - " + poolName);
+            Chaos.Warn("Pool not found in client - ID: " + poolBarcode);
             return;
         }
 
-        Poolee poolee = pool.InstantiatePoolee();
-        poolee.gameObject.SetActive(true);
-        poolee.transform.DeserializePosRot(data[0]);
+        (Vector3 pos, Quaternion rot) = Utilities.DebytePosRot(data[0]);
+        pool.Spawn(pos, rot, null, true);
     }
 }

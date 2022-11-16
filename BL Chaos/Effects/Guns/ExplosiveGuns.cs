@@ -1,5 +1,5 @@
-﻿using MelonLoader;
-using ModThatIsNotMod;
+﻿using BoneLib;
+using MelonLoader;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +16,7 @@ internal class ExplosiveGuns : EffectBase
 
     public override void OnEffectEnd() => Hooking.OnPostFireGun -= Hooking_OnPostFireGun;
 
-    private void Hooking_OnPostFireGun(StressLevelZero.Props.Weapons.Gun obj)
+    private void Hooking_OnPostFireGun(SLZ.Props.Weapons.Gun obj)
     {
         Vector3 origin = obj.firePointTransform.position;
 

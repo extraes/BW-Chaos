@@ -1,15 +1,15 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
-using ModThatIsNotMod;
+using BoneLib;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
 using UnityEngineInternal;
-using StressLevelZero.Combat;
-using StressLevelZero.Pool;
-using StressLevelZero.Props.Weapons;
-using ModThatIsNotMod.Nullables;
+using SLZ.Combat;
+using SLZ.Props.Weapons;
+using SLZ.Marrow.Pool;
+using Jevil;
 
 namespace BLChaos.Effects;
 
@@ -33,10 +33,10 @@ internal class DupeGun : EffectBase
     {
         if (!Physics.Raycast(gun.firePointTransform.position, gun.firePointTransform.forward, out RaycastHit hitInfo, 100)) return;
 
-        Poolee poolee = hitInfo.collider.GetComponentInParent<Poolee>();
+        AssetPoolee poolee = hitInfo.collider.GetComponentInParent<AssetPoolee>();
         if (poolee == null) return;
 
         for (int i = 0; i < dupeAmount; i++)
-            poolee.pool.Spawn(hitInfo.point, Quaternion.identity, null, true);
+            poolee.spawnableCrate.Spawn(hitInfo.point, Quaternion.identity);
     }
 }

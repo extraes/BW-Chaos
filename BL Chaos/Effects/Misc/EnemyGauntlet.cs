@@ -1,8 +1,10 @@
-﻿using ModThatIsNotMod.Nullables;
-using StressLevelZero.Pool;
+﻿using SLZ.Marrow.Pool;
+using BoneLib.Nullables;
 using System.Collections;
 using System.Linq;
 using UnityEngine;
+using Jevil;
+using Jevil.Spawning;
 
 // maybe try adding shit from ultrakill?
 namespace BLChaos.Effects;
@@ -15,7 +17,7 @@ internal class EnemyGauntlet : EffectBase
     private static AudioClip clip;
     public override void OnEffectStart()
     {
-        clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/thecybergrind.mp3");
+        clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset("assets/sounds/thecybergrind.mp3").Cast<AudioClip>();
 
         GlobalVariables.MusicPlayer.Play(clip, GlobalVariables.MusicMixer, volume, null, null, null);
     }
@@ -30,24 +32,24 @@ internal class EnemyGauntlet : EffectBase
     {
         if (isNetworked) yield break;
         yield return null;
-        int entangleChange = Prefs.SyncEffects ? 2 : 1;
-        Pool nbPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
-        Pool eePool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Ford EarlyExit");
-        Pool crabPool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
+        int entangleChange = Prefs.syncEffects ? 2 : 1;
+        AssetPool nbPool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
+        AssetPool eePool = Barcodes.ToAssetPool(JevilBarcode.EARLY_EXIT_ZOMBIE);
+        AssetPool crabPool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
 
 
         // spawn nullbodies
         for (int i = 0; i < 4; i++)
         {
             if (i % entangleChange != 0) continue;
-            Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
-            float theta = (i / 8f) * 360;
-            float x = Mathf.Cos(theta * Const.FPI / 180);
-            float y = Mathf.Sin(theta * Const.FPI / 180);
+            Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
+            float theta = (i / 8f) * Const.FPI * 2; // no way its ftau
+            float x = Mathf.Cos(theta);
+            float y = Mathf.Sin(theta);
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            GameObject spawnedNB = nbPool.Spawn(spawnPos, spawnRot, null, true);
+            nbPool.Spawn(spawnPos, spawnRot, null, true);
             yield return new WaitForSeconds(5f);
         }
 
@@ -57,14 +59,14 @@ internal class EnemyGauntlet : EffectBase
         for (int i = 0; i < 4; i++)
         {
             if (i % entangleChange != 0) continue;
-            Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
+            Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
             float theta = (i / 8f) * 360;
             float x = Mathf.Cos(theta * Const.FPI / 180);
             float y = Mathf.Sin(theta * Const.FPI / 180);
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            GameObject spawnedCrab = crabPool.Spawn(spawnPos, spawnRot, null, true);
+            crabPool.Spawn(spawnPos, spawnRot, null, true);
             yield return new WaitForSeconds(5f);
         }
 
@@ -74,14 +76,14 @@ internal class EnemyGauntlet : EffectBase
         for (int i = 0; i < 4; i++)
         {
             if (i % entangleChange != 0) continue;
-            Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
+            Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
             float theta = (i / 8f) * 360;
             float x = Mathf.Cos(theta * Const.FPI / 180);
             float y = Mathf.Sin(theta * Const.FPI / 180);
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            GameObject spawnedEE = eePool.Spawn(spawnPos, spawnRot, null, true); //todo: change to earlyexit that can throw stuff
+            eePool.Spawn(spawnPos, spawnRot, null, true); //todo: change to earlyexit that can throw stuff
             //spawnedEE.GetComponent<AIBrain>().behaviour.enableThrowAttack = true;
             yield return new WaitForSeconds(5f);
         }

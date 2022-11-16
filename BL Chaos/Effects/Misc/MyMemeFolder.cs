@@ -27,7 +27,7 @@ internal class MyMemeFolder : EffectBase
             return;
         }
 
-        VideoClip vid = GlobalVariables.EffectResources.LoadAsset<VideoClip>(vidPath);
+        VideoClip vid = GlobalVariables.EffectResources.LoadAsset(vidPath).Cast<VideoClip>();
 #if DEBUG
         if (vid == null)
         {
@@ -61,7 +61,7 @@ internal class MyMemeFolder : EffectBase
         sign.transform.rotation = Quaternion.Euler(sign.transform.rotation.eulerAngles + new Vector3(0, 0, 180));
         SendNetworkData(sign.transform.SerializePosRot(), Encoding.ASCII.GetBytes(vidPath));
 
-        VideoClip vid = GlobalVariables.EffectResources.LoadAsset<VideoClip>(vidPath);
+        VideoClip vid = GlobalVariables.EffectResources.LoadAsset(vidPath).Cast<VideoClip>();
 
         MeshRenderer rend = sign.GetComponentInChildren<MeshRenderer>();
         rend.material = CreateRTex(vid, out VideoPlayer plyr);
@@ -90,9 +90,9 @@ internal class MyMemeFolder : EffectBase
 
     private Material CreateRTex(VideoClip clip, out VideoPlayer plyr)
     {
-        Material mat = new Material(Shader.Find("Valve/vr_standard"));
+        Material mat = new Material(Shader.Find(Const.URP_LIT_NAME));
         RenderTexture tex = new RenderTexture(256, 256, 24);
-        mat.mainTexture = tex;
+        mat.SetTexture(Const.URP_MAINTEX_NAME, tex);
 
         VideoPlayer player = vidParent.AddComponent<VideoPlayer>();
         player.clip = clip;

@@ -1,4 +1,4 @@
-﻿using ModThatIsNotMod;
+﻿using BoneLib;
 using System;
 using System.Net.Http;
 using System.Text;
@@ -9,24 +9,25 @@ namespace BLChaos;
 internal static class Stats
 {
 #if DEBUG
-    private const string modName = "ChaosTesting";
+    private const string modName = "BLChaosTesting";
 #else
-    private const string modName = "Chaos";
+    private const string modName = "BLChaos";
 #endif
     private const string versionURL = "https://stats.extraes.xyz/increment?mod=" + modName + "&key=" + BuildInfo.Version;
     private const string statBase = "https://stats.extraes.xyz/increment?mod=" + modName + "_Effects&key=";
+    private const string prefsKey = "Pinged" + modName + "V" + BuildInfo.Version;
     private static readonly HttpClient client = new();
 
     public static void PingVersion()
     {
         if (!Player.handsExist) return;
 
-        if (!PlayerPrefs.HasKey("PingedChaos_" + BuildInfo.Version))
+        if (!PlayerPrefs.HasKey(prefsKey))
         {
             try
             {
                 client.GetAsync(new Uri(versionURL));
-                PlayerPrefs.SetInt("PingedChaos_" + BuildInfo.Version, 1);
+                PlayerPrefs.SetInt(prefsKey, 1);
             }
 #if !DEBUG
             catch { }

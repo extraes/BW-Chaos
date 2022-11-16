@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
-using ModThatIsNotMod;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
@@ -39,7 +38,7 @@ internal class InTheHeadlights : EffectBase
     public IEnumerator CoRun()
     {
         WaitForFixedUpdate wffu = new WaitForFixedUpdate();
-        Transform head = GlobalVariables.Player_PhysBody.rbHead.transform;
+        Transform head = GlobalVariables.Player_PhysRig.torso.rbHead.transform;
 
         yield return null;
 

@@ -1,5 +1,6 @@
-﻿using ModThatIsNotMod;
-using StressLevelZero.Props.Weapons;
+﻿using BoneLib;
+using Jevil;
+using SLZ.Props.Weapons;
 
 namespace BLChaos.Effects;
 
@@ -20,7 +21,7 @@ internal class BarrySteakfries : EffectBase
 
     private void OnFire(Gun gun)
     {
-        GlobalVariables.Player_PhysBody.AddVelocityChange(-gun.transform.forward * 5 * forceMultiplier);
+        GlobalVariables.Player_PhysRig.AddVelocityChange(5 * forceMultiplier * -gun.transform.forward);
     }
 
 }

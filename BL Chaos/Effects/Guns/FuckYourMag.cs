@@ -1,5 +1,6 @@
-﻿using ModThatIsNotMod;
-using StressLevelZero.Props.Weapons;
+﻿
+using BoneLib;
+using SLZ.Props.Weapons;
 using System.Collections;
 using UnityEngine;
 
@@ -19,7 +20,7 @@ internal class FuckYourMag : EffectBase
         {
             Gun gun = Player.GetGunInHand(Utilities.GetRandomPlayerHand());
 
-            gun?.magazineSocket?.MagazineRelease();
+            gun?.EjectCartridge(); //todo: test (old code = .magazineSocket?.MagazineRelease(); )
 
             yield return new WaitForSecondsRealtime(UnityEngine.Random.RandomRange(minWaitTime, maxWaitTime));
         }

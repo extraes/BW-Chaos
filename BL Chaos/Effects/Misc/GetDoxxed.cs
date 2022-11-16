@@ -14,7 +14,7 @@ internal class GetDoxxed : EffectBase
     private float y = 0;
     public override void OnEffectStart()
     {
-        clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset<AudioClip>("assets/sounds/vineboom.mp3");
+        clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset("assets/sounds/vineboom.mp3").Cast<AudioClip>();
 
         dist = 50;
 
@@ -27,15 +27,15 @@ internal class GetDoxxed : EffectBase
         };
         string ip = string.Join(".", ipParts);
         SendNetworkData(ip);
-        headT = GlobalVariables.Player_PhysBody.rbHead.transform;
+        headT = GlobalVariables.Player_PhysRig.torso.rbHead.transform;
         sign = Utilities.SpawnAd(string.Join(".", ipParts));
 
         sign.transform.position = headT.position + Vector3.ProjectOnPlane(headT.forward, Vector3.up).normalized * 50;
 
         sign.GetComponent<Rigidbody>().detectCollisions = false;
-        GameObject.Destroy(sign.GetComponent<StressLevelZero.Props.ObjectDestructable>());
-        GameObject.Destroy(sign.GetComponent<StressLevelZero.SFX.ImpactSFX>());
-        GameObject.Destroy(sign.GetComponent<StressLevelZero.Interaction.InteractableHost>());
+        GameObject.Destroy(sign.GetComponent<SLZ.Props.ObjectDestructable>());
+        GameObject.Destroy(sign.GetComponent<SLZ.SFX.ImpactSFX>());
+        GameObject.Destroy(sign.GetComponent<SLZ.Interaction.InteractableHost>());
     }
 
     private bool wasFarLastFrame; // BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE BAD CODE 

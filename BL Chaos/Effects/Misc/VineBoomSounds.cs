@@ -1,5 +1,5 @@
 ﻿using Il2CppSystem;
-using StressLevelZero.SFX;
+using SLZ.SFX;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -15,7 +15,7 @@ internal class VineBoomSounds : EffectBase
 
     private void Init()
     {
-        vineBoomSound = GlobalVariables.EffectResources.LoadAsset<AudioClip>(GlobalVariables.ResourcePaths.FirstOrDefault(p => p.ToLower().Contains("vineboom")));
+        vineBoomSound = GlobalVariables.EffectResources.LoadAsset(GlobalVariables.ResourcePaths.FirstOrDefault(p => p.ToLower().Contains("vineboom"))).Cast<AudioClip>();
         vineBoomSound.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
 #if DEBUG

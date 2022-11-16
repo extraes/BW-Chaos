@@ -1,4 +1,4 @@
-﻿using ModThatIsNotMod;
+﻿using BoneLib;
 
 namespace BLChaos.Effects;
 
@@ -10,7 +10,7 @@ class GunSlowdown : EffectBase
     public override void OnEffectStart() => Hooking.OnPostFireGun += OnGunFired;
     public override void OnEffectEnd() => Hooking.OnPostFireGun -= OnGunFired;
 
-    public void OnGunFired(StressLevelZero.Props.Weapons.Gun gun)
+    public void OnGunFired(SLZ.Props.Weapons.Gun gun)
     {
         if (gun == Player.GetGunInHand(Player.rightHand) || gun == Player.GetGunInHand(Player.leftHand))
         {

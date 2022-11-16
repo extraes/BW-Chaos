@@ -1,4 +1,4 @@
-﻿using StressLevelZero.AI;
+﻿using SLZ.AI;
 using UnityEngine;
 
 namespace BLChaos.Effects;

@@ -1,6 +1,7 @@
 ﻿using HarmonyLib;
-using StressLevelZero.Rig;
-using StressLevelZero.VRMK;
+using Jevil;
+using SLZ.Rig;
+using SLZ.VRMK;
 using System;
 using UnityEngine;
 
@@ -36,11 +37,11 @@ internal class HighJump : EffectBase
         Vector3 verticalJump = Vector3.up * HighJump.upJumpMult;
 
         // Apply jump velocity to the player
-        rig.physBody.AddVelocityChange(verticalJump + forwardJump);
+        rig.AddVelocityChange(verticalJump + forwardJump);
     }
 
 
-    [HarmonyPatch(typeof(ControllerRig), "Jump")]
+    [HarmonyPatch(typeof(ControllerRig), nameof(ControllerRig.Jump))]
     public class ControllerRigJumpPatch
     {
         public static void Postfix()

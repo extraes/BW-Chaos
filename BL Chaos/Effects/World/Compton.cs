@@ -1,5 +1,5 @@
 ﻿using Il2CppSystem;
-using StressLevelZero.SFX;
+using SLZ.SFX;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;

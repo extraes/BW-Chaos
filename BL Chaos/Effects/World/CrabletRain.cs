@@ -1,9 +1,12 @@
-﻿using ModThatIsNotMod;
-using ModThatIsNotMod.Nullables;
+﻿using BoneLib;
+using BoneLib.Nullables;
+using Jevil;
+using Jevil.Spawning;
 using PuppetMasta;
-using StressLevelZero.Pool;
+using SLZ.Marrow.Pool;
 using System.Collections;
 using System.Linq;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BLChaos.Effects;
@@ -18,7 +21,7 @@ internal class CrabletRain : EffectBase
     {
         yield return null;
 
-        Pool pool = GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Crablet");
+        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
 
         yield return new WaitForSeconds(maxWaitTime * Random.value);
         Vector3 spawnPos =
@@ -26,8 +29,10 @@ internal class CrabletRain : EffectBase
             new Vector3((Random.value - 0.5f) * 5, 10, (Random.value - 0.5f) * 5);
 
         
-        GameObject c = pool.Spawn(spawnPos, Quaternion.identity, null, true);
-        PuppetMaster poppet = c.GetComponentInChildren<PuppetMaster>();
+        Task<AssetPoolee> task = pool.Spawn(spawnPos, Quaternion.identity, null, true).ToTask();
+        while (!task.IsCompleted) yield return null;
+
+        PuppetMaster poppet = task.Result.GetComponentInChildren<PuppetMaster>();
         poppet.StartCoroutine(poppet.DisabledToActive());
     }
 }

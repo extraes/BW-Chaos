@@ -1,6 +1,9 @@
-﻿using ModThatIsNotMod.Nullables;
+﻿
+using BoneLib.Nullables;
+using Jevil;
+using Jevil.Spawning;
 using PuppetMasta;
-using StressLevelZero.Pool;
+using SLZ.Marrow.Pool;
 using System.Linq;
 using UnityEngine;
 
@@ -9,14 +12,13 @@ namespace BLChaos.Effects;
 internal class GetJumped : EffectBase
 {
     public GetJumped() : base("Get Jumped") { }
-    Pool pool;
 
-    public override void OnEffectStart()
+    public override async void OnEffectStart()
     {
-        pool = pool != null ? pool : GameObject.FindObjectsOfType<Pool>().FirstOrDefault(p => p.name == "pool - Null Body");
+        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
         if (isNetworked) return;
         if (pool == null) return;
-        Vector3 playerPos = GlobalVariables.Player_PhysBody.feet.transform.position;
+        Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
 
         for (int i = 0; i < 8; i++)
         {
@@ -26,7 +28,7 @@ internal class GetJumped : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            GameObject spawnedNB = pool.Spawn(spawnPos, spawnRot, null, true);
+            AssetPoolee spawnedNB = await pool.Spawn(spawnPos, spawnRot, null, true).ToTask();
             PuppetMaster pm = spawnedNB.GetComponentInChildren<PuppetMaster>();
             spawnedNB.gameObject.SetActive(true);
             pm.StartCoroutine(pm.DisabledToActive());
@@ -34,14 +36,13 @@ internal class GetJumped : EffectBase
         }
     }
 
-    public override void HandleNetworkMessage(byte[] data)
+    public override async void HandleNetworkMessage(byte[] data)
     {
-        if (pool == null) return;
+        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
 
-        GameObject spawnedNB = pool.Spawn(Vector3.zero, Quaternion.identity, null, false);
+        (Vector3 pos, Quaternion rot) = Utilities.DebytePosRot(data);
+        AssetPoolee spawnedNB = await pool.Spawn(pos, rot, null, true).ToTask();
         PuppetMaster pm = spawnedNB.GetComponentInChildren<PuppetMaster>();
-        spawnedNB.transform.DeserializePosRot(data);
-        spawnedNB.SetActive(true);
         pm.StartCoroutine(pm.DisabledToActive());
     }
 }

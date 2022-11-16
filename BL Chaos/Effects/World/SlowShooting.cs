@@ -1,6 +1,6 @@
-﻿using MelonLoader;
-using ModThatIsNotMod;
-using StressLevelZero.Props.Weapons;
+﻿using BoneLib;
+using MelonLoader;
+using SLZ.Props.Weapons;
 using System.Collections;
 using UnityEngine;
 

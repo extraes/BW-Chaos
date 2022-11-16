@@ -1,10 +1,11 @@
 ﻿using BLChaos.Effects;
-using StressLevelZero.Rig;
-using StressLevelZero.VRMK;
+using SLZ.VRMK;
+using SLZ.Rig;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Audio;
 using WatsonWebsocket;
+using SLZ.Utilities;
 
 namespace BLChaos;
 
@@ -22,7 +23,7 @@ internal static class GlobalVariables
     public static BodyVitals Player_BodyVitals;
     public static RigManager Player_RigManager;
     public static Player_Health Player_Health;
-    public static PhysBody Player_PhysBody;
+    public static PhysicsRig Player_PhysRig;
 
     public static Camera SpectatorCam;
     public static Camera[] Cameras;
@@ -34,4 +35,7 @@ internal static class GlobalVariables
 
     public static AssetBundle EffectResources;
     public static IReadOnlyList<string> ResourcePaths;
+
+    public static Vector3 inFrontOfPlayer; // 2m in front of player
+    public static Quaternion lookingAtPlayer;
 }

@@ -1,12 +1,13 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
-using ModThatIsNotMod;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
 using UnityEngine.SceneManagement;
-using StressLevelZero.Utilities;
+using SLZ.Utilities;
+using Utilities;
+using SLZ.Marrow.SceneStreaming;
 
 namespace BLChaos.Effects;
 
@@ -29,7 +30,7 @@ internal class ReloadLevel : EffectBase
             Utilities.SpawnAd(300 - (30 * passed30s) + " seconds left...");
         }
 
-        if (currTime > 5 * 60) BoneworksSceneManager.ReloadScene();
+        if (currTime > 5 * 60) SceneStreamer.Reload();
         lastTime1FrameAgo = currTime;
     }
 }

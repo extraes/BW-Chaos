@@ -1,5 +1,5 @@
+using Jevil.IMGUI;
 using MelonLoader;
-using ModThatIsNotMod.BoneMenu;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,12 +38,12 @@ public class EffectBase
     public string Name { get; }
     public int Duration { get; }
     public EffectTypes Types { get; }
-    private static readonly Dictionary<string, MenuCategory> elements = new Dictionary<string, MenuCategory>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
-    public MenuCategory MenuElement
-    {
-        get { return elements[GetType().Name]; }
-        set { elements[GetType().Name] = value; }
-    }
+    //private static readonly Dictionary<string, MenuCategory> elements = new Dictionary<string, MenuCategory>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
+    //public MenuCategory MenuElement
+    //{
+    //    get { return elements[GetType().Name]; }
+    //    set { elements[GetType().Name] = value; }
+    //}
 
     public bool Active { get; private set; }
     public float StartTime { get; private set; }
@@ -138,17 +138,17 @@ public class EffectBase
             if (type == typeof(string))
             {
                 MelonPreferences_Entry<string> entry = SetEntry(field, out string toSet, ep.desc);
-                MenuElement.CreateStringElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
+                //MenuElement.CreateStringElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
             }
             else if (type == typeof(bool))
             {
                 MelonPreferences_Entry<bool> entry = SetEntry(field, out bool toSet, ep.desc);
-                MenuElement.CreateBoolElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
+                //MenuElement.CreateBoolElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
             }
             else if (type == typeof(Color))
             {
                 MelonPreferences_Entry<Color> entry = SetEntry(field, out Color toSet, ep.desc);
-                MenuElement.CreateColorElement(readableName, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
+                //MenuElement.CreateColorElement(readableName, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
             }
             else if (type.IsEnum)
             {
@@ -168,7 +168,7 @@ public class EffectBase
                     Chaos.Warn("Replacing it with its default value of " + dv);
                     entry.Value = dv.ToString();
                 }
-                MenuElement.CreateEnumElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val.ToString(); chaosConfigCategory.SaveToFile(false); });
+                //MenuElement.CreateEnumElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val.ToString(); chaosConfigCategory.SaveToFile(false); });
             }
 #if DEBUG
             else
@@ -205,12 +205,12 @@ public class EffectBase
             if (field.FieldType == typeof(int))
             {
                 MelonPreferences_Entry<int> entry = SetEntry(field, out int toSet, $"{rp.low} to {rp.high}");
-                MenuElement.CreateIntElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, (int)rp.inc, (int)rp.low, (int)rp.high);
+                //MenuElement.CreateIntElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, (int)rp.inc, (int)rp.low, (int)rp.high);
             }
             else if (field.FieldType == typeof(float))
             {
                 MelonPreferences_Entry<float> entry = SetEntry(field, out float toSet, $"{rp.low} to {rp.high}");
-                MenuElement.CreateFloatElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, rp.inc, rp.low, rp.high);
+                //MenuElement.CreateFloatElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, rp.inc, rp.low, rp.high);
             }
 #if DEBUG
             else
@@ -323,6 +323,9 @@ public class EffectBase
 
     private IEnumerator CoRun()
     {
+#if DEBUG
+        GUIToken token = DebugDraw.TrackVariable("ACTIVE:" + Name, GUIPosition.TOP_RIGHT, () => (StartTime + Duration) - Time.realtimeSinceStartup);
+#endif
         if (autoCRMethod != null) autoCRToken = MelonCoroutines.Start((IEnumerator)autoCRMethod.Invoke(this, null));
         _dataRecieved += FilterNetworkData;
         OnEffectStart();
@@ -331,8 +334,13 @@ public class EffectBase
         StartTime = Time.realtimeSinceStartup;
         GlobalVariables.ActiveEffects.Add(this);
 
-        yield return new WaitForSecondsRealtime(Duration);
-
+        Log($"Waiting {Duration} SCALED seconds before ending");
+        while (Time.realtimeSinceStartup - StartTime < Duration)
+        {
+            yield return null;
+            Log($"RTSS={Time.realtimeSinceStartup:F2};Dur={Duration};RUNTIME={Time.realtimeSinceStartup - StartTime:F2};CONT?={Time.realtimeSinceStartup - StartTime < Duration}");
+        }
+        Log($"Done waiting {Duration} SCALED seconds");
         GlobalVariables.ActiveEffects.Remove(this);
         Active = false;
 
@@ -342,7 +350,8 @@ public class EffectBase
         hasFinished = true;
         AddToPrevEffects();
 #if DEBUG
-        Chaos.Log(Name + " has finished running");
+        Log("Finished running");
+        DebugDraw.Dont(token);
 #endif
     }
 

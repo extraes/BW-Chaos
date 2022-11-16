@@ -1,4 +1,4 @@
-﻿using StressLevelZero.Interaction;
+﻿using SLZ.Interaction;
 using System.Collections;
 using UnityEngine;
 
@@ -16,10 +16,10 @@ internal class Butterfingers : EffectBase
         yield return null;
         while (Active)
         {
-            Interactable interactable = Utilities.GetRandomPlayerHand().attachedInteractable;
+            Utilities.GetRandomPlayerHand().DetachObject();
 
-            InteractableHost interactableHost = interactable?.GetComponentInParent<InteractableHost>();
-            interactableHost?.Drop();
+            //InteractableHost interactableHost = interactable?.GetComponentInParent<InteractableHost>();
+            //interactableHost?.DetachHand();
 
             yield return new WaitForSecondsRealtime(UnityEngine.Random.Range(minWaitTime, maxWaitTime));
         }

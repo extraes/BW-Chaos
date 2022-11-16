@@ -23,7 +23,7 @@ internal class ImportantInstructions : EffectBase
         if (videos == null || videos[0] == null)
             videos = GlobalVariables.ResourcePaths
                                     .Where(a => a.Contains("/instructionals/"))
-                                    .Select(a => GlobalVariables.EffectResources.LoadAsset<VideoClip>(a))
+                                    .Select(a => GlobalVariables.EffectResources.LoadAsset(a).Cast<VideoClip>())
                                     .ToArray();
         // In case IL2 feels like fucking my shit up.
         videos.ForEach(v => v.hideFlags = HideFlags.DontUnloadUnusedAsset);
@@ -38,9 +38,9 @@ internal class ImportantInstructions : EffectBase
 
 
         // Can't make a blank material without a shader or basing it off an already existing material, so grab vr standard
-        vidMat = new Material(Shader.Find("Valve/vr_standard"));
+        vidMat = new Material(Shader.Find(Const.URP_LIT_NAME));
         vidMat.hideFlags = HideFlags.DontUnloadUnusedAsset;
-        vidMat.mainTexture = texture;
+        vidMat.SetTexture(Const.URP_MAINTEX_NAME, texture);
 #if DEBUG
         Log("Loaded " + videos.Length + " textures into ImportantInstructions and made render texture");
         videos.ForEach(v => Log("Instructional " + v.name + " is loaded"));

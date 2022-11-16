@@ -1,10 +1,12 @@
-﻿namespace BLChaos.Effects;
+﻿using Jevil;
+
+namespace BLChaos.Effects;
 
 internal class InvertPlayerVelocity : EffectBase
 {
     public InvertPlayerVelocity() : base("Invert player velocity") { }
 
     public override void OnEffectStart() =>
-        GlobalVariables.Player_PhysBody.AddVelocityChange(-2 * GlobalVariables.Player_PhysBody.rbPelvis.velocity);
+        GlobalVariables.Player_PhysRig.AddVelocityChange(-2 * GlobalVariables.Player_PhysRig.torso.rbPelvis.velocity);
 
 }

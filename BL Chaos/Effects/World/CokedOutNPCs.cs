@@ -1,5 +1,5 @@
 ﻿using PuppetMasta;
-using StressLevelZero.AI;
+using SLZ.AI;
 
 namespace BLChaos.Effects;
 

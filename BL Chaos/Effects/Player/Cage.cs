@@ -9,7 +9,7 @@ internal class Cage : EffectBase
     GameObject cage;
     static Cage()
     {
-        cagePrefab = GlobalVariables.EffectResources.LoadAsset<GameObject>("Assets/Cage/cage.prefab");
+        cagePrefab = GlobalVariables.EffectResources.LoadAsset("Assets/Cage/cage.prefab").Cast<GameObject>();
         cagePrefab.hideFlags = HideFlags.DontUnloadUnusedAsset;
     }
 
@@ -22,7 +22,7 @@ internal class Cage : EffectBase
     {
         cage = GameObject.Instantiate(cagePrefab);
         if (isNetworked) return;
-        cage.transform.position = GlobalVariables.Player_PhysBody.rbFeet.position;
+        cage.transform.position = GlobalVariables.Player_PhysRig.rbFeet.position;
         SendNetworkData(cage.transform.position.ToBytes());
     }
 

@@ -1,4 +1,6 @@
-﻿using ModThatIsNotMod;
+﻿using BoneLib;
+using Jevil;
+using SLZ.Interaction;
 using UnityEngine;
 
 namespace BLChaos.Effects;
@@ -21,17 +23,17 @@ internal class NimbusHands : EffectBase
     public override void OnEffectUpdate()
     {
         // only do it to one hand at a time because framerate is high enough to make it not matter
-        StressLevelZero.Interaction.Hand hand = Time.frameCount % 2 == 0 ? Player.leftHand : Player.rightHand;
+        Hand hand = Time.frameCount % 2 == 0 ? Player.leftHand : Player.rightHand;
         Vector3 vel = hand.rb.velocity;
 
         // make sure the velocity is velocity relative to the body
-        vel -= GlobalVariables.Player_PhysBody.rbPelvis.velocity;
+        vel -= GlobalVariables.Player_PhysRig.torso.rbPelvis.velocity;
 
         vel *= forceMultiplier * Time.deltaTime * 100; // effectively square it to make smaller movements not move as much
 
         vel.x *= 0.5f;
         vel.z *= 0.5f;
 
-        GlobalVariables.Player_PhysBody.AddVelocityChange(-Vector3.ClampMagnitude(vel, 5 * forceMultiplier));
+        GlobalVariables.Player_PhysRig.AddVelocityChange(-Vector3.ClampMagnitude(vel, 5 * forceMultiplier));
     }
 }

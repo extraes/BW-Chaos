@@ -1,7 +1,6 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
-using ModThatIsNotMod;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
@@ -30,7 +29,7 @@ internal class RandomTeleport : EffectBase
         int count = 0;
 #endif
         Stopwatch sw = Stopwatch.StartNew();
-        Vector3 footpos = GlobalVariables.Player_PhysBody.rbFeet.transform.position;
+        Vector3 footpos = GlobalVariables.Player_PhysRig.rbFeet.transform.position;
         Vector3 location = footpos;
         while (!IsValid(location))
         {
@@ -44,12 +43,12 @@ internal class RandomTeleport : EffectBase
         if (sw.ElapsedMilliseconds > 1000)
         {
             Utilities.SpawnAd("damn bro youre so ugly i couldn't find anywhere to relocate you. face for radio headass.");
-            Log("Failed to find a valid location to telepor the player in 1000ms! WTF?");
+            Log("Failed to find a valid location to teleport the player in 1000ms! WTF?");
             return;
         }
 
 #if DEBUG
-        Log($"Found a valid location after {count} tries.");
+        Log($"Found a valid location after {count} tries ({sw.ElapsedMilliseconds}ms).");
 #endif
         Tele(location);
         SendNetworkData(location.ToBytes());
@@ -58,7 +57,7 @@ internal class RandomTeleport : EffectBase
     void Tele(Vector3 footPos)
     {
         GlobalVariables.Player_RigManager.Teleport(footPos);
-        GlobalVariables.Player_RigManager.physicsRig.ResetHands(StressLevelZero.Handedness.BOTH);
+        GlobalVariables.Player_RigManager.physicsRig.ResetHands(SLZ.Handedness.BOTH);
     }
 
     bool IsValid(Vector3 worlspaceFootPos)

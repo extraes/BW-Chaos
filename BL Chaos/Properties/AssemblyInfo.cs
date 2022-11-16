@@ -1,4 +1,5 @@
-﻿using MelonLoader;
+﻿using Jevil.Patching;
+using MelonLoader;
 using System.Reflection;
 using System.Resources;
 using System.Runtime.InteropServices;
@@ -20,4 +21,5 @@ using System.Runtime.InteropServices;
 [assembly: MelonInfo(typeof(BLChaos.Chaos), BLChaos.BuildInfo.Name, BLChaos.BuildInfo.Version, BLChaos.BuildInfo.Author, BLChaos.BuildInfo.DownloadLink)]
 //[assembly: MelonColor(System.ConsoleColor.Yellow)]
 // [assembly: VerifyLoaderVersion("0.5.3", true)] // theres nothing to really warrant it aside from the comments in chaosconfig
-[assembly: MelonGame("Stress Level Zero", "BONEWORKS")] 
+[assembly: MelonGame("Stress Level Zero", "BONELAB")]
+[assembly: Ungovernable((UngovernableType)~0)]

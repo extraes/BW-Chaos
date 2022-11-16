@@ -1,27 +1,30 @@
 ﻿using BLChaos.Effects;
 using HarmonyLib;
 using MelonLoader;
-using ModThatIsNotMod;
-using ModThatIsNotMod.BoneMenu;
+using BoneLib;
 using System;
 using System.Collections;
 using System.Linq;
 using System.Text;
 using UnityEngine;
+using Jevil.Prefs;
 using static BLChaos.Effects.EffectBase;
 
 namespace BLChaos;
 
 public static class BoneMenu
 {
+#if false
     internal static MenuCategory boneMenuEntry;
     internal static MenuCategory recentCategory;
     internal static MenuCategory effectsCategory;
     internal static MenuCategory preferencesCategory;
     internal static MenuCategory debugCategory;
+#endif
 
     public static void Register()
     {
+#if false
         Chaos.OnEffectRan += UpdateRecentEffect;
 
         if (boneMenuEntry == null)
@@ -88,23 +91,23 @@ public static class BoneMenu
         #region Manually populate bonemenu with MelonPreferences
 
         // Start the entanglement module, assuming it isn't started already
-        if (!Prefs.SyncEffects) preferencesCategory.CreateFunctionElement("Start entanglement module", Color.white, () =>
+        if (!Prefs.syncEffects) preferencesCategory.CreateFunctionElement("Start entanglement module", Color.white, () =>
         {
             // delete this menu element when its ran
             preferencesCategory.elements.Remove(preferencesCategory.elements.FirstOrDefault(e => e.displayText == "Start entanglement module"));
             Extras.EntanglementSyncHandler.Init();
-            Prefs.syncEffects.Value = !Prefs.SyncEffects;
+            Prefs.syncEffects.Value = !Prefs.syncEffects;
             Prefs.syncEffects.Save();
             Chaos.LiveUpdateEffects();
         });
 
-        preferencesCategory.CreateBoolElement("Random on no votes", Color.white, Prefs.RandomOnNoVotes, b =>
+        preferencesCategory.CreateBoolElement("Random on no votes", Color.white, Prefs.randomOnNoVotes, b =>
         {
             Prefs.randomOnNoVotes.Value = b;
             Prefs.randomOnNoVotes.Save();
         });
 
-        if (Prefs.EnableRemoteVoting) preferencesCategory.CreateBoolElement("Proportional voting", Color.white, Prefs.ProportionalVoting, b =>
+        if (Prefs.enableRemoteVoting) preferencesCategory.CreateBoolElement("Proportional voting", Color.white, Prefs.proportionalVoting, b =>
         {
             MelonPreferences.SetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser", b);
             Prefs.ignoreRepeatVotes.Value = b;
@@ -112,34 +115,34 @@ public static class BoneMenu
             GlobalVariables.WatsonClient.SendAsync(Encoding.UTF8.GetBytes("ignorerepeatvotes:" + b)).GetAwaiter().GetResult();
         });
 
-        preferencesCategory.CreateBoolElement("Show candidate effects on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
+        preferencesCategory.CreateBoolElement("Show candidate effects on screen", Color.white, Prefs.showCandidatesOnScreen, b =>
         {
             Prefs.showCandidatesOnScreen.Value = b;
             Prefs.showCandidatesOnScreen.Save();
             // this doesn't necessitate reloading effects
         });
 
-        preferencesCategory.CreateBoolElement("Use gravity effects", Color.white, Prefs.UseGravityEffects, b =>
+        preferencesCategory.CreateBoolElement("Use gravity effects", Color.white, Prefs.useGravityEffects, b =>
         {
             Prefs.useGravityEffects.Value = b;
             Prefs.useGravityEffects.Save();
             Chaos.LiveUpdateEffects();
         });
 
-        preferencesCategory.CreateBoolElement("Use laggy effects", Color.white, Prefs.UseLaggyEffects, b =>
+        preferencesCategory.CreateBoolElement("Use laggy effects", Color.white, Prefs.useLaggyEffects, b =>
         {
             Prefs.useLaggyEffects.Value = b;
             Prefs.useLaggyEffects.Save();
             Chaos.LiveUpdateEffects();
         });
 
-        preferencesCategory.CreateBoolElement("Modulate effect time", Color.white, Prefs.UseLaggyEffects, b =>
+        preferencesCategory.CreateBoolElement("Modulate effect time", Color.white, Prefs.useLaggyEffects, b =>
         {
             Prefs.modulateEffectTime.Value = b;
             Prefs.modulateEffectTime.Save();
         });
 
-        preferencesCategory.CreateBoolElement("Use bag randomizer", Color.white, Prefs.UseLaggyEffects, b =>
+        preferencesCategory.CreateBoolElement("Use bag randomizer", Color.white, Prefs.useLaggyEffects, b =>
         {
             Prefs.useBagRandomizer.Value = b;
             Prefs.useBagRandomizer.Save();
@@ -151,33 +154,33 @@ public static class BoneMenu
             Prefs.maxActiveEffects.Save();
         });
 
-        preferencesCategory.CreateStringElement("Effect on scene load", Color.white, Prefs.EffectOnSceneLoad, i =>
+        preferencesCategory.CreateStringElement("Effect on scene load", Color.white, Prefs.effectOnSceneLoad, i =>
         {
             Prefs.effectOnSceneLoad.Value = i;
             Prefs.effectOnSceneLoad.Save();
         });
 
-        if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use Steam profile effects", Color.white, Prefs.UseSteamProfileEffects, b =>
+        if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use Steam profile effects", Color.white, Prefs.useSteamProfileEffects, b =>
         {
             Prefs.useSteamProfileEffects.Value = b;
             Prefs.useSteamProfileEffects.Save();
             Chaos.LiveUpdateEffects();
         });
 
-        preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.UseMetaEffects, b =>
+        preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.useMetaEffects, b =>
         {
             Prefs.useMetaEffects.Value = b;
             Prefs.useMetaEffects.Save();
             Chaos.LiveUpdateEffects();
         });
 
-        preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.ShowWristUI, b =>
+        preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.showWristUI, b =>
         {
             Prefs.showWristUI.Value = b;
             Prefs.showWristUI.Save();
         });
 
-        preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.ShowCandidatesOnScreen, b =>
+        preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.showCandidatesOnScreen, b =>
         {
             Prefs.showCandidatesOnScreen.Value = b;
             Prefs.showCandidatesOnScreen.Save();
@@ -242,8 +245,10 @@ public static class BoneMenu
         });
 
         #endregion
+#endif
     }
 
+#if false
     // shortcut to recently ran effects
     private static void UpdateRecentEffect(EffectBase effect)
     {
@@ -265,4 +270,5 @@ public static class BoneMenu
         lastNotif?.End();
         lastNotif = Notifications.SendNotification("ERROR - " + str, 5, Color.red);
     }
+#endif
 }

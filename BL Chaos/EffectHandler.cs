@@ -1,4 +1,5 @@
 ﻿using BLChaos.Effects;
+using Jevil.IMGUI;
 using MelonLoader;
 using System;
 using System.Collections;
@@ -61,7 +62,7 @@ public class EffectHandler : MonoBehaviour
         overlayCanvas = GameObject.Instantiate(GlobalVariables.OverlayChaosUI, transform).GetComponent<Canvas>();
         overlayImage = overlayCanvas.transform.Find("TimerImage").GetComponent<Image>();
         overlayImage.fillAmount = 0;
-        if (Prefs.ShowCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
+        if (Prefs.showCandidatesOnScreen) overlayImage.rectTransform.position = overlayImagePos_Candidates;
 
         overlayText = overlayCanvas.transform.Find("PastText").GetComponent<Text>();
         overlayText.text = string.Empty;
@@ -74,7 +75,7 @@ public class EffectHandler : MonoBehaviour
         for (int i = 0; i < 5; i++)
             voteBars[i] = cEx.Find("VoteBar" + (i + 1)).GetComponent<Image>();
 
-        Transform wristTransform = GlobalVariables.Player_RigManager.gameWorldSkeletonRig.characterAnimationManager.rightHandTransform;
+        Transform wristTransform = GlobalVariables.Player_RigManager.animationRig.RightAnimatorHand.transform; // todo: is the wrist ui placed in the right location?
         wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
         wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
         wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -172,7 +173,7 @@ public class EffectHandler : MonoBehaviour
             #region Set vote UI elements
 
             voteText.text = string.Empty;
-            if (Prefs.ShowCandidatesOnScreen && Prefs.EnableRemoteVoting)
+            if (Prefs.showCandidatesOnScreen && Prefs.enableRemoteVoting)
             {
                 voteBars[0].transform.parent.gameObject.SetActiveRecursively(true);
 
@@ -186,7 +187,7 @@ public class EffectHandler : MonoBehaviour
 
             #endregion
 
-            wristCanvas.gameObject.SetActive(Prefs.ShowWristUI);
+            wristCanvas.gameObject.SetActive(Prefs.showWristUI);
 
             currentTimerValue += updateRate;
             float fillAmount = currentTimerValue / secondsEachEffect;
@@ -217,7 +218,7 @@ public class EffectHandler : MonoBehaviour
                 ResetEffectCandidates();
                 voteText.text = string.Empty;
 
-                if (Prefs.ModulateEffectTime) secondsEachEffect = 20 + Mathf.Cos(effectsRan * 0.25f) * 10;
+                if (Prefs.modulateEffectTime) secondsEachEffect = 20 + Mathf.Cos(effectsRan * 0.25f) * 10;
             }
         }
     }
@@ -300,15 +301,15 @@ public class EffectHandler : MonoBehaviour
         (int, int) voted = GetVotedEffect(accumulatedVotes); // format is (arrIndex, value)
 #if DEBUG
         Chaos.Log($"Voted effect: {(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].Name)} (of type '{(voted.Item1 == 4 ? "Random" : GlobalVariables.CandidateEffects[voted.Item1].GetType().Name)}'), [{string.Join(", ", accumulatedVotes)}]");
-        if (voted.Item2 == 0) Chaos.Log("The voted effect has no votes... Should I run a random effect? " + Prefs.randomOnNoVotes.Value);
-        Chaos.Log("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !Prefs.randomOnNoVotes.Value));
+        if (voted.Item2 == 0) Chaos.Log("The voted effect has no votes... Should I run a random effect? " + Prefs.randomOnNoVotes);
+        Chaos.Log("Compound boolean statement of whether to return: " + (voted.Item2 == 0 && !Prefs.randomOnNoVotes));
 #endif
         // change the hidden effect name
         hiddenEffectName = allEffects.Random().Key;
 
         EffectBase votedEffect;
         // return if the top voted effect has no votes & modpref is set to not run on no votes
-        if (voted.Item2 == 0 && !Prefs.RandomOnNoVotes) return;
+        if (voted.Item2 == 0 && !Prefs.randomOnNoVotes) return;
         if (voted.Item1 == 4 || voted.Item2 == 0)
         {
             // Get a random effect from the dictionary
@@ -320,7 +321,7 @@ public class EffectHandler : MonoBehaviour
             votedEffect = GlobalVariables.CandidateEffects[voted.Item1];
             Chaos.Log(votedEffect.Name + " was chosen");
         }
-        if (Prefs.UseBagRandomizer) bag.Remove(votedEffect.Name);
+        if (Prefs.useBagRandomizer) bag.Remove(votedEffect.Name);
         EffectBase eff = (EffectBase)Activator.CreateInstance(votedEffect.GetType());
         eff.Run();
         effectsRan++;
@@ -357,7 +358,7 @@ public class EffectHandler : MonoBehaviour
 
     private (int, int) GetVotedEffect(int[] votes)
     {
-        if (Prefs.ProportionalVoting)
+        if (Prefs.proportionalVoting)
         {
             // My gigabrain proportional voting system that works without floats, just ints.
             // heres a diagram in case you were confused https://discord.com/channels/563139253542846474/724595991675797554/898447182762479637 (lol)
@@ -431,7 +432,7 @@ public class EffectHandler : MonoBehaviour
         for (int i = 0; i < 4; i++)
         {
             // use bag or alleffects
-            Dictionary<string, EffectBase> collection = Prefs.UseBagRandomizer ? bag : allEffects;
+            Dictionary<string, EffectBase> collection = Prefs.useBagRandomizer ? bag : allEffects;
 
             // Get a random effect from the list
             EffectBase effect = collection.Values.Random();
@@ -449,12 +450,12 @@ public class EffectHandler : MonoBehaviour
 
         botMsg = botMesssageBuilder.ToString();
 
-        if (Prefs.SendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMsg);
+        if (Prefs.sendCandidatesInChannel && advanceTimer) GlobalVariables.WatsonClient?.SendAsync("sendtochannel:" + botMsg);
 
-        if (Prefs.ShowCandidatesOnScreen && advanceTimer)
+        if (Prefs.showCandidatesOnScreen && advanceTimer)
         {
             string[] lines = botMsg.Split('\n').Skip(1).ToArray();
-            if (Prefs.ScrollCandidates) MelonCoroutines.Start(ScrollNewCandidates(lines));
+            if (Prefs.scrollCandidates) MelonCoroutines.Start(ScrollNewCandidates(lines));
             else candidateText.text = string.Join("\n", lines);
             overlayImage.rectTransform.anchoredPosition = overlayImagePos_Candidates;
         }

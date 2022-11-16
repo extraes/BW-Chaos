@@ -19,7 +19,7 @@ internal class DarkWorld : EffectBase
     {
         if (BLACK == null)
         {
-            BLACK = new Material(Shader.Find("Valve/vr_standard"));
+            BLACK = new Material(Shader.Find(Const.URP_LIT_NAME));
             BLACK.color = Color.black;
             //BLACK.mainTexture = new Texture2D(69, 420, TextureFormat.RGB24, false);
             BLACK.hideFlags = HideFlags.DontUnloadUnusedAsset;

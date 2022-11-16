@@ -1,4 +1,4 @@
-﻿using ModThatIsNotMod;
+﻿using BoneLib;
 using UnityEngine;
 
 namespace BLChaos.Effects;

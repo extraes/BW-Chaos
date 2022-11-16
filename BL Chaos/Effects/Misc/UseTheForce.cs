@@ -1,11 +1,11 @@
 ﻿using System;
 using UnityEngine;
 using MelonLoader;
-using ModThatIsNotMod;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
-using StressLevelZero.Interaction;
+using SLZ.Interaction;
+using BoneLib;
 
 namespace BLChaos.Effects;
 
@@ -30,7 +30,7 @@ internal class UseTheForce : EffectBase
         while (Active)
         {
             // FUCK NONALLOC, WE ALLOC IN THIS HOUSE
-            UnhollowerBaseLib.Il2CppReferenceArray<Collider> cols = Physics.OverlapCapsule(head.position, head.position + head.forward * 10, 0.5f);
+            Collider[] cols = Physics.OverlapCapsule(head.position, head.position + head.forward * 10, 0.5f);
 
             yield return null;
             int j = 0;

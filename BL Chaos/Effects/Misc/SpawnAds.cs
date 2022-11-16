@@ -512,6 +512,7 @@ internal class SpawnAds : EffectBase
         "adderall needs to send me an influencer box",
         "i did a thing :P\n<i>picture of shit in ikea display toilet</i>",
         "sticking a floss pick in my urethra to make my penis sneeze",
+        "fucking a kiwifarms girl and she moans your address",
         #endregion
         "iirc there was someone in the bw community that slowly faded away from it and one time i checked their twitter, and they liked a tweet saying 'peeing yourself is super cute'\nguh, am i right",
         "thinkin abt the joys of inhaling from a fine cuban smokeable whilst kicking up ones feet in a sun-drenched tropical paradise (like isle delfino)",
@@ -562,10 +563,11 @@ internal class SpawnAds : EffectBase
         "you got the dud!",
         "nothing beats a bald scrotum",
         "Under Articles 1 and 2 of the document Rules and Info, you are prohibited from sending homosexual porn in the general chat on the Unofficial BONELAB Discord Server",
-        "Why are you playing BW? Go play BONELAB!",
+        "A port of a BONEWORKS mod!",
         "Announcement to release window of 6 days. Hope my divorce has that kind of turnaround time.",
         "Drop kick a bitch",
         "He looks just like you, poindexter!",
-        "Why the fuck am I updating this mod in the last week before BONELAB's release?",
+        "Get Addicted To Nicotine To Combat Depression.\n-Chair",
+        "if your avatar is your fursona, i regret to inform you that originality is not your strong suit",
     };
 }

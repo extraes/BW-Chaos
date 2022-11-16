@@ -1,9 +1,9 @@
-﻿using HarmonyLib;
-using ModThatIsNotMod;
+﻿using BoneLib;
+using HarmonyLib;
 using PuppetMasta;
-using StressLevelZero.Interaction;
-using StressLevelZero.Rig;
-using StressLevelZero.VRMK;
+using SLZ.Interaction;
+using SLZ.Rig;
+using SLZ.VRMK;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -87,9 +87,10 @@ internal class SimonSays : EffectBase
             SimonSaysType sst = pair.Key;
             string mName = Utilities.GetReadableStringFromMemberName(pair.Value);
             bool didSimonSay = Random.value > 0.5f;
-            Vector3 startPos = GlobalVariables.Player_PhysBody.transform.position;
+            Vector3 startPos = GlobalVariables.Player_PhysRig.torso.transform.position;
 
-            NotificationData nDat = Notifications.SendNotification((didSimonSay ? "Simon says " : "") + mName, 5);
+            //NotificationData nDat = Notifications.SendNotification(, 5);
+
             yield return new WaitForSecondsRealtime(roundTime);
 
             // cond = true; dss = true; do not punish
@@ -109,10 +110,11 @@ internal class SimonSays : EffectBase
                     conditions[sst] = Player.GetGunInHand(Player.leftHand) || Player.GetGunInHand(Player.rightHand);
                     break;
                 case SimonSaysType.duck:
-                    Vector3 posFeet = GlobalVariables.Player_PhysBody.rbFeet.transform.position;
-                    Vector3 posHead = GlobalVariables.Player_PhysBody.rbHead.transform.position;
+                    Vector3 posFeet = GlobalVariables.Player_PhysRig.rbFeet.transform.position;
+                    Vector3 posHead = GlobalVariables.Player_PhysRig.torso.rbHead.transform.position;
                     float dist = Vector3.Distance(posFeet, posHead);
-                    conditions[sst] = dist < 1;
+                    conditions[sst] = dist < 0.5 * GlobalVariables.Player_RigManager.avatar.height;
+                    
 #if DEBUG
                     Log("Distance between head and feet: " + dist);
 #endif
@@ -121,7 +123,7 @@ internal class SimonSays : EffectBase
                     conditions[sst] = !(Player.GetObjectInHand(Player.leftHand) || Player.GetObjectInHand(Player.rightHand));
                     break;
                 case SimonSaysType.dontMove:
-                    conditions[sst] = Vector3.Distance(startPos, GlobalVariables.Player_PhysBody.transform.position) < 1;
+                    conditions[sst] = Vector3.Distance(startPos, GlobalVariables.Player_PhysRig.transform.position) < 1;
                     break;
                 case SimonSaysType.holdItemsInBothHands:
                     conditions[sst] = !(Player.GetObjectInHand(Player.leftHand) == null || Player.GetObjectInHand(Player.rightHand) == null);
@@ -134,7 +136,7 @@ internal class SimonSays : EffectBase
 #if DEBUG
             Log($"Did the player {sst}? {conditions[sst]}. Punish? {doPunish}");
 #endif
-            if (doPunish) GlobalVariables.Player_Health?.Death();
+            if (doPunish) GlobalVariables.Player_Health.Death();
         }
     }
 

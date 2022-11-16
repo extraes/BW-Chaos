@@ -13,7 +13,7 @@ internal class TextureSwap : EffectBase
     {
         textures = GlobalVariables.ResourcePaths
             .Where(a => a.Contains("/textureswap/"))
-            .Select(a => GlobalVariables.EffectResources.LoadAsset<Texture>(a))
+            .Select(a => GlobalVariables.EffectResources.LoadAsset(a).Cast<Texture>())
             .ToArray();
         // In case IL2 feels like fucking my shit up.
         textures.ForEach(tex => tex.hideFlags = HideFlags.DontUnloadUnusedAsset);
