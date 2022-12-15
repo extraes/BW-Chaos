@@ -20,6 +20,7 @@ using System.Text;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using WatsonWebsocket;
+using HarmonyLib;
 using static BLChaos.Effects.EffectBase;
 
 namespace BLChaos;
@@ -42,10 +43,12 @@ public static class BuildInfo
 // todo: change "My meme folder" -> change the material of monitors & spawn one (see: https://discord.com/channels/563139253542846474/753783288031608923/1037511912268771358)
 // todo: make "Lego deconstruction" (see: https://discord.com/channels/563139253542846474/753783288031608923/1037513696060129302)
 // todo: make "Bad to the bone" (whenever you spawn w/ the skeleton avatar or a skeleton NPC wakes up, play the bad to the bone riff)
+// todo: https://discord.com/channels/563139253542846474/753783288031608923/1050226721577775154
 public class Chaos : MelonMod
 {
     public Chaos() : base() => _instance = this;
-    internal static bool isSteamVer = !File.Exists(Path.Combine(Application.dataPath, "..", "Boneworks_Oculus_Windows64.exe"));
+    internal static bool isSteamVer = File.Exists(Path.Combine(Application.dataPath, "..", "Bonelab_Steam_Windows64.exe"));
+    internal static bool isQuest = Jevil.Utilities.IsPlatformQuest();
     internal static new readonly Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
     private static Chaos _instance;
     public static Chaos Instance => _instance; // so that we can access some instanced fields, like harmonylib patching
@@ -80,22 +83,20 @@ public class Chaos : MelonMod
         #region Load Timer
 
         // Load the Chaos UI elements. Don't change scope in case it may screw something up. idk why it would, but we're dontunloadunusedasset'ing it.
-        MemoryStream memoryStream;
-        using (Stream stream = Assembly.GetManifestResourceStream("BLChaos.Resources.chaos_ui_elements"))
-        {
-            memoryStream = new MemoryStream((int)stream.Length);
-            stream.CopyTo(memoryStream);
-        }
+        string uiName = isQuest ? "questuielements" : "uielements";
 
-        AssetBundle assetBundle = AssetBundle.LoadFromMemory(memoryStream.ToArray());
+        AssetBundle uiBundle = null;
+        Assembly.UseEmbeddedResource($"BLChaos.Resources.{uiName}", bytes => uiBundle = AssetBundle.LoadFromMemory(bytes));
+        
 #if DEBUG
-        Chaos.Log("Loaded essentials assetbundle.");
+        Chaos.Log("Loaded essentials assetbundle. All asset paths are below:");
+        uiBundle.GetAllAssetNames().ForEach(str => Chaos.Log(" - " + str));
 #endif
 
-        GlobalVariables.WristChaosUI = assetBundle.LoadAsset("Assets/UIStuff/prefabs/ChaosCanvas.prefab").Cast<GameObject>();
+        GlobalVariables.WristChaosUI = uiBundle.LoadAsset("Assets/UIStuff/prefabs/ChaosCanvas.prefab").Cast<GameObject>();
         GlobalVariables.WristChaosUI.hideFlags = HideFlags.DontUnloadUnusedAsset;
 
-        GlobalVariables.OverlayChaosUI = assetBundle.LoadAsset("Assets/UIStuff/prefabs/ChaosCanvasOverlay.prefab").Cast<GameObject>();
+        GlobalVariables.OverlayChaosUI = uiBundle.LoadAsset("Assets/UIStuff/prefabs/ChaosCanvasOverlay.prefab").Cast<GameObject>();
         GlobalVariables.OverlayChaosUI.hideFlags = HideFlags.DontUnloadUnusedAsset;
         Chaos.Log("Successfully initialized essential assets.");
 
@@ -106,7 +107,8 @@ public class Chaos : MelonMod
         Stopwatch resSW = Stopwatch.StartNew();
         Chaos.Log("Loading effect resources, please wait...");
         // Load the AssetBundle straight from memory to avoid copying unnecessary files to disk
-        Assembly.UseEmbeddedResource("BLChaos.Resources.effectresources", bytes => GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(bytes));
+        string resourceName = isQuest ? "questeffectresources" : "effectresources";
+        Assembly.UseEmbeddedResource($"BLChaos.Resources.{resourceName}", bytes => GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(bytes));
         GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
 
         // Unity doesn't like executing the same method on an assetbundle more than once, so I need to cache the paths here in my own readonly list, because for
@@ -151,9 +153,7 @@ public class Chaos : MelonMod
         DebugDraw.TrackVariable("ActiveEffects", GUIPosition.BOTTOM_RIGHT, () => GlobalVariables.ActiveEffects.Count);
 #endif
 
-        Hooking.OnPlayerReferencesFound += GetSceneReferences;
         BoneMenu.Register();
-        DebugDraw.Button("Test waiting", GUIPosition.TOP_RIGHT, TestWait);
         foreach (EffectBase eb in asmEffects.OrderBy(e => e.Name).ToArray())
         {
             eb.GetPreferencesFromAttrs(); // todo: switch to jevilib prefs
@@ -167,6 +167,13 @@ public class Chaos : MelonMod
             Stats.EffectCalledManuallyCallback(effect);
         // basically just allow http connections. why? uhhhh.... testing necessitated it? i dont think it breaks anything so uhhhh cool ig
         ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
+
+        SceneStreamer.doAnyLevelLoad += new Action(() => { Chaos.Log("SCENESTREAMER: ANY LEVEL LOAD"); });
+        SceneStreamer.doAnyLevelUnload += new Action(() => { Chaos.Log("SCENESTREAMER: ANY LEVEL UNLOAD"); });
+        FieldInfo[] fields = typeof(BoneLib.BuildInfo).GetFields();
+        Chaos.Log($"Found {fields.Length} fields on BoneLib's BuildInfo");
+        foreach (FieldInfo field in fields)
+            Chaos.Log($" - {field.FieldType.Name} {field.Name} = {field.GetRawConstantValue()}");
 
         #endregion
 
@@ -197,11 +204,30 @@ public class Chaos : MelonMod
     }
 
     // rename OnSceneWasInitialized because BL is built hella different i guess (addressables scene manager on crack i suppose)
-    private void GetSceneReferences()
+    public override void OnSceneWasInitialized(int buildIdx, string sceneName)
     {
-        // you already know what the fuck goin on
-        if (EffectHandler.allEffects.Count < 1) while (true) { }
 #if DEBUG
+        string otherName = SceneManager.GetActiveScene().name;
+        Chaos.Log($"LOADEDSCENE {sceneName} IDX {buildIdx}, SCENEMANAGERACTIVE {otherName}");
+        if (sceneName != "1378bdcaf9526974d98cc23b94c6ab5c" && // Void G114
+                                     sceneName != "scene_GameBootstrap" &&              // OpenXR check
+                                     sceneName != "77da2b1cce998aa4fb4fc76a7fd80e05")
+        {
+            new TextureSwap().Run();
+        }
+#endif
+
+        // you already know what the fuck goin on
+        if (EffectHandler.allEffects.Count < 1) {
+#if DEBUG
+            Log("NEED MORE EFFECTS");
+#endif
+            while (true) { }
+        }
+        if (!GlobalVariables.Player_PhysRig.INOC()) return;
+
+#if DEBUG
+        Log("Finding scene references!");
         Stopwatch sw = Stopwatch.StartNew();
 #endif
         // JeviLib Instances already finds instances
@@ -215,7 +241,7 @@ public class Chaos : MelonMod
         GlobalVariables.Player_PhysRig =
             Instances.Player_PhysicsRig;
 
-        GameObject pHead = Player.GetPlayerHead();
+        Transform pHead = Player.playerHead;
 
         GameObject musicPlayer = new GameObject("ChaosMusicPlayer");
         musicPlayer.transform.parent = pHead.transform;
@@ -236,7 +262,7 @@ public class Chaos : MelonMod
         GlobalVariables.SFXPlayer.enabled = true;
 
         new GameObject("ChaosUIEffectHandler").AddComponent<EffectHandler>();
-        string sceneName = SceneManager.GetActiveScene().name;
+        //string sceneName = SceneManager.GetActiveScene().name;
         EffectHandler.advanceTimer = sceneName != "1378bdcaf9526974d98cc23b94c6ab5c" && // Void G114
                                      sceneName != "scene_GameBootstrap" &&              // OpenXR check
                                      sceneName != "77da2b1cce998aa4fb4fc76a7fd80e05";   // loading screen
@@ -588,62 +614,6 @@ public class Chaos : MelonMod
         }
         if (Instance.started) e.GetPreferencesFromAttrs();
     }
-
-#if DEBUG
-    private void TestWait()
-    {
-        MelonCoroutines.Start(TestWaiter());
-    }
-
-private System.Collections.IEnumerator TestWaiter()
-{
-    Log("Waiting 1sec RT");
-    yield return new WaitForSecondsRealtime(1);
-    Log("Waiting 1sec SCALED");
-    yield return new WaitForSeconds(1);
-    Log("Waiting 1sec RTNULL");
-    float t = 0;
-    while (t < 1)
-    {
-        yield return null;
-        t += Time.unscaledDeltaTime;
-    }
-    Log("Waiting 1sec SCALEDNULL");
-    t = 0;
-    while (t < 1)
-    {
-        yield return null;
-        t += Time.deltaTime;
-    }
-    Log("Done waiting");
-}
-
-    private System.Collections.IEnumerator TestWaiter2()
-    {
-        Log("Waiting 1sec RT");
-        IEnumerator WFSRT = new Jevil.Waiting.WaitSecondsReal(1);
-        while (WFSRT.MoveNext()) yield return null;
-        Log("Waiting 1sec SCALED");
-        IEnumerator WFS = new Jevil.Waiting.WaitSeconds(1);
-        while (WFSRT.MoveNext()) yield return null;
-        Log("Waiting 1sec RTNULL");
-        float t = 0;
-        while (t < 1)
-        {
-            yield return null;
-            t += Time.unscaledDeltaTime;
-        }
-        Log("Waiting 1sec SCALEDNULL");
-        t = 0;
-        while (t < 1)
-        {
-            yield return null;
-            t += Time.deltaTime;
-        }
-        Log("Done waiting");
-    }
-
-#endif
 
     #region MelonLogger replacements
 
