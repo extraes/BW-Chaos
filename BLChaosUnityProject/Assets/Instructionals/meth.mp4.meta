@@ -3,9 +3,6 @@ guid: 3731884f256ffd0439c4e4965bf0fd5a
 VideoClipImporter:
   externalObjects: {}
   serializedVersion: 2
-  useLegacyImporter: 0
-  quality: 0.5
-  isColorLinear: 0
   frameRange: 0
   startFrame: -1
   endFrame: -1
@@ -18,13 +15,13 @@ VideoClipImporter:
   targetSettings:
     0:
       enableTranscoding: 1
-      codec: 0
-      resizeFormat: 0
-      aspectRatio: 0
+      codec: 1
+      resizeFormat: 5
+      aspectRatio: 5
       customWidth: 640
       customHeight: 360
-      bitrateMode: 2
-      spatialQuality: 2
+      bitrateMode: 1
+      spatialQuality: 1
   userData: 
   assetBundleName: effectresources
   assetBundleVariant: 

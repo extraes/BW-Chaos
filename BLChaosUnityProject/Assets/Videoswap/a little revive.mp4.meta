@@ -3,9 +3,6 @@ guid: 3e215cbfe507e3e4283e89255c40b0a9
 VideoClipImporter:
   externalObjects: {}
   serializedVersion: 2
-  useLegacyImporter: 0
-  quality: 0.5
-  isColorLinear: 0
   frameRange: 0
   startFrame: -1
   endFrame: -1
@@ -20,7 +17,7 @@ VideoClipImporter:
       enableTranscoding: 1
       codec: 0
       resizeFormat: 6
-      aspectRatio: 0
+      aspectRatio: 5
       customWidth: 320
       customHeight: 320
       bitrateMode: 1
