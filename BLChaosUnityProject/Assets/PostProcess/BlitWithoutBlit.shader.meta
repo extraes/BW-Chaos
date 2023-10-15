@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 2e696e7297b4b0c4a8b5e7fec590e566
+ShaderImporter:
+  externalObjects: {}
+  defaultTextures: []
+  nonModifiableTextures: []
+  preprocessorOverride: 0
+  userData: 
+  assetBundleName: postprocessingshaders
+  assetBundleVariant: 

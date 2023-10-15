@@ -7,7 +7,7 @@ public class AssetBundleBuilder : EditorWindow
     [MenuItem("Window/AssetBundles")]
     public static void BuildBundleWindow()
     {
-        GetWindow<AssetBundleBuilder>("AssetBundles");
+        GetWindow<AssetBundleBuilder>("AssetBundles").position = new Rect(0,0, 384, 768);
     }
 
     private void OnGUI()

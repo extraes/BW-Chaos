@@ -16,7 +16,11 @@ MonoBehaviour:
   m_Data:
     m_SerializedData: []
   m_GUID: 7e0a5c0944800d14f98ec6a25a381ca3
-  m_SerializeEntries: []
+  m_SerializeEntries:
+  - m_GUID: 33b6a7873c68924478bcdd9019038e2e
+    m_Address: Assets/URP/SLZ URP.asset
+    m_ReadOnly: 0
+    m_SerializedLabels: []
   m_ReadOnly: 0
   m_Settings: {fileID: 11400000, guid: ecfa60129f5616541a8fad5be3782bb7, type: 2}
   m_SchemaSet:
