@@ -14,9 +14,13 @@ class GunSpeedup : EffectBase
 
     public void OnGunFired(SLZ.Props.Weapons.Gun gun)
     {
-        if (gun == Player.GetGunInHand(Player.rightHand) || gun == Player.GetGunInHand(Player.leftHand))
-        {
-            gun.SetRpm(gun.roundsPerMinute * multiplier);
-        }
+
+        //if (gun == Player.GetGunInHand(Player.rightHand) || gun == Player.GetGunInHand(Player.leftHand))
+        //{
+#if DEBUG
+        Chaos.Log($"GUN FIRED! RPM={gun.roundsPerMinute}; PATH: {gun.transform.GetFullPath()}");
+#endif
+        gun.SetRpm(gun.roundsPerMinute * multiplier);
+        //}
     }
 }
