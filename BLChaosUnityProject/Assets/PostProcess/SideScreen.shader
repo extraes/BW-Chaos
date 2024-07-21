@@ -87,13 +87,14 @@ Shader "extraes/SideScreen"
                 
                 half mainViewSize = 1 - _SideSize;
                 //[UNITY_BRANCH]
+                // mvs = 0.4
                 if (uv.x > mainViewSize)
                 {
                     uv.x -= mainViewSize;
                     uv.x /= _SideSize;
                     return SAMPLE_TEXTURE2D(_AltTex, sampler_AltTex, uv) * _BaseColor;
                 }
-                uv.x *= mainViewSize;
+                uv.x /= mainViewSize;
 
                 return SAMPLE_TEXTURE2D_X(_MainTex, sampler_MainTex, uv) * _BaseColor;
             }
