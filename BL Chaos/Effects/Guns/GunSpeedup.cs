@@ -1,6 +1,9 @@
 ﻿
 
 using BoneLib;
+using SLZ.Props.Weapons;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace BLChaos.Effects;
 
@@ -23,4 +26,19 @@ class GunSpeedup : EffectBase
         gun.SetRpm(gun.roundsPerMinute * multiplier);
         //}
     }
+
+
+#if DEBUG
+    internal override Task<TestResult> Test()
+    {
+        OnEffectStart();
+        Gun gun = new GameObject("guntmp").AddComponent<Gun>();
+        float preRpm = gun.roundsPerMinute;
+        gun.Fire();
+        float postRpm = gun.roundsPerMinute;
+        OnEffectEnd();
+        gun.gameObject.Destroy();
+        return ResT(preRpm != postRpm);
+    }
+#endif
 }

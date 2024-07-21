@@ -1,11 +1,16 @@
 ﻿using BoneLib;
+using Cysharp.Threading.Tasks;
+using Jevil;
+using Jevil.Spawning;
 using MelonLoader;
 using MelonLoader.Assertions;
+using SLZ.Marrow.Pool;
 using SLZ.Props.Weapons;
 using System;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -44,4 +49,22 @@ internal class RandomizeGunSpeeds : EffectBase
             gun.SetRpm(ran);
         }
     }
+
+#if DEBUG
+    internal override async Task<TestResult> Test()
+    {
+        AssetPoolee poolee = await Barcodes.ToSpawnable(JevilBarcode.MP5).SpawnAsync(Vector3.one, Quaternion.identity);
+        Gun newGun = poolee.GetComponentInChildren<Gun>();
+        float preRPM = newGun.roundsPerMinute;
+
+        newGun.ForceFireable();
+        await UniTask.Yield(PlayerLoopTiming.FixedUpdate);
+        OnEffectStart();
+
+        float postRPM = newGun.roundsPerMinute;
+
+        Log($"PreRPM={preRPM}, PostRPM={postRPM}");
+        return Res(postRPM != preRPM);
+    }
+#endif
 }

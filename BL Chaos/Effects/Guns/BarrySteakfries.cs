@@ -1,6 +1,9 @@
 ﻿using BoneLib;
+using Cysharp.Threading.Tasks;
 using Jevil;
 using SLZ.Props.Weapons;
+using System.Threading.Tasks;
+using UnityEngine;
 
 namespace BLChaos.Effects;
 
@@ -24,4 +27,12 @@ internal class BarrySteakfries : EffectBase
         GlobalVariables.Player_PhysRig.AddVelocityChange(5 * forceMultiplier * -gun.transform.forward);
     }
 
+#if DEBUG
+    internal override async Task<TestResult> Test()
+    {
+        GlobalVariables.Player_PhysRig.AddVelocityChange(Vector3.up * 100);
+        await UniTask.Yield(PlayerLoopTiming.FixedUpdate);
+        return Res(GlobalVariables.Player_PhysRig.torso.rbPelvis.velocity.magnitude > 50);
+    }
+#endif
 }

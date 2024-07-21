@@ -7,6 +7,8 @@ using Random = UnityEngine.Random;
 using SLZ.Props.Weapons;
 using BoneLib;
 using Jevil;
+using System.Threading.Tasks;
+using Cysharp.Threading.Tasks;
 
 namespace BLChaos.Effects;
 
@@ -42,4 +44,19 @@ internal class ZipGun : EffectBase
 
         GlobalVariables.Player_PhysRig.AddVelocityChange(forceMultiplier * Mathf.Sqrt(dist) * delta);
     }
+
+#if DEBUG
+    internal override async Task<TestResult> Test()
+    {
+        lastShot = Vector3.one * 1000;
+
+        for (int i = 0; i < 30; i++)
+        {
+            OnEffectUpdate();
+            await UniTask.Yield();
+        }
+
+        return Res(GlobalVariables.Player_PhysRig.torso._pelvisRb.velocity.magnitude > 2);
+    }
+#endif
 }
