@@ -5,6 +5,7 @@ using System.Linq;
 using UnityEngine;
 using Jevil;
 using Jevil.Spawning;
+using SLZ.Marrow.Data;
 
 // maybe try adding shit from ultrakill?
 namespace BLChaos.Effects;
@@ -33,9 +34,9 @@ internal class EnemyGauntlet : EffectBase
         if (isNetworked) yield break;
         yield return null;
         int entangleChange = Prefs.syncEffects ? 2 : 1;
-        AssetPool nbPool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
-        AssetPool eePool = Barcodes.ToAssetPool(JevilBarcode.EARLY_EXIT_ZOMBIE);
-        AssetPool crabPool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
+        Spawnable nullbodies = Barcodes.ToSpawnable(JevilBarcode.NULL_BODY);
+        Spawnable earlyExit = Barcodes.ToSpawnable(JevilBarcode.EARLY_EXIT_ZOMBIE);
+        Spawnable crablets = Barcodes.ToSpawnable(JevilBarcode.CRABLET);
 
 
         // spawn nullbodies
@@ -49,7 +50,7 @@ internal class EnemyGauntlet : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            nbPool.Spawn(spawnPos, spawnRot, null, true);
+            nullbodies.Spawn(spawnPos, spawnRot, true);
             yield return new WaitForSeconds(5f);
         }
 
@@ -66,7 +67,7 @@ internal class EnemyGauntlet : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            crabPool.Spawn(spawnPos, spawnRot, null, true);
+            crablets.Spawn(spawnPos, spawnRot, true);
             yield return new WaitForSeconds(5f);
         }
 
@@ -83,7 +84,7 @@ internal class EnemyGauntlet : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(spawnPos - playerPos, new Vector3(0, 1, 0));
-            eePool.Spawn(spawnPos, spawnRot, null, true); //todo: change to earlyexit that can throw stuff
+            earlyExit.Spawn(spawnPos, spawnRot, true); //todo: change to earlyexit that can throw stuff
             //spawnedEE.GetComponent<AIBrain>().behaviour.enableThrowAttack = true;
             yield return new WaitForSeconds(5f);
         }

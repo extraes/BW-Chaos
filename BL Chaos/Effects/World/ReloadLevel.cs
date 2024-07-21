@@ -6,8 +6,8 @@ using System.Linq;
 using Random = UnityEngine.Random;
 using UnityEngine.SceneManagement;
 using SLZ.Utilities;
-using Utilities;
 using SLZ.Marrow.SceneStreaming;
+using Jevil;
 
 namespace BLChaos.Effects;
 

@@ -1,5 +1,5 @@
-﻿
-using BoneLib;
+﻿using BoneLib;
+using Jevil;
 using SLZ.Props.Weapons;
 using System.Collections;
 using UnityEngine;
@@ -22,7 +22,7 @@ internal class FuckYourMag : EffectBase
 
             gun?.EjectCartridge(); //todo: test (old code = .magazineSocket?.MagazineRelease(); )
 
-            yield return new WaitForSecondsRealtime(UnityEngine.Random.RandomRange(minWaitTime, maxWaitTime));
+            yield return new WaitForSecondsRealtime(Random.RandomRange(minWaitTime, maxWaitTime));
         }
     }
 }

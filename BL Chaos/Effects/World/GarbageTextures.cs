@@ -1,10 +1,14 @@
-﻿using System;
+﻿using Jevil;
+using SLZ.Interaction;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Runtime.InteropServices;
 using System.Text;
+using UnhollowerBaseLib;
 using UnityEngine;
+using UnityEngine.Experimental.Rendering;
 using Color = UnityEngine.Color;
 using Random = UnityEngine.Random;
 
@@ -12,7 +16,13 @@ namespace BLChaos.Effects;
 
 internal class GarbageTextures : EffectBase
 {
-    static Texture2D[] textures;
+    // why 256? dunno, but its a large enough number that *maybe* people wont notice repeats!
+    static readonly int texCount = Chaos.isQuest ? 64 : 256;
+    static readonly int texWidth = Chaos.isQuest ? 64 : 128;
+    static readonly int texHeight = Chaos.isQuest ? 64 : 128;
+    static readonly int texDepth = 3;
+    static Texture2D[] textures = new Texture2D[texCount];
+
     [RangePreference(0f, 1f, 0.02f)] static readonly float swapChance = 0.2f;
     public GarbageTextures() : base("Garble Random Textures") { Init(); }
 
@@ -22,61 +32,31 @@ internal class GarbageTextures : EffectBase
         uint totalSize = 0;
         uint totalSizeConverted = 0;
 #endif
-        // why 256? dunno, but its a large enough number that *maybe* people wont notice repeats!
-        const int texCount = 256;
-
-        textures = new Texture2D[256];
-
-        // Generate a bunch of random bytes, 128 * 128 * 3 (Length, width, RGB)
-        int texWidth = 128;
-        int texHeight = 128;
-        int texDepth = 3;
+        
         System.Random rand = new System.Random();
 
         for (int i = 0; i < texCount; i++)
         {
             // Calculate the amount of data needed to fill a 128x128 texture
             byte[] data = new byte[texWidth * texHeight * texDepth];
-
-            #region Convert raw bytes to jpg
+            rand.NextBytes(data);
 
             // Unity doesn't load raw BMP's, so we need to convert it to a JPG/PNG/Supported format. How? IDK, but the internet has a way!
-            // https://stackoverflow.com/questions/23781364/generating-a-random-jpg-image-from-console-application/23812460#23812460
-            using (Bitmap bitmap = new Bitmap(texWidth, texHeight, PixelFormat.Format24bppRgb))
-            {
-                // 2. Get access to the raw bitmap data
-                BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), ImageLockMode.WriteOnly, bitmap.PixelFormat);
-
-                // 3. Generate RGB noise and write it to the bitmap's buffer.
-                // Note that we are assuming that data.Stride == 3 * data.Width for simplicity/brevity here.
-                byte[] noise = new byte[bmpData.Width * bmpData.Height * 3];
-                rand.NextBytes(noise);
-                Marshal.Copy(noise, 0, bmpData.Scan0, noise.Length);
-
+            //byte[] image = ConvertBMPToJPG(data);
+            var unhollowerArray = (Il2CppStructArray<byte>)data;
+            var il2cppSystemArray = new Il2CppSystem.Array(unhollowerArray.Pointer);
+            byte[] image = ImageConversion.EncodeArrayToJPG(il2cppSystemArray, GraphicsFormat.R8G8B8_SRGB, (uint)texWidth, (uint)texHeight);
 #if DEBUG
-                totalSize += (uint)noise.Length;
+            totalSize += (uint)image.Length;
 #endif
-
-                bitmap.UnlockBits(bmpData);
-
-                // 4. Save as JPEG and copy to array
-                using (MemoryStream jpegStream = new MemoryStream())
-                {
-                    bitmap.Save(jpegStream, ImageFormat.Jpeg);
-                    data = jpegStream.ToArray();
-                }
-            }
-
-            #endregion
-
-            Texture2D tex = new Texture2D(256, 256);
+            Texture2D tex = new Texture2D(2, 2);
             tex.filterMode = FilterMode.Point;
-            ImageConversion.LoadImage(tex, data);
+            ImageConversion.LoadImage(tex, image);
             tex.hideFlags = HideFlags.DontUnloadUnusedAsset;
             textures[i] = tex;
 
 #if DEBUG
-            totalSizeConverted += (uint)data.Length;
+            totalSizeConverted += (uint)image.Length;
 #endif
         }
 
@@ -88,7 +68,7 @@ internal class GarbageTextures : EffectBase
 
     public override void OnEffectStart()
     {
-        if (textures == null || textures[0] == null) Init();
+        if (textures == null || textures[0].INOC()) Init();
 
         if (isNetworked) return;
 
@@ -134,7 +114,7 @@ internal class GarbageTextures : EffectBase
         }
         else
         {
-            mesh.material.SetTexture("_MainTex", textures.Random());
+            mesh.material.SetTexture(Const.URP_MAINTEX_NAME, textures.Random());
             mesh.material.color = col;
         }
     }

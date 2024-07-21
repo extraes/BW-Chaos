@@ -3,6 +3,7 @@ using Jevil;
 using Jevil.Spawning;
 using PuppetMasta;
 using SLZ.AI;
+using SLZ.Marrow.Data;
 using SLZ.Marrow.Pool;
 using System.Linq;
 using UnityEngine;
@@ -15,14 +16,14 @@ internal class PunchingBagNullbody : EffectBase
 
     public override async void HandleNetworkMessage(byte[] data)
     {
-        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
-        if (pool == null)
+        Spawnable nbSpawnable = Barcodes.ToSpawnable(JevilBarcode.NULL_BODY);
+        if (nbSpawnable == null)
         {
             Chaos.Warn("(networked) Nullbody pool not found! Why?");
             return;
         }
 
-        AssetPoolee nullbody = await pool.Spawn(Vector3.zero, Quaternion.identity, null, false).ToTask();
+        AssetPoolee nullbody = await nbSpawnable.SpawnAsync(Vector3.zero, Quaternion.identity);
         PuppetMaster pm = nullbody.GetComponentInChildren<PuppetMaster>();
         Utilities.MoveAndFacePlayer(nullbody.gameObject);
         nullbody.gameObject.SetActive(true);
@@ -35,14 +36,14 @@ internal class PunchingBagNullbody : EffectBase
     public override async void OnEffectStart()
     {
         if (isNetworked) return;
-        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
-        if (pool == null)
+        Spawnable nbSpawnable = Barcodes.ToSpawnable(JevilBarcode.NULL_BODY);
+        if (nbSpawnable == null)
         {
             Chaos.Warn("Nullbody pool not found! Why?");
             return;
         }
 
-        AssetPoolee nullbody = await pool.Spawn(Vector3.zero, Quaternion.identity, null, false).ToTask();
+        AssetPoolee nullbody = await nbSpawnable.SpawnAsync(Vector3.zero, Quaternion.identity);
         Utilities.MoveAndFacePlayer(nullbody.gameObject);
         SendNetworkData(nullbody.transform.SerializePosRot());
         nullbody.gameObject.SetActive(true);

@@ -12,13 +12,13 @@ internal class NimbusHands : EffectBase
 
     public override void OnEffectStart()
     {
-        Utilities.MultiplyForces(Player.leftHand.physHand, 100, 5);
-        Utilities.MultiplyForces(Player.rightHand.physHand, 100, 5);
+        Utilities.ChangeStrength(Player.leftHand.physHand, 100, 5);
+        Utilities.ChangeStrength(Player.rightHand.physHand, 100, 5);
     }
     public override void OnEffectEnd()
     {
-        Utilities.MultiplyForces(Player.leftHand.physHand);
-        Utilities.MultiplyForces(Player.rightHand.physHand);
+        Utilities.ChangeStrength(Player.leftHand.physHand);
+        Utilities.ChangeStrength(Player.rightHand.physHand);
     }
     public override void OnEffectUpdate()
     {

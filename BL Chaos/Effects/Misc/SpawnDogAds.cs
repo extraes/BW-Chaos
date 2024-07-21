@@ -1,4 +1,5 @@
 ﻿using BoneLib.RandomShit;
+using Jevil.Waiting;
 using Newtonsoft.Json;
 using System.Collections;
 using System.Net.Http;
@@ -19,16 +20,7 @@ internal class SpawnDogAd : EffectBase
         yield return null;
         while (Active)
         {
-            var imageUrlTask = httpClient.GetStringAsync(API);
-            while (!imageUrlTask.IsCompleted) yield return null;
-            string imageUrlJson = imageUrlTask.Result;
-            string imageUrl = JsonConvert.DeserializeObject<string[]>(imageUrlJson).Random();
-            
-            var imageBytesTask = httpClient.GetByteArrayAsync(imageUrl);
-            while (!imageBytesTask.IsCompleted) yield return null;
-            byte[] image = imageBytesTask.Result;
-            // cant sync this unless i try to patch MTINM or implement chap's logic in my own code. Oh well.
-            PopupBoxManager.CreateNewImagePopup(image);
+            PopupBoxManager.CreateNewShibePopup();
             yield return new WaitForSecondsRealtime(waitTime);
         }
     }

@@ -56,7 +56,7 @@ internal class WrongMag : EffectBase
         // stolen from MTINM
         // thx 4 open sauce, chap
         Magazine mag = mags.Random();
-        AssetPoolee magObject = await NullableMethodExtensions.PoolManager_SpawnAsync(mag.magazineState.magazineData.spawnable).ToTask();
+        AssetPoolee magObject = await NullableMethodExtensions.PoolManager_SpawnAsync(mag.magazineState.magazineData.spawnable);
         Grip grip = magObject.GetComponent<Grip>();
         //magObject.transform.rotation = grip.transform.transform(hand).rotation;
         Vector3 localTarget = (grip.targetTransform != null) ? grip.targetTransform.localPosition : Vector3.zero;

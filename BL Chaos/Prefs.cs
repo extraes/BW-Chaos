@@ -1,7 +1,9 @@
-﻿using Jevil.Prefs;
+﻿using Jevil;
+using Jevil.Prefs;
 using MelonLoader;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using static BLChaos.Effects.EffectBase;
 
 namespace BLChaos;
@@ -11,8 +13,7 @@ namespace BLChaos;
 public static class Prefs
 {
     internal const string CATEGORY_NAME = "Chaos";
-    private static MelonPreferences_Category category;
-
+    internal static PrefEntries prefEntries;
 
     [Pref("Toggles effects being ran when no votes are recieved. Enable this if you want to play w/o the Discord/Twitch bot.")]
     internal static bool randomOnNoVotes = true;
@@ -24,6 +25,8 @@ public static class Prefs
     internal static bool useSteamProfileEffects = false;
     [Pref("Toggles effects that change the way this mod works.")]
     internal static bool useMetaEffects = true;
+    [Pref("Toggles effects that modify the game's appearance onscreen. The overhead of these effects may be more pronounced on Quest, so this defaults to disabled on that platform.")]
+    internal static bool usePostProcessEffects = !Utilities.IsPlatformQuest();
     [Pref("Shows effect candidates on the flatscreen UI.")]
     internal static bool showCandidatesOnScreen = true;
     [Pref("Toggles an animation that occurs when the timer runs out & switches effects.")]
@@ -47,39 +50,38 @@ public static class Prefs
     [Pref("Runs an effect on level load. You can use MassEffect to run multiple effects at once.")]
     internal static string effectOnSceneLoad = "";
     [RangePref(1, 15, 1)] internal static int MaxActiveEffects = 10;
+
+#if DEBUG
+    [Pref("When executing the test circuit, will wait an effect's duration (+5 for a small breather). If disabled, the wait time is a fixed 30 sec.")]
+    internal static bool waitEffectDurForTest = true;
+    internal static MelonPreferences_Entry<int> lastEffectTested;
+#endif
+
     internal static List<string> ForceEnabledEffects { get; private set; } = new List<string>();
     internal static List<string> ForceDisabledEffects { get; private set; } = new List<string>();
-#if DEBUG
-    internal static bool enableIMGUI = false;
-    internal static bool IMGUIUseBag = false;
-#endif
 
     internal static void Init()
     {
-        PrefEntries entries = Preferences.Register(typeof(Prefs));
-        category = MelonPreferences.CreateCategory(CATEGORY_NAME);
+        prefEntries = Preferences.Register(typeof(Prefs));
 
-        MelonPreferences.CreateEntry(CATEGORY_NAME, "token", "YOUR_TOKEN_HERE", "token", "If using remote voting: Discord/Twitch token");
-        MelonPreferences.CreateEntry(CATEGORY_NAME, "channel", "CHANNEL_ID_HERE", "channel", "If using remote voting: Discord channel ID/Twitch channel name.");
-        category.CreateEntry("forceEnabledEffects", ForceEnabledEffects.ToArray());
-        category.CreateEntry("forceDisabledEffects", ForceDisabledEffects.ToArray());
+        prefEntries.MelonPrefsCategory.CreateEntry("token", "YOUR_TOKEN_HERE", description: "If using remote voting: Discord/Twitch token");
+        prefEntries.MelonPrefsCategory.CreateEntry("channel", "CHANNEL_ID_HERE", description: "If using remote voting: Discord channel ID/Twitch channel name.");
+        prefEntries.MelonPrefsCategory.CreateEntry("forceEnabledEffects", ForceEnabledEffects.ToArray());
+        prefEntries.MelonPrefsCategory.CreateEntry("forceDisabledEffects", ForceDisabledEffects.ToArray());
 
 #if DEBUG
-        category.CreateEntry("enableIMGUI", enableIMGUI, "enableIMGUI");
-        category.CreateEntry("IMGUIUseBag", IMGUIUseBag, "IMGUIUseBag");
+        lastEffectTested = prefEntries.MelonPrefsCategory.CreateEntry(nameof(lastEffectTested), -1);
+        prefEntries.BoneMenuCategory.CreateFunctionElement("Start/Resume Test", Color.white, TestingHelper.Start);
 #endif
-        category.SaveToFile();
-        category.LoadFromFile();
+
+        prefEntries.MelonPrefsCategory.SaveToFile();
+        prefEntries.MelonPrefsCategory.LoadFromFile();
     }
 
     public static void Get()
     {
         ForceEnabledEffects = MelonPreferences.GetEntryValue<string[]>(CATEGORY_NAME, "forceEnabledEffects").ToList();
         ForceDisabledEffects = MelonPreferences.GetEntryValue<string[]>(CATEGORY_NAME, "forceDisabledEffects").ToList();
-#if DEBUG
-        enableIMGUI = MelonPreferences.GetEntryValue<bool>(CATEGORY_NAME, "enableIMGUI");
-        IMGUIUseBag = MelonPreferences.GetEntryValue<bool>(CATEGORY_NAME, "IMGUIUseBag");
-#endif
 
         Chaos.eTypesToPrefs.Clear();
         // populate eTypesToPrefs now
@@ -91,6 +93,8 @@ public static class Prefs
             (EffectTypes.HIDDEN, true),
             (EffectTypes.DONT_SYNC, !syncEffects),
             (EffectTypes.META, useMetaEffects),
+            (EffectTypes.POST_PROCESS, usePostProcessEffects),
+            (EffectTypes.POST_PROCESS_ANIMATED, usePostProcessEffects),
             (EffectTypes.DEFAULT_DISABLED, false),
         });
     }

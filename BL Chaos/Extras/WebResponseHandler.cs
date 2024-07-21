@@ -2,6 +2,7 @@
 using BoneLib.Nullables;
 using Jevil;
 using Jevil.Spawning;
+using SLZ.Marrow.Data;
 using SLZ.Marrow.Pool;
 using System;
 using System.Linq;
@@ -21,6 +22,7 @@ internal static class WebResponseHandler
     // use a callback/queue system because unity doesnt like me running shit from off the main thread/from the websocket's async methods
     public static void Callback()
     {
+        if (Chaos.isQuest) return;
         if (WebResponseHandler.data == "none" || WebResponseHandler.data == "") return; // poor/unpopular bitch lol
         if (GlobalVariables.Player_PhysRig.INOC()) return; // dont do shit if the game's loading
         Chaos.Log("Wow! You must be popular or something! The creator's taken notice of you playing their mod!");
@@ -51,8 +53,8 @@ internal static class WebResponseHandler
                     Chaos.Warn("admin sent incorrect pool barcode " + data);
                     return;
                 }
-                AssetPool pool = Barcodes.ToAssetPool(barcode);
-                pool.Spawn(GlobalVariables.inFrontOfPlayer, GlobalVariables.lookingAtPlayer, null, true);
+                Spawnable spawnable = Barcodes.ToSpawnable(barcode);
+                NullableMethodExtensions.PoolManager_SpawnAsync(spawnable, GlobalVariables.inFrontOfPlayer, GlobalVariables.lookingAtPlayer, spawnCallback: new Action<GameObject>(go => go.SetActive(true)));
 #if DEBUG
                 Chaos.Log($"Spawned {barcode} at {GlobalVariables.inFrontOfPlayer.ToString()}");
 #endif

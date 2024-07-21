@@ -1,4 +1,6 @@
-﻿using MelonLoader;
+﻿using Jevil.Patching;
+using MelonLoader;
+using System;
 using System.Collections;
 using UnityEngine;
 using Random = UnityEngine.Random;
@@ -8,15 +10,22 @@ namespace BLChaos.Effects;
 internal class RandomTimeScale : EffectBase
 {
     public RandomTimeScale() : base("Random slowmo", 90) { }
+    static bool active;
+
+    static RandomTimeScale()
+    {
+        Disable.When(() => active, typeof(Control_GlobalTime).GetMethod(nameof(Control_GlobalTime.DECREASE_TIMESCALE)));
+    }
 
     public override void OnEffectStart()
     {
-        Utilities.DisableSloMo();
+        active = true;
     }
+
     public override void OnEffectEnd()
     {
         Time.timeScale = 1;
-        Utilities.EnableSloMo();
+        active = false;
     }
 
     [AutoCoroutine]
@@ -29,8 +38,11 @@ internal class RandomTimeScale : EffectBase
         {
             float waitTime = Random.RandomRange(6, 10);
             float timeScale = times.Random();
+            byte[] data = new byte[sizeof(float) * 2];
 
-            SendNetworkData(waitTime + "," + timeScale);
+            BitConverter.GetBytes(waitTime).CopyTo(data, 0);
+            BitConverter.GetBytes(timeScale).CopyTo(data, sizeof(float));
+            SendNetworkData(data);
 
             yield return new WaitForSecondsRealtime(waitTime);
             Time.timeScale = timeScale;
@@ -40,11 +52,10 @@ internal class RandomTimeScale : EffectBase
         }
     }
 
-    public override void HandleNetworkMessage(string data)
+    public override void HandleNetworkMessage(byte[] data)
     {
-        string[] datas = data.Split(',');
-        float f1 = float.Parse(datas[0]);
-        float f2 = float.Parse(datas[1]);
+        float f1 = BitConverter.ToSingle(data, 0);
+        float f2 = BitConverter.ToSingle(data, sizeof(float));
         MelonCoroutines.Start(NetScale(f1, f2));
     }
 

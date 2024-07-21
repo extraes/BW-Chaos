@@ -1,8 +1,11 @@
-﻿using PuppetMasta;
+﻿using Jevil;
+using PuppetMasta;
 using SLZ.AI;
 
 namespace BLChaos.Effects;
 
+//todo hook aibrain awake or some shit
+[DontRegisterEffect]
 internal class CokedOutNPCs : EffectBase
 {
     public CokedOutNPCs() : base("Coked Out NPCs", 180) { }

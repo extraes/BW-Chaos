@@ -1,4 +1,5 @@
-﻿using MelonLoader;
+﻿using Jevil.Patching;
+using MelonLoader;
 using System;
 using System.Collections;
 using System.Linq;
@@ -12,15 +13,11 @@ internal class Lag : EffectBase
     public Lag() : base("Lag", 60, EffectTypes.LAGGY) { }
     [RangePreference(0, 1, 0.0625f)] static readonly float timeScale = 0.0625f;
 
-    public override void OnEffectStart()
-    {
-        Utilities.DisableSloMo();
-    }
+    static Lag() => Disable.When(() => enabled, typeof(Control_GlobalTime).GetMethod(nameof(Control_GlobalTime.DECREASE_TIMESCALE)));
+    static bool enabled;
 
-    public override void OnEffectEnd()
-    {
-        Utilities.EnableSloMo();
-    }
+    public override void OnEffectStart() => enabled = true;
+    public override void OnEffectEnd() => enabled = false;
 
     public override void HandleNetworkMessage(byte[] data)
     {

@@ -1,16 +1,22 @@
+using BoneLib.BoneMenu.Elements;
+using Jevil;
 using Jevil.IMGUI;
+using Jevil.Prefs;
 using MelonLoader;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
 
 namespace BLChaos.Effects;
 
 // todo: maybe add a "conflicting effects" list variable in case of something such as 2 effects modifying gravity
+[PreferencesFile("./ChaosConfig.cfg")]
 public class EffectBase
 {
     [Flags]
@@ -24,7 +30,9 @@ public class EffectBase
         HIDDEN = 1 << 4,
         DONT_SYNC = 1 << 5,
         META = 1 << 6,
-        DEFAULT_DISABLED = 1 << 7,
+        POST_PROCESS = 1 << 7,
+        POST_PROCESS_ANIMATED = 1 << 8,
+        DEFAULT_DISABLED = 1 << 9,
     }
 
     public enum NetMsgType : byte
@@ -35,15 +43,34 @@ public class EffectBase
         START = 3,
     }
 
+#if DEBUG
+    protected internal enum TestResult
+    {
+        NOT_IMPLEMENTED = -1,
+        INCONCLUSIVE = 0,
+        USER_INTERVENTION_NEEDED = 1,
+        FAILURE = 2,
+        SUCCESS = 3,
+    }
+
+    protected TestResult Res(bool? res) => res switch
+    {
+        true => TestResult.SUCCESS,
+        false => TestResult.FAILURE,
+        _ => TestResult.INCONCLUSIVE,
+    };
+    protected Task<TestResult> ResT(bool? res) => Task.FromResult(Res(res));
+#endif
+
     public string Name { get; }
     public int Duration { get; }
     public EffectTypes Types { get; }
-    //private static readonly Dictionary<string, MenuCategory> elements = new Dictionary<string, MenuCategory>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
-    //public MenuCategory MenuElement
-    //{
-    //    get { return elements[GetType().Name]; }
-    //    set { elements[GetType().Name] = value; }
-    //}
+    private static readonly Dictionary<string, MenuCategory> elements = new Dictionary<string, MenuCategory>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
+    public MenuCategory MenuElement
+    {
+        get { return elements[GetType().Name]; }
+        set { elements[GetType().Name] = value; }
+    }
 
     public bool Active { get; private set; }
     public float StartTime { get; private set; }
@@ -105,136 +132,12 @@ public class EffectBase
     }
 
     // gets called from BoneMenu.cs after the effect's subcategory has been created and set up
-    public void GetPreferencesFromAttrs()
+    public void RegisterPreferences()
     {
-        Type myType = GetType();
-
-#if DEBUG
-        FieldInfo[] instanceFields = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-
-        IEnumerable<FieldInfo> instancePrefs = instanceFields.Where(f => f.GetCustomAttribute<EffectPreference>() != null);
-        if (instancePrefs.Count() != 0)
-        {
-            Chaos.Warn($"This effect {Name} ({myType.Name}) declares instanced preferences, this is not allowed!");
-            Chaos.Warn($"These preferences are: ");
-            foreach (FieldInfo field in instancePrefs) Chaos.Warn(" - " + field.Name);
-        }
-#endif
-
-        FieldInfo[] staticFields = myType.GetFields(BindingFlags.NonPublic | BindingFlags.Public | BindingFlags.Static | BindingFlags.DeclaredOnly);
-        if (staticFields.Length == 0) return;
-
-        foreach (FieldInfo field in staticFields)
-        {
-            EffectPreference ep = field.GetCustomAttribute<EffectPreference>();
-            if (ep == null) continue;
-#if DEBUG
-            Chaos.Log($"Found effect preference on {myType.Name}.{field.Name}");
-#endif
-            chaosConfigCategory = chaosConfigCategory ?? EffectConfig.GetOrCreateCategory(myType.Name);
-
-            Type type = field.FieldType;
-            string readableName = Utilities.GetReadableStringFromMemberName(field.Name);
-            if (type == typeof(string))
-            {
-                MelonPreferences_Entry<string> entry = SetEntry(field, out string toSet, ep.desc);
-                //MenuElement.CreateStringElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
-            }
-            else if (type == typeof(bool))
-            {
-                MelonPreferences_Entry<bool> entry = SetEntry(field, out bool toSet, ep.desc);
-                //MenuElement.CreateBoolElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
-            }
-            else if (type == typeof(Color))
-            {
-                MelonPreferences_Entry<Color> entry = SetEntry(field, out Color toSet, ep.desc);
-                //MenuElement.CreateColorElement(readableName, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); });
-            }
-            else if (type.IsEnum)
-            {
-#if DEBUG
-                if (!string.IsNullOrEmpty(ep.desc)) Chaos.Warn($"Descriptions are not allowed for enum preferences - the description '{ep.desc}' on {myType.Name}.{field.Name} will not be put in ChaosConfig.cfg");
-#endif
-                Enum dv = (Enum)field.GetValue(null);
-                MelonPreferences_Entry<string> entry = chaosConfigCategory.CreateEntry<string>(field.Name, dv.ToString(), description: $"Options: {string.Join(", ", Enum.GetNames(type))}");
-                Enum toSet = dv; // if the two are different
-                try
-                {
-                    toSet = (Enum)Enum.Parse(type, entry.Value);
-                }
-                catch
-                {
-                    Chaos.Warn($"Failed to parse '{entry.Value}' as a value in the enum {type.Name} for the effect {myType.Name}'s preference {field.Name}");
-                    Chaos.Warn("Replacing it with its default value of " + dv);
-                    entry.Value = dv.ToString();
-                }
-                //MenuElement.CreateEnumElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val.ToString(); chaosConfigCategory.SaveToFile(false); });
-            }
-#if DEBUG
-            else
-            {
-                Chaos.Error($"{myType.Name}.{field.Name} is of un-bonemenu-able (or un-melonpreferences-able) type {type.Name}! This is no good!");
-            }
-#endif
-        }
-
-
-#if DEBUG
-
-        IEnumerable<FieldInfo> instanceRanges = instanceFields.Where(f => f.GetCustomAttribute<RangePreference>() != null);
-        if (instanceRanges.Count() != 0)
-        {
-            Chaos.Warn($"This effect {Name} ({myType.Name}) declares instanced range preferences, this is not allowed!");
-            Chaos.Warn($"These preferences are: ");
-            foreach (FieldInfo field in instanceRanges) Chaos.Warn(" - " + field.Name);
-        }
-#endif
-
-        chaosConfigCategory = chaosConfigCategory ?? EffectConfig.GetOrCreateCategory(myType.Name);
-        foreach (FieldInfo field in staticFields)
-        {
-            RangePreference rp = field.GetCustomAttribute<RangePreference>();
-            if (rp == null) continue;
-#if DEBUG
-            Chaos.Log($"Found effect range preference on {myType.Name}.{field.Name}");
-#endif
-            chaosConfigCategory = chaosConfigCategory ?? EffectConfig.GetOrCreateCategory(myType.Name);
-
-            string readableName = Utilities.GetReadableStringFromMemberName(field.Name);
-            object defaultValue = field.GetValue(null);
-            if (field.FieldType == typeof(int))
-            {
-                MelonPreferences_Entry<int> entry = SetEntry(field, out int toSet, $"{rp.low} to {rp.high}");
-                //MenuElement.CreateIntElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, (int)rp.inc, (int)rp.low, (int)rp.high);
-            }
-            else if (field.FieldType == typeof(float))
-            {
-                MelonPreferences_Entry<float> entry = SetEntry(field, out float toSet, $"{rp.low} to {rp.high}");
-                //MenuElement.CreateFloatElement(readableName, Color.white, toSet, val => { field.SetValue(null, val); entry.Value = val; chaosConfigCategory.SaveToFile(false); }, rp.inc, rp.low, rp.high);
-            }
-#if DEBUG
-            else
-            {
-                Chaos.Error($"{myType.Name}.{field.Name} is of un-range-able type {field.FieldType.Name}! This is no good!");
-            }
-            Chaos.Log("Successfully created range preference");
-#endif
-        }
-
-#if DEBUG
-        Chaos.Log($"Created {chaosConfigCategory.Entries.Count} entries in the preference category for {Name} ({myType.Name})");
-#endif
-        if (chaosConfigCategory.Entries.Count != 0) chaosConfigCategory.SaveToFile(false);
-    }
-
-    private MelonPreferences_Entry<T> SetEntry<T>(FieldInfo field, out T toSet, string desc = "")
-    {
-        T dv = (T)field.GetValue(null);
-        desc = string.Join(", ", "Default: " + dv.ToString(), desc);
-        MelonPreferences_Entry<T> entry = chaosConfigCategory.CreateEntry<T>(field.Name, dv, description: desc);
-        T ev = entry.Value;
-        toSet = dv.Equals(ev) ? ev : ev; // if the two are different
-        return entry;
+        MelonPreferences_Category myMpCategory = MelonPreferences.CreateCategory(Name);
+        myMpCategory.SetFilePath(Path.Combine(MelonUtils.UserDataDirectory, "ChaosConfig.cfg"), true, false);
+        MenuCategory myBmCategory = BoneMenu.GetMenuCategoryFor(Name);
+        Preferences.RegisterUnder(GetType(), myMpCategory, myBmCategory);
     }
 
     private void GetIndex()
@@ -274,9 +177,13 @@ public class EffectBase
     public virtual void OnEffectUpdate() { }
     public virtual void OnEffectEnd() { }
 
+#if DEBUG
+    internal virtual Task<TestResult> Test() { return Task.FromResult<TestResult>(default); }
+#endif
+
     protected void Log(UnityEngine.Object obj) => Log(obj != null ? $"<{obj.GetType().Name}> {obj.name} '{obj.ToString()}'" : "<null>");
     protected void Log(object obj) => Log(obj != null ? obj.ToString() : "<null>");
-    protected void Log(string str) => Chaos.Log($"-> [{Name}] " + str);
+    protected void Log(string str) => Chaos.Log($"-> [{Name}] {str}");
 
     public void Run()
     {
@@ -334,13 +241,10 @@ public class EffectBase
         StartTime = Time.realtimeSinceStartup;
         GlobalVariables.ActiveEffects.Add(this);
 
-        Log($"Waiting {Duration} SCALED seconds before ending");
         while (Time.realtimeSinceStartup - StartTime < Duration)
         {
             yield return null;
-            Log($"RTSS={Time.realtimeSinceStartup:F2};Dur={Duration};RUNTIME={Time.realtimeSinceStartup - StartTime:F2};CONT?={Time.realtimeSinceStartup - StartTime < Duration}");
         }
-        Log($"Done waiting {Duration} SCALED seconds");
         GlobalVariables.ActiveEffects.Remove(this);
         Active = false;
 
@@ -422,7 +326,8 @@ public class EffectBase
     private IEnumerator CoHookNetworker()
     {
         _dataRecieved += FilterNetworkData;
-        yield return new WaitForSecondsRealtime(5);
+        float realtime = 0;
+        while ((realtime += Time.unscaledDeltaTime) < 5) yield return null;
         _dataRecieved -= FilterNetworkData;
     }
 

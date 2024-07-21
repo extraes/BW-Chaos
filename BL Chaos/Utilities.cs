@@ -13,6 +13,7 @@ using BoneLib.RandomShit;
 
 namespace BLChaos;
 
+#if false
 public static class Utilities
 {
     static readonly HarmonyMethod skipMethod = new HarmonyMethod(typeof(Utilities), nameof(Utilities.SkipMethod));
@@ -286,6 +287,5 @@ public static class Utilities
 
         return res;
     }
-
-    public static void ReMain() => EffectHandler.Instance.EnsureRunningOnMainThread();
 }
+#endif

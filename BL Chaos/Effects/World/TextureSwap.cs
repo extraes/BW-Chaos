@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using Jevil;
+using System.Linq;
 using UnityEngine;
 
 namespace BLChaos.Effects;
@@ -6,7 +7,7 @@ namespace BLChaos.Effects;
 internal class TextureSwap : EffectBase
 {
     static Texture[] textures;
-    [RangePreference(0f, 1f, 0.01f)] static readonly float swapChance = 0.2f;
+    [RangePreference(0f, 1f, 0.05f)] static readonly float swapChance = 0.2f;
     public TextureSwap() : base("Swap Random Textures") { Init(); }
 
     private void Init()
@@ -37,7 +38,13 @@ internal class TextureSwap : EffectBase
                 if (mesh.GetComponent<TMPro.TMP_Text>() != null) continue;
 
                 Texture tex = textures.Random();
-                mesh.material.SetTexture("_MainTex", tex);
+                // fucking _BaseMap kys
+                mesh.material.SetTexture(Const.URP_MAINTEX_NAME, tex);
+                mesh.material.mainTexture = tex;
+#if DEBUG
+                Log($"Changing texture of mat {mesh.material.name} (shader {mesh.material.shader.name}) to {tex.name}");
+#endif
+
                 SendNetworkData($"{tex.name};{mesh.transform.GetFullPath()}");
             }
         }

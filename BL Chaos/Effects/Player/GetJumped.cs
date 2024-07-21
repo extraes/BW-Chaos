@@ -3,6 +3,7 @@ using BoneLib.Nullables;
 using Jevil;
 using Jevil.Spawning;
 using PuppetMasta;
+using SLZ.Marrow.Data;
 using SLZ.Marrow.Pool;
 using System.Linq;
 using UnityEngine;
@@ -15,7 +16,7 @@ internal class GetJumped : EffectBase
 
     public override async void OnEffectStart()
     {
-        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
+        Spawnable pool = Barcodes.ToSpawnable(JevilBarcode.NULL_BODY);
         if (isNetworked) return;
         if (pool == null) return;
         Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
@@ -28,7 +29,7 @@ internal class GetJumped : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            AssetPoolee spawnedNB = await pool.Spawn(spawnPos, spawnRot, null, true).ToTask();
+            AssetPoolee spawnedNB = await pool.SpawnAsync(spawnPos, spawnRot);
             PuppetMaster pm = spawnedNB.GetComponentInChildren<PuppetMaster>();
             spawnedNB.gameObject.SetActive(true);
             pm.StartCoroutine(pm.DisabledToActive());
@@ -38,10 +39,10 @@ internal class GetJumped : EffectBase
 
     public override async void HandleNetworkMessage(byte[] data)
     {
-        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.NULL_BODY);
+        Spawnable pool = Barcodes.ToSpawnable(JevilBarcode.NULL_BODY);
 
         (Vector3 pos, Quaternion rot) = Utilities.DebytePosRot(data);
-        AssetPoolee spawnedNB = await pool.Spawn(pos, rot, null, true).ToTask();
+        AssetPoolee spawnedNB = await pool.SpawnAsync(pos, rot);
         PuppetMaster pm = spawnedNB.GetComponentInChildren<PuppetMaster>();
         pm.StartCoroutine(pm.DisabledToActive());
     }

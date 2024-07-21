@@ -1,4 +1,6 @@
-﻿using Steamworks;
+﻿using Jevil;
+using SLZ.Marrow.Warehouse;
+using Steamworks;
 using System;
 using System.Collections;
 using System.IO;
@@ -43,12 +45,12 @@ internal class CaughtIn4K : EffectBase
 
         #region Read start menu shortcuts
 
-        // Get entries from User's start menu
+        // Get prefEntries from User's start menu
         System.Collections.Generic.List<string> shortcuts =
             (from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "*.lnk", SearchOption.AllDirectories)
              select Path.GetFileName(file)).ToList();
 
-        // In case it's a shared computer, get entries from the System's start menu too
+        // In case it's a shared computer, get prefEntries from the System's start menu too
         shortcuts.AddRange(
             from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.CommonStartMenu), "*.lnk", SearchOption.AllDirectories)
             where !shortcuts.Contains(Path.GetFileName(file))
@@ -171,7 +173,7 @@ internal class CaughtIn4K : EffectBase
         #region Check for things in game
 
         // protogen npc
-        if (Utilities.FindAll<SLZ.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("protogen")))
+        if (AssetWarehouse.Instance.GetPallets().ToArray().Any(p => p.Barcode.ID.ToLower().Contains("protogen")))
         {
             SpawnAd("man you got the mf protogen npc?");
             yield return new Wait(4f);

@@ -4,6 +4,7 @@ using MelonLoader;
 using System.Collections;
 using System.Linq;
 using Random = UnityEngine.Random;
+using Jevil;
 
 namespace BLChaos.Effects;
 

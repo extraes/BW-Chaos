@@ -1,4 +1,5 @@
-﻿using BLChaos.Effects;
+﻿#if !NOBONELIB
+using BLChaos.Effects;
 using HarmonyLib;
 using MelonLoader;
 using BoneLib;
@@ -9,32 +10,50 @@ using System.Text;
 using UnityEngine;
 using Jevil.Prefs;
 using static BLChaos.Effects.EffectBase;
+using BoneLib.BoneMenu;
+using BoneLib.BoneMenu.Elements;
+using System.IO;
+using Il2CppMK.Glow;
 
 namespace BLChaos;
 
 public static class BoneMenu
 {
-#if false
     internal static MenuCategory boneMenuEntry;
     internal static MenuCategory recentCategory;
     internal static MenuCategory effectsCategory;
     internal static MenuCategory preferencesCategory;
     internal static MenuCategory debugCategory;
-#endif
+    internal static MenuCategory[] effectsCategoriesAlphabetized = new MenuCategory[27]; // last one for numbers
+
+    internal static MenuCategory GetMenuCategoryFor(string name)
+    {
+        char firstAlphanumericChar = name.First(c => char.IsLetterOrDigit(c));
+
+        char firstCharUpper = char.ToUpper(firstAlphanumericChar);
+        int alphabetizedIdx = char.IsDigit(firstCharUpper) ? effectsCategoriesAlphabetized.Length - 1 : firstCharUpper.CompareTo('A');
+        if (effectsCategoriesAlphabetized[alphabetizedIdx] == null)
+            effectsCategoriesAlphabetized[alphabetizedIdx] = effectsCategory.CreateCategory("Effects starting with " + (char.IsDigit(firstCharUpper) ? "a number" : firstCharUpper), Color.white);
+
+        MenuCategory ret = (MenuCategory)effectsCategoriesAlphabetized[alphabetizedIdx].Elements.FirstOrDefault(mc => mc.Name == name);
+        
+        ret ??= effectsCategoriesAlphabetized[alphabetizedIdx].CreateCategory(name, Color.white); // create if doesnt exist
+        
+        return ret;
+    }
 
     public static void Register()
     {
-#if false
         Chaos.OnEffectRan += UpdateRecentEffect;
 
         if (boneMenuEntry == null)
         {
             boneMenuEntry = MenuManager.CreateCategory("Chaos", Color.white);
-            recentCategory = boneMenuEntry.CreateSubCategory("Recent Effects", Color.white);
+            recentCategory = boneMenuEntry.CreateCategory("Recent Effects", Color.white);
             boneMenuEntry.CreateFunctionElement("Reset/refilter effects", Color.white, Chaos.LiveUpdateEffects);
-            preferencesCategory = boneMenuEntry.CreateSubCategory("Preferences", Color.white);
-            effectsCategory = boneMenuEntry.CreateSubCategory("Effects", Color.gray);
-            debugCategory = boneMenuEntry.CreateSubCategory("Debug", Color.gray);
+            preferencesCategory = boneMenuEntry.CreateCategory("Preferences", Color.white);
+            effectsCategory = boneMenuEntry.CreateCategory("Effects", Color.gray);
+            debugCategory = boneMenuEntry.CreateCategory("Debug", Color.gray);
         }
 
         System.Collections.Generic.List<EffectBase> sorted = Chaos.asmEffects.OrderBy(e => e.Name).ToList();
@@ -42,10 +61,15 @@ public static class BoneMenu
         {
             // don't let the oculus players activate effects that use steam
             if (Chaos.isSteamVer && effect.Types.HasFlag(EffectTypes.USE_STEAM)) continue;
-
-            MenuCategory ecat = effectsCategory.CreateSubCategory(effect.Name, Color.white);
+            
+            // way overbuilt method of sorting categories. this could (should) be abstracted out into another method.
+            char firstChar = char.ToUpper(effect.Name.First(c => char.IsLetterOrDigit(c)));
+            int idx = char.IsDigit(firstChar) ? effectsCategoriesAlphabetized.Length - 1 : firstChar.CompareTo('A');
+            if (effectsCategoriesAlphabetized[idx] == null)
+                effectsCategoriesAlphabetized[idx] = effectsCategory.CreateCategory("Effects starting with " + (char.IsDigit(firstChar) ? "a number" : firstChar), Color.white);
+            
+            MenuCategory ecat = effectsCategoriesAlphabetized[idx].CreateCategory(effect.Name, Color.white);
             effect.MenuElement = ecat;
-
 
             // As usual, make a force runner
             ecat.CreateFunctionElement("Force run", Color.white, () =>
@@ -59,9 +83,7 @@ public static class BoneMenu
             ecat.CreateBoolElement("Force enable/disable", Color.white, EffectHandler.allEffects.ContainsKey(effect.Name), addEffect =>
             {
 #if DEBUG
-                
-                
-                Chaos.Log("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is " + (EffectHandler.allEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
+                Chaos.Log("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is currently " + (EffectHandler.allEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
 #endif
                 if (addEffect)
                 {
@@ -80,113 +102,14 @@ public static class BoneMenu
                     EffectHandler.allEffects.Remove(effect.Name);
                     if (Chaos.IsEffectViable(effect.Types)) Prefs.ForceDisabledEffects.Add(effect.Name);
                 }
-                (ecat.elements[1] as BoolElement).SetValue(EffectHandler.allEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
+                //(ecat.Elements[1] as BoolElement).set(EffectHandler.allEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
             });
 
             ecat.CreateFunctionElement("Flags: " + effect.Types, Color.gray, () => { });
 
-            effect.GetPreferencesFromAttrs();
+            effect.RegisterPreferences();
         }
-
-        #region Manually populate bonemenu with MelonPreferences
-
-        // Start the entanglement module, assuming it isn't started already
-        if (!Prefs.syncEffects) preferencesCategory.CreateFunctionElement("Start entanglement module", Color.white, () =>
-        {
-            // delete this menu element when its ran
-            preferencesCategory.elements.Remove(preferencesCategory.elements.FirstOrDefault(e => e.displayText == "Start entanglement module"));
-            Extras.EntanglementSyncHandler.Init();
-            Prefs.syncEffects.Value = !Prefs.syncEffects;
-            Prefs.syncEffects.Save();
-            Chaos.LiveUpdateEffects();
-        });
-
-        preferencesCategory.CreateBoolElement("Random on no votes", Color.white, Prefs.randomOnNoVotes, b =>
-        {
-            Prefs.randomOnNoVotes.Value = b;
-            Prefs.randomOnNoVotes.Save();
-        });
-
-        if (Prefs.enableRemoteVoting) preferencesCategory.CreateBoolElement("Proportional voting", Color.white, Prefs.proportionalVoting, b =>
-        {
-            MelonPreferences.SetEntryValue<bool>("BW_Chaos", "ignoreRepeatVotesFromSameUser", b);
-            Prefs.ignoreRepeatVotes.Value = b;
-            Prefs.ignoreRepeatVotes.Save();
-            GlobalVariables.WatsonClient.SendAsync(Encoding.UTF8.GetBytes("ignorerepeatvotes:" + b)).GetAwaiter().GetResult();
-        });
-
-        preferencesCategory.CreateBoolElement("Show candidate effects on screen", Color.white, Prefs.showCandidatesOnScreen, b =>
-        {
-            Prefs.showCandidatesOnScreen.Value = b;
-            Prefs.showCandidatesOnScreen.Save();
-            // this doesn't necessitate reloading effects
-        });
-
-        preferencesCategory.CreateBoolElement("Use gravity effects", Color.white, Prefs.useGravityEffects, b =>
-        {
-            Prefs.useGravityEffects.Value = b;
-            Prefs.useGravityEffects.Save();
-            Chaos.LiveUpdateEffects();
-        });
-
-        preferencesCategory.CreateBoolElement("Use laggy effects", Color.white, Prefs.useLaggyEffects, b =>
-        {
-            Prefs.useLaggyEffects.Value = b;
-            Prefs.useLaggyEffects.Save();
-            Chaos.LiveUpdateEffects();
-        });
-
-        preferencesCategory.CreateBoolElement("Modulate effect time", Color.white, Prefs.useLaggyEffects, b =>
-        {
-            Prefs.modulateEffectTime.Value = b;
-            Prefs.modulateEffectTime.Save();
-        });
-
-        preferencesCategory.CreateBoolElement("Use bag randomizer", Color.white, Prefs.useLaggyEffects, b =>
-        {
-            Prefs.useBagRandomizer.Value = b;
-            Prefs.useBagRandomizer.Save();
-        });
-
-        preferencesCategory.CreateIntElement("Max active effects", Color.white, Prefs.MaxActiveEffects, i =>
-        {
-            Prefs.maxActiveEffects.Value = i;
-            Prefs.maxActiveEffects.Save();
-        });
-
-        preferencesCategory.CreateStringElement("Effect on scene load", Color.white, Prefs.effectOnSceneLoad, i =>
-        {
-            Prefs.effectOnSceneLoad.Value = i;
-            Prefs.effectOnSceneLoad.Save();
-        });
-
-        if (Chaos.isSteamVer) preferencesCategory.CreateBoolElement("Use Steam profile effects", Color.white, Prefs.useSteamProfileEffects, b =>
-        {
-            Prefs.useSteamProfileEffects.Value = b;
-            Prefs.useSteamProfileEffects.Save();
-            Chaos.LiveUpdateEffects();
-        });
-
-        preferencesCategory.CreateBoolElement("Use meta effects", Color.white, Prefs.useMetaEffects, b =>
-        {
-            Prefs.useMetaEffects.Value = b;
-            Prefs.useMetaEffects.Save();
-            Chaos.LiveUpdateEffects();
-        });
-
-        preferencesCategory.CreateBoolElement("Toggle wrist UI", Color.white, Prefs.showWristUI, b =>
-        {
-            Prefs.showWristUI.Value = b;
-            Prefs.showWristUI.Save();
-        });
-
-        preferencesCategory.CreateBoolElement("Toggle candidates on screen", Color.white, Prefs.showCandidatesOnScreen, b =>
-        {
-            Prefs.showCandidatesOnScreen.Value = b;
-            Prefs.showCandidatesOnScreen.Save();
-        });
-
-        #endregion
+        effectsCategory.Elements.Sort((me1, me2) => StringComparer.InvariantCultureIgnoreCase.Compare(me1.Name, me2.Name));
 
         #region Populate debug category
 
@@ -194,6 +117,23 @@ public static class BoneMenu
         debugCategory.CreateFunctionElement("Log all enabled effects", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log(e.Value.Name)); });
         debugCategory.CreateFunctionElement("Log effect syncing indices", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"{e.Value.Name}: {e.Value.EffectIndex}")); });
         debugCategory.CreateFunctionElement("Log effect type names (useful for ChaosConfig)", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"Effect '{e.Value.Name}' = type '{e.Value.GetType().Name}'")); });
+
+#if DEBUG
+        debugCategory.CreateFunctionElement("Run all tests", Color.white, async () =>
+        {
+            string basePath = Path.Combine(MelonUtils.UserDataDirectory, "Chaos", "TestResult");
+            string chaosDir = Path.GetDirectoryName(basePath);
+
+            if (!Directory.Exists(chaosDir)) Directory.CreateDirectory(chaosDir);
+            
+            Vector3 startPos = GlobalVariables.Player_RigManager.transform.position;
+            foreach (var kvp in EffectHandler.allEffects)
+            {
+                GlobalVariables.Player_RigManager.Teleport(startPos, true);
+                //todo: finish
+            }
+        });
+#endif
         debugCategory.CreateFunctionElement("Log all preferences (w/o token & channel)", Color.white, () =>
         {
             foreach (System.Reflection.PropertyInfo prop in typeof(Prefs).GetProperties(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
@@ -202,10 +142,10 @@ public static class BoneMenu
                 {
                     Chaos.Log($"{prop.Name}: {prop.GetValue(null)}");
                 }
-                else if (prop.PropertyType.GetInterfaces().Any(t => t == typeof(IEnumerable)))
+                else if (prop.GetValue(null) is IEnumerable enumerable)
                 {
                     Chaos.Log(prop.Name + ": ");
-                    foreach (object item in (IEnumerable)prop)
+                    foreach (object item in enumerable)
                     {
                         Chaos.Log(" - " + (item?.ToString() ?? "<null>"));
                     }
@@ -213,62 +153,14 @@ public static class BoneMenu
             }
         });
 
-#if DEBUG
-        // why put this in chaos? fucking beats me
-        Action act = new Action(() => GameObject.FindObjectOfType<HotKeyEnable>().Spawn());
-        debugCategory.CreateFunctionElement("UIRig.popUpMenu.addFunMenu", Color.gray, () => GameObject.FindObjectOfType<StressLevelZero.Rig.UIRig>().popUpMenu.AddDevMenu(act));
-#endif
-
-        HarmonyMethod[] logMethods = new HarmonyMethod[]
-        {
-            new HarmonyMethod(typeof(Chaos), nameof(Chaos.Warn), new Type[] { typeof(string) }),
-            new HarmonyMethod(typeof(Chaos), nameof(Chaos.Warn), new Type[] { typeof(object) }),
-            new HarmonyMethod(typeof(Chaos), nameof(Chaos.Error), new Type[] { typeof(string) }),
-            new HarmonyMethod(typeof(Chaos), nameof(Chaos.Error), new Type[] { typeof(object) }),
-        };
-        HarmonyMethod[] postfixes = new HarmonyMethod[]
-        {
-            new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.WarnPostfix), new Type[] { typeof(string) }),
-            new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.WarnPostfix), new Type[] { typeof(object) }),
-            new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.ErrorPostfix), new Type[] { typeof(string) }),
-            new HarmonyMethod(typeof(BoneMenu), nameof(BoneMenu.ErrorPostfix), new Type[] { typeof(object) }),
-        };
-        debugCategory.CreateFunctionElement("Enable warn/error notifications", Color.white, () =>
-        {
-            for (int i = 0; i < logMethods.Length; i++)
-            {
-                HarmonyMethod logMethod = logMethods[i];
-                HarmonyMethod postfix = postfixes[i];
-                Chaos.Instance.HarmonyInstance.Patch(logMethod.method, null, postfix);
-            }
-            Notifications.SendNotification("Enabled notifications", 3);
-        });
-
         #endregion
-#endif
     }
 
-#if false
     // shortcut to recently ran effects
     private static void UpdateRecentEffect(EffectBase effect)
     {
-        recentCategory.RemoveElement(effect.Name);
-        recentCategory.AddElement(effect.MenuElement);
+        recentCategory.Elements.Remove(effect.MenuElement);
+        recentCategory.Elements.Add(effect.MenuElement);
     }
-
-    private static NotificationData lastNotif;
-    private static void WarnPostfix(object obj) => WarnPostfix(obj?.ToString() ?? "null");
-    private static void WarnPostfix(string str)
-    {
-        lastNotif?.End();
-        lastNotif = Notifications.SendNotification("WARN - " + str, 5, Color.yellow);
-    }
-
-    private static void ErrorPostfix(object obj) => ErrorPostfix(obj?.ToString() ?? "null");
-    private static void ErrorPostfix(string str)
-    {
-        lastNotif?.End();
-        lastNotif = Notifications.SendNotification("ERROR - " + str, 5, Color.red);
-    }
-#endif
 }
+#endif

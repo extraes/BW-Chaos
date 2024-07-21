@@ -1,6 +1,8 @@
 ﻿using BLChaos.Effects;
+using Jevil;
 using Jevil.IMGUI;
 using MelonLoader;
+using SLZ.WebSocket;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -23,7 +25,8 @@ public class EffectHandler : MonoBehaviour
     public static bool advanceTimer = false;
     public float secondsEachEffect = 30;
 
-    private float updateRate = 0.25f;
+    private static readonly Regex wristTextRegex = new Regex(@".*HIDDEN", RegexOptions.Compiled | RegexOptions.ECMAScript);
+    private float updateRate = 1f;
     private int effectsRan = 0;
     private float currentTimerValue;
     private int numberFlip = 0;
@@ -94,8 +97,9 @@ public class EffectHandler : MonoBehaviour
         wristText.verticalOverflow = VerticalWrapMode.Overflow;
 
         wristCanvas.transform.Reset();
-        wristCanvas.transform.localPosition = new Vector3(0f, -0.1f, 0f);
+        wristCanvas.transform.localPosition = new Vector3(0f, 0.1f, 0f);
         wristCanvas.transform.localScale = new Vector3(0.001f, 0.001f, 0.001f);
+        wristCanvas.transform.rotation = Quaternion.Euler(0, 0, 180);
 
         // Start the timer immediately
         timerToken = MelonCoroutines.Start(Timer());
@@ -126,6 +130,8 @@ public class EffectHandler : MonoBehaviour
 
     public void Update()
     {
+        if (wristText.INOC()) return;
+
         string newString = GlobalVariables.PreviousEffects.Take(7 - GlobalVariables.ActiveEffects.Count).Join("\n") + "\n";
         //newString += GlobalVariables.PreviousEffects.Join("\n");
         // Hide hidden effects (Like FakeCrash) from the player
@@ -146,7 +152,8 @@ public class EffectHandler : MonoBehaviour
         overlayText.text = newString;
         // Hide all hidden effects, replace them with Immortality (because its relatively hard to discover)
         // this makes all of them change at the same time. dont care.
-        wristText.text = Regex.Replace(newString, @".*HIDDEN", hiddenEffectName, RegexOptions.Compiled | RegexOptions.ECMAScript);
+        
+        wristText.text = wristTextRegex.Replace(newString, hiddenEffectName);
     }
 
     public void OnTriggerEnter(Collider col)
@@ -166,9 +173,11 @@ public class EffectHandler : MonoBehaviour
     {
         while (true)
         {
-            yield return new WaitForSecondsRealtime(updateRate);
+            float realtime = 0;
+            do yield return null;
+            while ((realtime += Time.unscaledDeltaTime) < updateRate);
             // Timescale being 0 usually means the player is in the steamvr menu, we dont want anything happening then.
-            if (!advanceTimer || Time.timeScale == 0 || Time.deltaTime > 0.1f) continue;
+            if (!advanceTimer || Time.timeScale == 0 || Time.unscaledDeltaTime > 0.1f) continue;
 
             #region Set vote UI elements
 

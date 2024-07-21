@@ -1,5 +1,6 @@
 ﻿using BoneLib;
 using HarmonyLib;
+using Jevil;
 using PuppetMasta;
 using SLZ.Interaction;
 using SLZ.Rig;
@@ -85,7 +86,7 @@ internal class SimonSays : EffectBase
         {
             KeyValuePair<SimonSaysType, string> pair = kv.Random();
             SimonSaysType sst = pair.Key;
-            string mName = Utilities.GetReadableStringFromMemberName(pair.Value);
+            string mName = Utilities.GenerateFriendlyMemberName(pair.Value);
             bool didSimonSay = Random.value > 0.5f;
             Vector3 startPos = GlobalVariables.Player_PhysRig.torso.transform.position;
 

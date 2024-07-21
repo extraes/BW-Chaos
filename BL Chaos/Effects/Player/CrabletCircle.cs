@@ -2,6 +2,7 @@
 using Jevil;
 using Jevil.Spawning;
 using PuppetMasta;
+using SLZ.Marrow.Data;
 using SLZ.Marrow.Pool;
 using System.Linq;
 using UnityEngine;
@@ -14,7 +15,7 @@ internal class CrabletCircle : EffectBase
 
     public override async void OnEffectStart()
     {
-        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
+        Spawnable pool = Barcodes.ToSpawnable(JevilBarcode.CRABLET);
         if (isNetworked) return;
         Vector3 playerPos = GlobalVariables.Player_PhysRig.feet.transform.position;
 
@@ -26,8 +27,8 @@ internal class CrabletCircle : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            AssetPoolee spawnedNB = await pool.Spawn(spawnPos, spawnRot, null, true).ToTask();
-            Utilities.ReMain();
+            AssetPoolee spawnedNB = await pool.SpawnAsync(spawnPos, spawnRot);
+            spawnedNB.gameObject.SetActive(true);
             PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();
             poppet.StartCoroutine(poppet.DisabledToActive());
 
@@ -37,9 +38,9 @@ internal class CrabletCircle : EffectBase
 
     public override async void HandleNetworkMessage(byte[] data)
     {
-        AssetPool pool = Barcodes.ToAssetPool(JevilBarcode.CRABLET);
+        Spawnable pool = Barcodes.ToSpawnable(JevilBarcode.CRABLET);
 
-        AssetPoolee spawnedNB = await pool.Spawn(Vector3.zero, Quaternion.identity, null, false).ToTask();
+        AssetPoolee spawnedNB = await pool.SpawnAsync(Vector3.zero, Quaternion.identity);
         spawnedNB.transform.DeserializePosRot(data);
         spawnedNB.gameObject.SetActive(true);
         PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();

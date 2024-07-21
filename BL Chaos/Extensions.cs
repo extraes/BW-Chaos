@@ -1,4 +1,6 @@
-﻿using SLZ.Utilities;
+﻿using Jevil;
+using SLZ.Props.Weapons;
+using SLZ.Utilities;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -62,7 +64,7 @@ public static class Extensions
     public static void UseEmbeddedResource(this System.Reflection.Assembly assembly, string resourcePath, Action<byte[]> whatToDoWithResource)
     {
         using System.IO.Stream stream = assembly.GetManifestResourceStream(resourcePath);
-        using System.IO.MemoryStream mStream = new((int)stream.Length); // Don't overallocate memory to the mstream (?).
+        using System.IO.MemoryStream mStream = new((int)stream.Length); // Don't overallocate memory to the mstream (?)
         // Copy the stream to a memorystream. Why? Don't know, ask .NET 4.7.2 designers.
         stream.CopyTo(mStream);
         whatToDoWithResource(mStream.ToArray());
@@ -164,12 +166,24 @@ public static class Extensions
 #if DEBUG
         if (!dontWarn) if (serializedPosRot.Length != Const.SizeV3 * 2) Chaos.Warn("Deserializing posrot of unexpected length " + serializedPosRot.Length + "!!! This could be bad!!!");
 #endif
-        t.position = Utilities.DebyteV3(serializedPosRot);
-        t.rotation = Quaternion.Euler(Utilities.DebyteV3(serializedPosRot, sizeof(float) * 3));
+        Vector3 pos = Utilities.DebyteV3(serializedPosRot);
+        Quaternion rot = Quaternion.Euler(Utilities.DebyteV3(serializedPosRot, sizeof(float) * 3));
+        t.SetPositionAndRotation(pos, rot);
     }
 
     public static void PlayClip(this AudioPlayer player, AudioClip clip, float? volume = null)
     {
         BoneLib.Nullables.NullableMethodExtensions.Play(player, clip, player._source.outputAudioMixerGroup, volume, null, null, null);
+    }
+
+    public static void ForceFireable(this Gun gun)
+    {
+        // thx swipez https://discord.com/channels/563139253542846474/656631681406468137/1069485703429374092
+        bool magState_inoc = gun.MagazineState is null || gun.MagazineState.WasCollected || gun.MagazineState == null;
+        if (!magState_inoc) gun.MagazineState.Refill();
+        else gun.InstantLoad();
+
+        gun.CeaseFire();
+        gun.Charge();
     }
 }

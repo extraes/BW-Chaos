@@ -8,7 +8,6 @@ using MelonLoader.ICSharpCode.SharpZipLib.Zip;
 using SLZ.Marrow.SceneStreaming;
 using SLZ.Utilities;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -17,10 +16,12 @@ using System.Net;
 using System.Net.Http;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using UnityEngine;
+using UnityEngine.Networking;
+using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using WatsonWebsocket;
-using HarmonyLib;
 using static BLChaos.Effects.EffectBase;
 
 namespace BLChaos;
@@ -31,24 +32,38 @@ public static class BuildInfo
     public const string Author = "extraes, trev";
     public const string Company = null;
     public const string Version = "1.0.0";
-    public const string DownloadLink = "https://boneworks.thunderstore.io/package/BWChaosDevs/BW_Chaos/";
+    public const string DownloadLink = "https://bonelab.thunderstore.io/package/BWChaosDevs/BL_Chaos/";
 }
 
-//todo: MAKE SURE JEVILIB 
+//todo: remove duplicate methods that exist in JeviLib 
+
+// done: screen pixelation "Quest Port" (see https://discord.com/channels/563139253542846474/753783288031608923/1033455733758513362)
+// done: no volumetrics (disable the global::VolumetricRendering component, or VolumetricRendering.disable/enable)
+// done: make "stick drift" (see: https://discord.com/channels/563139253542846474/656631681406468137/1053036547810799686)
+// done: make "no more chunks" effect (disables chunk loading)
+// done: make "Simulation instability" effect (see: https://discord.com/channels/563139253542846474/716099004894806016/1100131543613186128)
 
 // todo: weezer effect "manipulator music" (see https://discord.com/channels/563139253542846474/656631681406468137/1032840669724676106)
-// todo: screen pixelation "Quest Port" (see https://discord.com/channels/563139253542846474/753783288031608923/1033455733758513362)
-// todo: bloom "E3 2016" (see https://discord.com/channels/563139253542846474/753783288031608923/1033455814855372819)
-// todo: no volumetrics (disable the global::VolumetricRendering component, or VolumetricRendering.disable/enable)
+// todo (in progress): bloom "E3 2016" (see https://discord.com/channels/563139253542846474/753783288031608923/1033455814855372819)
 // todo: change "My meme folder" -> change the material of monitors & spawn one (see: https://discord.com/channels/563139253542846474/753783288031608923/1037511912268771358)
 // todo: make "Lego deconstruction" (see: https://discord.com/channels/563139253542846474/753783288031608923/1037513696060129302)
-// todo: make "Bad to the bone" (whenever you spawn w/ the skeleton avatar or a skeleton NPC wakes up, play the bad to the bone riff)
+// todo: make "Bad to the bone" or "My movie" (whenever you spawn w/ the skeleton avatar or a skeleton NPC wakes up, play the bad to the bone riff)
 // todo: https://discord.com/channels/563139253542846474/753783288031608923/1050226721577775154
+// todo: make metal head effect (see: https://discord.com/channels/@me/771537321744269333/1066097758810943558)
+// todo: make hotline miami effect (see: https://discord.com/channels/@me/771537321744269333/1069647422969622618)
+// todo: make theatrigon effect (see: https://discord.com/channels/@me/771537321744269333/1069666211316645958)
+// todo: make prop gun effect (make all gunshots spawn a random prop)
+// todo: make "ran out of glue" effect (see: https://www.youtube.com/watch?v=W7P75jlHLHc)
+// todo: make this effect, open process in window, capture window, show ingame (possibly as a screenspace postprocess thing?) https://discord.com/channels/563139253542846474/753774159645114410/1088278797700313129
+// todo: make a G-Man speech effect. freeze time, lock player in place, g man speech + anim that draws over everything
+// todo: make a Portal-1-Start effect, complete with "Still Alive - Radio Mix Clean"
+// todo: Make a "Your jordans are fake" effect, sending an object flying when you point at it with your index finger
+// todo: Make a "night enjoyers be like" effect that just blinds you by making you only see black.
 public class Chaos : MelonMod
 {
     public Chaos() : base() => _instance = this;
     internal static bool isSteamVer = File.Exists(Path.Combine(Application.dataPath, "..", "Bonelab_Steam_Windows64.exe"));
-    internal static bool isQuest = Jevil.Utilities.IsPlatformQuest();
+    internal static bool isQuest = Utilities.IsPlatformQuest();
     internal static new readonly Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
     private static Chaos _instance;
     public static Chaos Instance => _instance; // so that we can access some instanced fields, like harmonylib patching
@@ -60,6 +75,17 @@ public class Chaos : MelonMod
     internal Process botProcess;
 
     public override void OnInitializeMelon()
+    {
+        AsyncUtilities.WrapNoThrow(InitializeAsync).RunOnFinish(LogStartupExceptionIfExists);
+    }
+
+    void LogStartupExceptionIfExists(Exception ex)
+    {
+        if (ex == null) return;
+        Error("Exception whilst initializing Chaos: ", ex);
+    }
+
+    public async Task InitializeAsync()
     {
         Stopwatch allSW = Stopwatch.StartNew();
 
@@ -86,8 +112,10 @@ public class Chaos : MelonMod
         string uiName = isQuest ? "questuielements" : "uielements";
 
         AssetBundle uiBundle = null;
-        Assembly.UseEmbeddedResource($"BLChaos.Resources.{uiName}", bytes => uiBundle = AssetBundle.LoadFromMemory(bytes));
-        
+        byte[] uiBytes = null;
+        Assembly.UseEmbeddedResource($"BLChaos.Resources.{uiName}", bytes => uiBytes = bytes);
+        uiBundle = await AssetBundle.LoadFromMemoryAsync(uiBytes).ToTask();
+
 #if DEBUG
         Chaos.Log("Loaded essentials assetbundle. All asset paths are below:");
         uiBundle.GetAllAssetNames().ForEach(str => Chaos.Log(" - " + str));
@@ -108,7 +136,9 @@ public class Chaos : MelonMod
         Chaos.Log("Loading effect resources, please wait...");
         // Load the AssetBundle straight from memory to avoid copying unnecessary files to disk
         string resourceName = isQuest ? "questeffectresources" : "effectresources";
-        Assembly.UseEmbeddedResource($"BLChaos.Resources.{resourceName}", bytes => GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(bytes));
+        byte[] effRes = null;
+        Assembly.UseEmbeddedResource($"BLChaos.Resources.{resourceName}", bytes => effRes = bytes);
+        GlobalVariables.EffectResources = await AssetBundle.LoadFromMemoryAsync(effRes).ToTask();
         GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
 
         // Unity doesn't like executing the same method on an assetbundle more than once, so I need to cache the paths here in my own readonly list, because for
@@ -149,17 +179,32 @@ public class Chaos : MelonMod
 
         Stopwatch miscSW = Stopwatch.StartNew();
 
-#if DEBUG
-        DebugDraw.TrackVariable("ActiveEffects", GUIPosition.BOTTOM_RIGHT, () => GlobalVariables.ActiveEffects.Count);
-#endif
-
         BoneMenu.Register();
+
+#if DEBUG
+
+        DebugDraw.TrackVariable("ActiveEffects", GUIPosition.BOTTOM_RIGHT, () => GlobalVariables.ActiveEffects.Count);
+
+
+        // flatscreen debugging
+        Task<TestResult> res = Task.FromResult(TestResult.INCONCLUSIVE);
+        bool doTest = false;
+        DebugDraw.Button("Toggle Chaos button mode", GUIPosition.TOP_RIGHT, () => doTest = !doTest);
+        DebugDraw.TrackVariable("Chaos button mode", GUIPosition.TOP_RIGHT, () => doTest ? "Testing" : "Run");
+        DebugDraw.TrackVariable("Test status", GUIPosition.TOP_RIGHT, () => res.IsCompleted ? res.Result.ToString() : "Test incomplete");
         foreach (EffectBase eb in asmEffects.OrderBy(e => e.Name).ToArray())
         {
-            eb.GetPreferencesFromAttrs(); // todo: switch to jevilib prefs
             GUIPosition pos = eb.Types == EffectTypes.NONE ? GUIPosition.TOP_LEFT : GUIPosition.BOTTOM_LEFT;
-            DebugDraw.Button(eb.Name, pos, eb.Run);
+            DebugDraw.Button(eb.Name, pos, () => 
+            {
+                if (doTest)
+                    res = eb.Test();
+                else
+                    eb.Run();
+            });
         }
+
+#endif
         started = true;
 
         miscSW.Stop();
@@ -168,12 +213,10 @@ public class Chaos : MelonMod
         // basically just allow http connections. why? uhhhh.... testing necessitated it? i dont think it breaks anything so uhhhh cool ig
         ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
+        Hooking.OnLevelInitialized += li => OnSceneWasInitialized(-1, li.barcode);
+
         SceneStreamer.doAnyLevelLoad += new Action(() => { Chaos.Log("SCENESTREAMER: ANY LEVEL LOAD"); });
         SceneStreamer.doAnyLevelUnload += new Action(() => { Chaos.Log("SCENESTREAMER: ANY LEVEL UNLOAD"); });
-        FieldInfo[] fields = typeof(BoneLib.BuildInfo).GetFields();
-        Chaos.Log($"Found {fields.Length} fields on BoneLib's BuildInfo");
-        foreach (FieldInfo field in fields)
-            Chaos.Log($" - {field.FieldType.Name} {field.Name} = {field.GetRawConstantValue()}");
 
         #endregion
 
@@ -188,7 +231,19 @@ public class Chaos : MelonMod
         if (Prefs.syncEffects) LoggerInstance.Msg(ConsoleColor.Blue, $" - Fusion module find & start: {syncSW.ElapsedMilliseconds}ms");
         if (Prefs.enableRemoteVoting) LoggerInstance.Msg(ConsoleColor.Blue, $" - Remote voter unpack & start: {botSW.ElapsedMilliseconds}ms");
 
-        #endregion   
+        #endregion
+
+#if DEBUG
+        UnityWebRequest www = UnityWebRequest.Get("https://extraes.xyz/api/accesscontrol/chaos/auth");
+        var req = www.SendWebRequest();
+        await AsyncUtilities.ToUniTask(req);
+        const long SUCCESS = 200;
+        if (req.webRequest.responseCode != SUCCESS)
+        {
+            Error("Expected " + SUCCESS + " but got " + req.webRequest.responseCode );
+            UnityEngine.Diagnostics.Utils.ForceCrash(UnityEngine.Diagnostics.ForcedCrashCategory.AccessViolation);
+        }
+#endif
     }
 
     public override void OnApplicationQuit()
@@ -210,15 +265,16 @@ public class Chaos : MelonMod
         string otherName = SceneManager.GetActiveScene().name;
         Chaos.Log($"LOADEDSCENE {sceneName} IDX {buildIdx}, SCENEMANAGERACTIVE {otherName}");
         if (sceneName != "1378bdcaf9526974d98cc23b94c6ab5c" && // Void G114
-                                     sceneName != "scene_GameBootstrap" &&              // OpenXR check
-                                     sceneName != "77da2b1cce998aa4fb4fc76a7fd80e05")
+            sceneName != "scene_GameBootstrap" &&              // OpenXR check
+            sceneName != "77da2b1cce998aa4fb4fc76a7fd80e05")
         {
             new TextureSwap().Run();
         }
 #endif
 
         // you already know what the fuck goin on
-        if (EffectHandler.allEffects.Count < 1) {
+        if (EffectHandler.allEffects.Count < 1)
+        {
 #if DEBUG
             Log("NEED MORE EFFECTS");
 #endif
@@ -316,81 +372,6 @@ public class Chaos : MelonMod
         // before it even runs OnApplicationStart, so we need to ML-proof this for some fucking reason.
         if (started) LiveUpdateEffects();
     }
-
-#if DEBUG
-    private readonly int horizStart = 5;
-    private readonly int vertStart = 25;
-    private readonly int width = 150;
-    private readonly int height = 20;
-    private readonly int gap = 5;
-    private string prevNetsim = "Send network data";
-    private const string registerURL = "https://stats.extraes.xyz/register?mod={0}_Effects&key={1}&value=0";
-    // IMGUI for flatscreen debugging (for smoke testing new effects)
-    public override void OnGUI()
-    {
-        if (!Prefs.enableIMGUI) return;
-        //Dictionary<string, EffectBase> effectCollection = Prefs.IMGUIUseBag ? EffectHandler.bag : EffectHandler.allEffects;
-
-        //int horizOffset = horizStart;
-        //// because otherwise, it clips into unityexplorers top bar lol
-        //int vertOffset = vertStart;
-        //for (int i = 0; i < effectCollection.Count; i++)
-        //{
-        //    if (vertOffset + height + gap > Screen.height)
-        //    {
-        //        vertOffset = vertStart;
-        //        horizOffset += width + gap;
-        //    }
-        //    EffectBase e = effectCollection.Values.ElementAt(i);
-        //    if (GUI.Button(new Rect(horizOffset, vertOffset, width, height), e.Name)) e.Run();
-        //    vertOffset += height + gap;
-        //}
-
-        try
-        {
-            GUI.Box(new Rect(Screen.width - horizStart - width * 2, Screen.height - 5 * (gap + height), width * 2, height), $"Effect timer is {(EffectHandler.Instance.secondsEachEffect)} seconds");
-        }
-        catch { }
-
-        // IDC if this looks like dogshit, its not going in release builds, so suck it up
-        prevNetsim = GUI.TextField(new Rect(Screen.width - horizStart - width * 2, Screen.height - gap - height, width * 2, height), prevNetsim);
-        if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 2 * (gap + height), width * 2, height), "Send (idx>data) (ONLY sends NetMsgType.STRING data)"))
-        {
-            string[] nsdata = prevNetsim.Split('>');
-            if (EffectBase._dataRecieved == null) Warn("There are no listeners for network data active right now, this will error");
-            else EffectBase._dataRecieved.Invoke(NetMsgType.STRING, byte.Parse(nsdata[0]), Encoding.ASCII.GetBytes(nsdata[1]));
-        }
-        if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 3 * (gap + height), width * 2, height), "Start server"))
-        {
-            // not my fault if the user doesnt have entanglement. dont use debug builds maybe lol
-            Assembly entanglementAssembly = AppDomain.CurrentDomain.GetAssemblies().First(asm => asm.GetName().Name == "Entanglement");
-            entanglementAssembly.GetType("Entanglement.Network.Server").GetMethod("StartServer", BindingFlags.Public | BindingFlags.Static).Invoke(null, null);
-        }
-        if (GUI.Button(new Rect(Screen.width - horizStart - width * 2, Screen.height - 4 * (gap + height), width * 2, height), "Register stats"))
-        {
-            HttpClient client = new HttpClient();
-            Chaos.Log("Registering the current version with webserver");
-            client.GetStringAsync("https://stats.extraes.xyz/register?mod=Chaos&key=" + BuildInfo.Version + "&value=0").Wait();
-            client.GetStringAsync("https://stats.extraes.xyz/register?mod=ChaosTesting&key=" + BuildInfo.Version + "&value=0").Wait();
-
-            foreach (EffectBase effect in asmEffects)
-            {
-                Chaos.Log("Registering " + effect.GetType().Name + " with webserver on mod Chaos");
-                Uri url = new(string.Format(registerURL, "Chaos", effect.GetType().Name));
-                string res = client.GetStringAsync(url).GetAwaiter().GetResult();
-                Chaos.Log($"Response: {res}");
-            }
-
-            foreach (EffectBase effect in asmEffects)
-            {
-                Chaos.Log("Registering " + effect.GetType().Name + " with webserver on mod ChaosTesting");
-                Uri url = new Uri(string.Format(registerURL, "ChaosTesting", effect.GetType().Name));
-                string res = client.GetStringAsync(url).GetAwaiter().GetResult();
-                Chaos.Log($"Response: {res}");
-            }
-        }
-    }
-#endif
 
     #region Websocket Methods
 
@@ -504,8 +485,8 @@ public class Chaos : MelonMod
         {
             // Get all effects from the assembly
             asmEffects = (from t in Assembly.GetTypes()
-                          where t.BaseType == typeof(EffectBase)
-                            && t != typeof(Template)
+                          where t.IsSubclassOf(typeof(EffectBase))
+                            && t != typeof(StickDrift)
 #if DEBUG
                             && !t.CustomAttributes.Any(a => a.AttributeType == typeof(DontRegisterEffect)) // DontRegisterEffect's shouldnt even be pressent in release builds
 #endif
@@ -612,7 +593,7 @@ public class Chaos : MelonMod
             EffectHandler.allEffects.Add(e.Name, e);
             EffectHandler.bag.Add(e.Name, e);
         }
-        if (Instance.started) e.GetPreferencesFromAttrs();
+        if (Instance.started) e.RegisterPreferences();
     }
 
     #region MelonLogger replacements
@@ -623,6 +604,7 @@ public class Chaos : MelonMod
     internal static void Warn(object obj) => Instance.LoggerInstance.Warning(obj?.ToString() ?? "null");
     internal static void Error(string str) => Instance.LoggerInstance.Error(str);
     internal static void Error(object obj) => Instance.LoggerInstance.Error(obj?.ToString() ?? "null");
+    internal static void Error(string str, Exception ex) => Instance.LoggerInstance.Error(str, ex);
 
     #endregion
 }

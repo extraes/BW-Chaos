@@ -3,6 +3,7 @@ using BoneLib.Nullables;
 using Cysharp.Threading.Tasks;
 using Jevil;
 using Jevil.Spawning;
+using SLZ.Marrow.Data;
 using SLZ.Marrow.Pool;
 using System.Collections;
 using System.Collections.Generic;
@@ -38,14 +39,14 @@ internal class PoolParty : EffectBase
     {
         string poolBarcode = Encoding.ASCII.GetString(data[1]);
 
-        AssetPool pool = Barcodes.ToAssetPool(poolBarcode);
-        if (pool == null)
+        Spawnable spawnable = Barcodes.ToSpawnable(poolBarcode);
+        if (spawnable == null)
         {
             Chaos.Warn("Pool not found in client - ID: " + poolBarcode);
             return;
         }
 
         (Vector3 pos, Quaternion rot) = Utilities.DebytePosRot(data[0]);
-        pool.Spawn(pos, rot, null, true);
+        spawnable.Spawn(pos, rot, true);
     }
 }

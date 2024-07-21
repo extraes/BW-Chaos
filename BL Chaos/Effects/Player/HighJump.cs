@@ -41,12 +41,13 @@ internal class HighJump : EffectBase
     }
 
 
-    [HarmonyPatch(typeof(ControllerRig), nameof(ControllerRig.Jump))]
+    //todo: fix
+    //[HarmonyPatch(typeof(ControllerRig), nameof(ControllerRig.Jump))]
     public class ControllerRigJumpPatch
     {
         public static void Postfix()
         {
-            PhysGrounder physGrounder = GameObject.FindObjectOfType<PhysGrounder>();
+            PhysGrounder physGrounder = Instances.Player_PhysicsRig.physG;
 
             // Only jump when on the ground
             if (physGrounder.isGrounded)

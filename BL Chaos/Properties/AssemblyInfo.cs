@@ -22,4 +22,4 @@ using System.Runtime.InteropServices;
 //[assembly: MelonColor(System.ConsoleColor.Yellow)]
 // [assembly: VerifyLoaderVersion("0.5.3", true)] // theres nothing to really warrant it aside from the comments in chaosconfig
 [assembly: MelonGame("Stress Level Zero", "BONELAB")]
-[assembly: Ungovernable((UngovernableType)~0)]
+// [assembly: Ungovernable((UngovernableType)~0)]

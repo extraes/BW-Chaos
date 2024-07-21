@@ -23,7 +23,7 @@ internal class UseTheForce : EffectBase
     public IEnumerator CoRun()
     {
         if (isNetworked) yield break;
-        Transform head = Player.GetPlayerHead().transform;
+        Transform head = Player.playerHead;
         WaitForFixedUpdate wffu = new WaitForFixedUpdate();
         yield return null;
 

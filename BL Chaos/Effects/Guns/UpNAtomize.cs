@@ -11,10 +11,11 @@ using BoneLib;
 using SLZ.Props.Weapons;
 using SLZ.Combat;
 using Jevil.Patching;
-using static Interop;
+using HarmonyLib;
 
 namespace BLChaos.Effects;
 
+[HarmonyPatch(typeof(Projectile), nameof(Projectile.Awake))]
 internal class UpNAtomize : EffectBase
 {
     public UpNAtomize() : base("Up-N-Atomize", 90, EffectTypes.LAGGY) { }
@@ -24,17 +25,9 @@ internal class UpNAtomize : EffectBase
 
     static Action<Collider, Vector3, Vector3> onBulletHit;
 
-    static UpNAtomize() => Hook.OntoMethod(typeof(Projectile).GetMethod(nameof(Projectile.OnEnable)), Projectile_OnEnable);
-
     public override void OnEffectStart()
     {
         onBulletHit += OnBulletHit;
-    }
-
-    private static IEnumerator RemoveListener(UnityEvent<Collider, Vector3, Vector3> unityEvent)
-    {
-        yield return new WaitForSeconds(1);
-        unityEvent?.RemoveListener(onBulletHit);
     }
 
     private void OnBulletHit(Collider col, Vector3 pos, Vector3 normal)
@@ -56,16 +49,19 @@ internal class UpNAtomize : EffectBase
         int counter = 0;
         foreach (Collider col in cols)
         {
-            if (col == null || col.attachedRigidbody == null || col.attachedRigidbody.isKinematic) continue;
+            if (col.INOC() || col.attachedRigidbody == null || col.attachedRigidbody.isKinematic) continue;
             Rigidbody rb = col.attachedRigidbody;
             rb.AddExplosionForce(rb.mass * forceMultiplier * 25, origin, radius, 2);
             if (counter++ % rbsPerFrame == 0) yield return null;
         }
     }
 
-    private static void Projectile_OnEnable(Projectile projectile)
+    [HarmonyPostfix]
+    private static void Projectile_Awake(Projectile __instance)
     {
-        projectile.onCollision.AddListener(onBulletHit);
-        MelonCoroutines.Start(RemoveListener(projectile.onCollision));
+        __instance.onCollision.AddListener(new Action<Collider, Vector3, Vector3>(OnBulletHitImpl));
     }
+
+    private static void OnBulletHitImpl(Collider col, Vector3 pos, Vector3 normal)
+    => onBulletHit?.Invoke(col, pos, normal);
 }

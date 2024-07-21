@@ -1,4 +1,5 @@
-﻿using MelonLoader;
+﻿using Jevil;
+using MelonLoader;
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Video;
@@ -119,7 +120,6 @@ internal class ImportantInstructions : EffectBase
 
     private System.Collections.IEnumerator ModulateVolume()
     {
-
         float time = 0;
         yield return null;
         while (Active && time < 1.1f)
@@ -143,6 +143,6 @@ internal class ImportantInstructions : EffectBase
 #endif
         yield return new WaitForSeconds(5.833f);
         if (!Active) yield break;
-        GlobalVariables.Player_Health?.Death();
+        if (!GlobalVariables.Player_Health.INOC()) GlobalVariables.Player_Health.Death();
     }
 }
