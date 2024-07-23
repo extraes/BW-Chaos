@@ -23,7 +23,7 @@ public static class BuildInfo
     public const string Name = "BWChaos";
     public const string Author = "extraes, trev";
     public const string Company = null;
-    public const string Version = "2.2.3";
+    public const string Version = "2.2.4";
     public const string DownloadLink = "https://boneworks.thunderstore.io/package/BWChaosDevs/BW_Chaos/";
 }
 
