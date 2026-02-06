@@ -1,9 +1,4 @@
-﻿using Jevil;
-using MelonLoader;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using MelonLoader;
 using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
@@ -40,8 +35,11 @@ internal class RGBLights : EffectBase
         List<(Volumetrics, GameObject)> volgos = new();
 
         foreach (VolumeComponent volcom in vol.profile.components)
-            if (volcom.GetType() == typeof(Volumetrics))
-                volgos.Add(volcom.Cast<Volumetrics>(), vol.gameObject);
+        {
+            var possibleVol = volcom.TryCast<Volumetrics>();            
+            if (possibleVol is not null)
+                volgos.Add(possibleVol, vol.gameObject);
+        }
 
         return volgos;
     }
@@ -52,19 +50,21 @@ internal class RGBLights : EffectBase
     {
         public UnityVolumetricRGB(IntPtr ptr) : base(ptr) { }
         public Volumetrics vol;
-        ColorParameter color;
+        ColorParameter? color;
         readonly float cycleTime = colorCycleTime;
         public void Start()
         {
             // vol will be set by OnEffectStart
-            for (int i = 0; i < vol.parameters.Count; i++)
+            for (var i = 0; i < vol.parameters.Count; i++)
             {
-                if (vol.parameters[i].GetType() == typeof(ColorParameter)) color = vol.parameters[i].Cast<ColorParameter>();
+                color ??= vol.parameters.list[i].TryCast<ColorParameter>();
             }
         }
 
         public void Update()
         {
+            if (color is null)
+                return;
             if (color.value == Color.white || color.value == Color.black) color.value = Color.cyan;
 
             Color.RGBToHSV(color.value, out float h, out float s, out float v);

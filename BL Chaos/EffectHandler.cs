@@ -1,15 +1,10 @@
 ﻿using BLChaos.Effects;
-using Jevil;
-using Jevil.IMGUI;
+using Il2CppInterop.Runtime.Attributes;
+using Jevil.Tweening;
 using MelonLoader;
-using SLZ.WebSocket;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using Newtonsoft.Json;
+using System.Text.Json;
 using System.Text.RegularExpressions;
-using UnityEngine;
 using UnityEngine.UI;
 
 namespace BLChaos;
@@ -78,7 +73,7 @@ public class EffectHandler : MonoBehaviour
         for (int i = 0; i < 5; i++)
             voteBars[i] = cEx.Find("VoteBar" + (i + 1)).GetComponent<Image>();
 
-        Transform wristTransform = GlobalVariables.Player_RigManager.animationRig.RightAnimatorHand.transform; // todo: is the wrist ui placed in the right location?
+        Transform wristTransform = GlobalVariables.Player_RigManager.physicsRig.artOutput.RightAnimatorHand.transform; // todo: is the wrist ui placed in the right location?
         wristCanvas = GameObject.Instantiate(GlobalVariables.WristChaosUI, wristTransform).GetComponent<Canvas>();
         wristImage = wristCanvas.transform.Find("TimerImage").GetComponent<Image>();
         wristImage.transform.localScale = new Vector3(0.5f, 0.5f, 0.5f);
@@ -130,7 +125,7 @@ public class EffectHandler : MonoBehaviour
 
     public void Update()
     {
-        if (wristText.INOC()) return;
+        if (wristText == null) return;
 
         string newString = GlobalVariables.PreviousEffects.Take(7 - GlobalVariables.ActiveEffects.Count).Join("\n") + "\n";
         //newString += GlobalVariables.PreviousEffects.Join("\n");
@@ -144,7 +139,7 @@ public class EffectHandler : MonoBehaviour
             if (e.Types.HasFlag(EffectBase.EffectTypes.META)) activeTags.Add("META");
 
             newString += e.Active ?
-                $"{e.Name} {activeTags.Join(" ")}\n" :
+                $"{e.Name} | {activeTags.Join(" ")}\n" :
                 $"{e.Name}\n";
         }
 
@@ -168,7 +163,7 @@ public class EffectHandler : MonoBehaviour
         }
     }
 
-    [UnhollowerBaseLib.Attributes.HideFromIl2Cpp]
+    [HideFromIl2Cpp]
     public IEnumerator Timer()
     {
         while (true)
@@ -201,6 +196,8 @@ public class EffectHandler : MonoBehaviour
             currentTimerValue += updateRate;
             float fillAmount = currentTimerValue / secondsEachEffect;
 
+            overlayImage.TweenFillAmount(fillAmount, 0.1f).Unique().UseCustomInterpolator(Mathf.Sqrt);
+            wristImage.TweenFillAmount(fillAmount, 0.1f).Unique().UseCustomInterpolator(Mathf.Sqrt);
             MelonCoroutines.Start(SlerpUICirle(overlayImage, fillAmount));
             MelonCoroutines.Start(SlerpUICirle(wristImage, fillAmount));
 
@@ -219,7 +216,7 @@ public class EffectHandler : MonoBehaviour
                     Chaos.Error("Error occurred while running effect! Exception details below:");
                     Chaos.Error(ex);
                     Chaos.Error("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
-                    Chaos.Error("Tell extraes#2048 on the BONEWORKS Discord server!");
+                    Chaos.Error("Tell extraes in the BONELAB Discord server!");
                     ModThatIsNotMod.Notifications.SendNotification("Failed to run an effect!\nSend a log in the BW server and ping extraes#2048!", 10);
                 }
 #endif
@@ -331,7 +328,7 @@ public class EffectHandler : MonoBehaviour
             Chaos.Log(votedEffect.Name + " was chosen");
         }
         if (Prefs.useBagRandomizer) bag.Remove(votedEffect.Name);
-        EffectBase eff = (EffectBase)Activator.CreateInstance(votedEffect.GetType());
+        EffectBase eff = (EffectBase)Activator.CreateInstance(votedEffect.GetType())!;
         eff.Run();
         effectsRan++;
 
@@ -362,7 +359,7 @@ public class EffectHandler : MonoBehaviour
         // Perform a null check to make sure 
         if (GlobalVariables.WatsonClient == null) return new int[] { 0, 0, 0, 0, 0 };
         string messageData = GlobalVariables.WatsonClient.SendAndWaitAsync("sendvotes:").GetAwaiter().GetResult(); // BLOCKING CALLS POG
-        return Newtonsoft.Json.JsonConvert.DeserializeObject<int[]>(messageData);
+        return JsonConvert.DeserializeObject<int[]>(messageData) ?? throw new Exception($"String failed to deserialize to int[] - '{messageData}'");
     }
 
     private (int, int) GetVotedEffect(int[] votes)

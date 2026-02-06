@@ -1,16 +1,8 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using System.Collections.Generic;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class LightBlowout : EffectBase
 {
-    public LightBlowout() : base("Realtime Light Blowout", 90) { }
+    public LightBlowout() : base("LED Headlight simulator", 90) { }
 
     List<Light> lights = new(18); // 18 realtime lights. Lol Mode.
 
@@ -24,7 +16,7 @@ internal class LightBlowout : EffectBase
 
             lights.Add(light);
 
-            light.intensity *= 1000;
+            light.intensity *= 100;
         }
     }
 

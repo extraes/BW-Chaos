@@ -1,10 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using Jevil.PostProcessing;
+﻿using Jevil.PostProcessing;
 
 namespace BLChaos.Effects;
 
@@ -19,6 +13,6 @@ internal class DownshiftAnim : Downshift
 
         float cos = Mathf.Cos(Time.time);
         SharedPostProcessingMaterials.DepthShift.DepthLog.SetOn(mat, cos * cos);
-        SharedPostProcessingMaterials.DepthShift.DepthPow.SetOn(mat, Mathf.Sin(Time.time));
+        SharedPostProcessingMaterials.DepthShift.DepthPow.SetOn(mat, MathF.Sin(Time.time));
     }
 }

@@ -1,35 +1,25 @@
-﻿
-using BoneLib.Nullables;
-using Cysharp.Threading.Tasks;
-using Jevil;
-using Jevil.Spawning;
-using SLZ.Marrow.Data;
-using SLZ.Marrow.Pool;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class PoolParty : EffectBase
 {
     public PoolParty() : base("Pool Party", 60) { }
-    static IEnumerable<AssetPool> pools;
+    static IEnumerable<Pool> pools;
 
     [AutoCoroutine]
     public IEnumerator CoRun()
     {
         yield return null;
 
-        if (pools == null || pools.First() == null) pools = Instances.AllPools;
+        if (pools == null || pools.FirstOrDefault() == null) pools = Instances.AllPools;
 
         if (isNetworked) yield break;
         while (Active)
         {
-            AssetPool pool = pools.Random();
-            pool.Spawn(GlobalVariables.inFrontOfPlayer, GlobalVariables.lookingAtPlayer, null, true);
+            Pool pool = pools.Random();
+            if (pool._crate.Barcode.ID.Contains("SLZ.BONELAB.Core.Spawnable.RigManager"))
+                continue;
+            Log("Spawning pool: " + pool._crate.Barcode.ID);
+            pool.Spawn(GlobalVariables.inFrontOfPlayer, GlobalVariables.lookingAtPlayer, Jevil.Utilities.NulledNullable<Vector3>());
             SendNetworkData(Utilities.SerializeInFrontFacingPlayer(), Encoding.ASCII.GetBytes(pool._crate.Barcode.ID));
             yield return new WaitForSeconds(5);
         }

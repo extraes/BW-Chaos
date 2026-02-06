@@ -1,16 +1,13 @@
 ﻿using MelonLoader;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace BLChaos.Effects;
 
 internal class MassEffect : EffectBase
 {
     public MassEffect() : base("Mass Effect", 30) { }
-    [EffectPreference("Comma separated list of effect names. If unchanged it will choose 10 effects at random.")] static readonly string effects = "";
-    [RangePreference(0, 5, 0.1f)] static readonly float timeBetweenEffets = 1;
+    [EffectPreference("Comma separated list of effect names. If unchanged it will choose 10 effects at random.")] static string effects = "";
+    [RangePreference(0, 5, 0.5f)] static float timeBetweenEffets = 1;
+
     readonly List<EffectBase> effectList = new List<EffectBase>();
 
     public override void OnEffectStart()

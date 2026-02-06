@@ -1,9 +1,4 @@
-﻿using BoneLib;
-using SLZ.Interaction;
-using SLZ.Player;
-using SLZ.Props.Weapons;
-using UnityEngine;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class FuckYourItem : EffectBase
@@ -13,8 +8,8 @@ internal class FuckYourItem : EffectBase
     public override void OnEffectStart()
     {
 #pragma warning disable UNT0008 // Null propagation on Unity objects
-        Player.GetObjectInHand(Player.leftHand)?.SetActive(false);
-        Player.GetObjectInHand(Player.rightHand)?.SetActive(false);
+        Player.GetObjectInHand(Player.LeftHand)?.SetActive(false);
+        Player.GetObjectInHand(Player.RightHand)?.SetActive(false);
 #pragma warning restore UNT0008 // Null propagation on Unity objects
 
         foreach (SlotContainer container in GameObject.FindObjectOfType<Inventory>().bodySlots)
@@ -23,3 +18,5 @@ internal class FuckYourItem : EffectBase
         }
     }
 }
+
+#endif

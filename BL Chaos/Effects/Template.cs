@@ -1,11 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class Template : EffectBase
 {

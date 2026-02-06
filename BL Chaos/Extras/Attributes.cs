@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BLChaos;
+﻿namespace BLChaos;
 
 // Attribute that EffectBase uses to get IEnumerators to run at the start of an effect and end at the end.
 [AttributeUsage(AttributeTargets.Method, Inherited = false, AllowMultiple = false)]

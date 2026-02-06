@@ -1,10 +1,8 @@
-﻿using System;
-
-namespace BLChaos;
+﻿namespace BLChaos;
 
 internal class ChaosModStartupException : Exception
 {
-    public ChaosModStartupException() : base($"Illegal environment path '{MelonLoader.MelonUtils.GameDirectory}'", new Exception("Failed validating local path, try installing BONEWORKS on C:")) { }
+    public ChaosModStartupException() : base($"Illegal environment path '{MelonLoader.Utils.MelonEnvironment.GameRootDirectory}'", new Exception("Failed validating local path, try installing the game on your C: drive.")) { }
 }
 
 internal class ChaosModRuntimeException : ChaosModStartupException
@@ -14,6 +12,6 @@ internal class ChaosModRuntimeException : ChaosModStartupException
 
 internal class ChaosModDependencyFailedException : Exception
 {
-    public ChaosModDependencyFailedException(string expected, string got) : base($"A dependency failed to return an expected value (exptcted \"{expected}\", got \"{got}\")") { }
+    public ChaosModDependencyFailedException(string expected, string got) : base($"A dependency failed to return an expected value (expected \"{expected}\", got \"{got}\")") { }
 }
 

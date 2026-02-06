@@ -1,11 +1,4 @@
-﻿using BoneLib.Nullables;
-using Jevil;
-using Jevil.Spawning;
-using PuppetMasta;
-using SLZ.Marrow.Data;
-using SLZ.Marrow.Pool;
-using System.Linq;
-using UnityEngine;
+﻿using Il2CppSLZ.Marrow.PuppetMasta;
 
 namespace BLChaos.Effects;
 
@@ -27,7 +20,7 @@ internal class CrabletCircle : EffectBase
 
             Vector3 spawnPos = playerPos + new Vector3(x, 0.1f, y);
             Quaternion spawnRot = Quaternion.LookRotation(playerPos - spawnPos, new Vector3(0, 1, 0));
-            AssetPoolee spawnedNB = await pool.SpawnAsync(spawnPos, spawnRot);
+            Poolee spawnedNB = await pool.SpawnAsync(spawnPos, spawnRot);
             spawnedNB.gameObject.SetActive(true);
             PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();
             poppet.StartCoroutine(poppet.DisabledToActive());
@@ -40,7 +33,7 @@ internal class CrabletCircle : EffectBase
     {
         Spawnable pool = Barcodes.ToSpawnable(JevilBarcode.CRABLET);
 
-        AssetPoolee spawnedNB = await pool.SpawnAsync(Vector3.zero, Quaternion.identity);
+        Poolee spawnedNB = await pool.SpawnAsync(Vector3.zero, Quaternion.identity);
         spawnedNB.transform.DeserializePosRot(data);
         spawnedNB.gameObject.SetActive(true);
         PuppetMaster poppet = spawnedNB.GetComponentInChildren<PuppetMaster>();

@@ -1,10 +1,4 @@
-﻿using Jevil;
-using System.Collections;
-using System.Text;
-using UnityEngine;
-using Random = UnityEngine.Random;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class RandomForces : EffectBase
 {

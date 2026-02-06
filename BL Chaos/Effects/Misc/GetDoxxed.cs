@@ -1,11 +1,4 @@
-﻿using Cysharp.Threading.Tasks;
-using Jevil;
-using System;
-using System.Text;
-using System.Threading.Tasks;
-using TMPro;
-using UnityEngine;
-using UnityEngine.Networking;
+﻿using UnityEngine.Networking;
 
 namespace BLChaos.Effects;
 
@@ -46,9 +39,9 @@ internal class GetDoxxed : EffectBase
         sign.transform.position = headT.position + Vector3.ProjectOnPlane(headT.forward, Vector3.up).normalized * 50;
 
         sign.GetComponent<Rigidbody>().detectCollisions = false;
-        GameObject.Destroy(sign.GetComponent<SLZ.Props.ObjectDestructable>());
-        GameObject.Destroy(sign.GetComponent<SLZ.SFX.ImpactSFX>());
-        GameObject.Destroy(sign.GetComponent<SLZ.Interaction.InteractableHost>());
+        GameObject.Destroy(sign.GetComponent<ObjectDestructible>());
+        GameObject.Destroy(sign.GetComponent<ImpactSFX>());
+        GameObject.Destroy(sign.GetComponent<InteractableHost>());
 
         if (real && Application.internetReachability != NetworkReachability.NotReachable)
             AsyncUtilities.WrapNoThrow(FunniestShitIveEverSeen).RunOnFinish(ex => { if (ex is not null) Chaos.Error(ex); });
@@ -81,7 +74,7 @@ internal class GetDoxxed : EffectBase
 
     public override void HandleNetworkMessage(byte[] data)
     {
-        if (sign.INOC())
+        if (sign == null)
         {
 #if DEBUG
             Chaos.Warn("Sign is null, but it's trying to be moved!");

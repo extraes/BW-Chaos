@@ -1,21 +1,21 @@
-﻿using BoneLib;
-using SLZ.Props.Weapons;
-using System.Threading.Tasks;
-using UnityEngine;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 class GunSlowdown : EffectBase
 {
     public GunSlowdown() : base("Progressively slower guns", 60) { }
-    [RangePreference(0, 1, 0.01f)] static readonly float multiplier = 0.99f;
+    [RangePreference(0, 1, 0.01f)] static float multiplier = 0.99f;
 
     public override void OnEffectStart() => Hooking.OnPostFireGun += OnGunFired;
     public override void OnEffectEnd() => Hooking.OnPostFireGun -= OnGunFired;
 
     public void OnGunFired(Gun gun)
     {
-        if (gun == Player.GetGunInHand(Player.rightHand) || gun == Player.GetGunInHand(Player.leftHand))
+        GameObject? leftHandObj = Player.GetObjectInHand(Player.LeftHand);
+        GameObject? rightHandObj = Player.GetObjectInHand(Player.RightHand);
+        if (leftHandObj == null && rightHandObj == null) return;
+
+        if (gun.transform.IsChildOf(leftHandObj.transform) || gun.transform.IsChildOf(rightHandObj.transform))
         {
             gun.SetRpm(gun.roundsPerMinute * multiplier);
         }
@@ -35,3 +35,4 @@ class GunSlowdown : EffectBase
     }
 #endif
 }
+#endif

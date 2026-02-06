@@ -1,6 +1,4 @@
-﻿using BoneLib;
-using Jevil;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class Weaken : EffectBase
@@ -10,14 +8,15 @@ internal class Weaken : EffectBase
     public override void OnEffectStart()
     {
         //GlobalVariables.Player_RigManager.physicsRig.EnableBallLoco();
-        Utilities.ChangeStrength(Player.leftHand.physHand, (1 / 5f), (1 / 5f));
-        Utilities.ChangeStrength(Player.rightHand.physHand, (1 / 5f), (1 / 5f));
+        Utilities.ChangeStrength(Player.LeftHand.physHand, 0.2f, 0.2f);
+        Utilities.ChangeStrength(Player.RightHand.physHand, 0.2f, 0.2f);
     }
 
     public override void OnEffectEnd()
     {
         //GlobalVariables.Player_RigManager.physicsRig.DisableBallLoco();
-        Utilities.ChangeStrength(Player.leftHand.physHand, 1, 1);
-        Utilities.ChangeStrength(Player.rightHand.physHand, 1, 1);
+        Utilities.ChangeStrength(Player.LeftHand.physHand, 1, 1);
+        Utilities.ChangeStrength(Player.RightHand.physHand, 1, 1);
     }
 }
+#endif

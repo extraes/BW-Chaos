@@ -1,7 +1,4 @@
 ﻿using MelonLoader;
-using System;
-using System.Collections;
-using UnityEngine;
 
 namespace BLChaos.Effects;
 

@@ -1,5 +1,5 @@
-﻿using PuppetMasta;
-using UnityEngine;
+﻿#if !NOBONELIB
+using Il2CppSLZ.Marrow.PuppetMasta;
 
 namespace BLChaos.Effects;
 
@@ -20,3 +20,4 @@ internal class Fold : EffectBase
     }
 
 }
+#endif

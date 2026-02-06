@@ -1,7 +1,4 @@
-﻿using Jevil;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class Cage : EffectBase
 {
@@ -23,7 +20,7 @@ internal class Cage : EffectBase
     {
         cage = GameObject.Instantiate(cagePrefab);
         if (isNetworked) return;
-        cage.transform.position = GlobalVariables.Player_PhysRig.rbFeet.position;
+        cage.transform.position = GlobalVariables.Player_PhysRig.torso.transform.position; //todo: scale by avatar height
         SendNetworkData(cage.transform.position.ToBytes());
     }
 

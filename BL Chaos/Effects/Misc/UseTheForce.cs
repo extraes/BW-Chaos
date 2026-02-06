@@ -1,12 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using SLZ.Interaction;
-using BoneLib;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class UseTheForce : EffectBase
@@ -23,7 +15,7 @@ internal class UseTheForce : EffectBase
     public IEnumerator CoRun()
     {
         if (isNetworked) yield break;
-        Transform head = Player.playerHead;
+        Transform head = Player.Head;
         WaitForFixedUpdate wffu = new WaitForFixedUpdate();
         yield return null;
 
@@ -55,3 +47,4 @@ internal class UseTheForce : EffectBase
         }
     }
 }
+#endif

@@ -1,30 +1,24 @@
 ﻿using BLChaos.Effects;
-using BoneLib;
-using Jevil;
+using Il2CppSLZ.Marrow.Audio;
+using Il2CppSLZ.Marrow.SceneStreaming;
 using Jevil.IMGUI;
+using Jevil.Patching;
 using MelonLoader;
 using MelonLoader.ICSharpCode.SharpZipLib.Core;
 using MelonLoader.ICSharpCode.SharpZipLib.Zip;
-using SLZ.Marrow.SceneStreaming;
-using SLZ.Utilities;
-using System;
-using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Http;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+using System.Security;
 using UnityEngine.Networking;
-using UnityEngine.Rendering;
 using UnityEngine.SceneManagement;
 using WatsonWebsocket;
 using static BLChaos.Effects.EffectBase;
 
+//[assembly:HarmonyDontPatchAll]
+
 namespace BLChaos;
+
 
 public static class BuildInfo
 {
@@ -42,15 +36,15 @@ public static class BuildInfo
 // done: make "stick drift" (see: https://discord.com/channels/563139253542846474/656631681406468137/1053036547810799686)
 // done: make "no more chunks" effect (disables chunk loading)
 // done: make "Simulation instability" effect (see: https://discord.com/channels/563139253542846474/716099004894806016/1100131543613186128)
+// done: bloom "E3 2016" (see https://discord.com/channels/563139253542846474/753783288031608923/1033455814855372819)
+// done: make metal head effect (see: https://discord.com/channels/@me/771537321744269333/1066097758810943558)
 
 // todo: weezer effect "manipulator music" (see https://discord.com/channels/563139253542846474/656631681406468137/1032840669724676106)
-// todo (in progress): bloom "E3 2016" (see https://discord.com/channels/563139253542846474/753783288031608923/1033455814855372819)
 // todo: change "My meme folder" -> change the material of monitors & spawn one (see: https://discord.com/channels/563139253542846474/753783288031608923/1037511912268771358)
 // todo: make "Lego deconstruction" (see: https://discord.com/channels/563139253542846474/753783288031608923/1037513696060129302)
 // todo: make "Bad to the bone" or "My movie" (whenever you spawn w/ the skeleton avatar or a skeleton NPC wakes up, play the bad to the bone riff)
-// todo: https://discord.com/channels/563139253542846474/753783288031608923/1050226721577775154
-// todo: make metal head effect (see: https://discord.com/channels/@me/771537321744269333/1066097758810943558)
 // todo: make hotline miami effect (see: https://discord.com/channels/@me/771537321744269333/1069647422969622618)
+// todo: https://discord.com/channels/563139253542846474/753783288031608923/1050226721577775154
 // todo: make theatrigon effect (see: https://discord.com/channels/@me/771537321744269333/1069666211316645958)
 // todo: make prop gun effect (make all gunshots spawn a random prop)
 // todo: make "ran out of glue" effect (see: https://www.youtube.com/watch?v=W7P75jlHLHc)
@@ -59,29 +53,37 @@ public static class BuildInfo
 // todo: make a Portal-1-Start effect, complete with "Still Alive - Radio Mix Clean"
 // todo: Make a "Your jordans are fake" effect, sending an object flying when you point at it with your index finger
 // todo: Make a "night enjoyers be like" effect that just blinds you by making you only see black.
+// todo: make a low-health jesus image effect. reuse shader from sugarcoat
 public class Chaos : MelonMod
 {
     public Chaos() : base() => _instance = this;
     internal static bool isSteamVer = File.Exists(Path.Combine(Application.dataPath, "..", "Bonelab_Steam_Windows64.exe"));
     internal static bool isQuest = Utilities.IsPlatformQuest();
     internal static new readonly Assembly Assembly = Assembly.GetExecutingAssembly(); // MelonMod's Assembly field isnt static so here we are
+    internal static Type[] AsmTypes = Assembly.GetTypes();
     private static Chaos _instance;
     public static Chaos Instance => _instance; // so that we can access some instanced fields, like harmonylib patching
     internal static List<EffectBase> asmEffects = new List<EffectBase>();
     internal static List<(EffectTypes, bool)> eTypesToPrefs = new List<(EffectTypes, bool)>();
-    public static Action<EffectBase> OnEffectRan;
+    public static event Action<EffectBase>? OnEffectRan;
 
     private bool started = false;
-    internal Process botProcess;
+    internal Process? botProcess;
 
     public override void OnInitializeMelon()
     {
+#if NOBONELIB
+        Hook.OntoMethod(typeof(JeviLib).GetMethod(nameof(JeviLib.OnSceneWasInitialized), BindingFlags.DeclaredOnly | BindingFlags.Instance | BindingFlags.Public) ?? throw new MissingMethodException("JL OSWI"), InitializeReferences);
+#endif
+
+        //InitializeAsync().GetAwaiter().GetResult();
         AsyncUtilities.WrapNoThrow(InitializeAsync).RunOnFinish(LogStartupExceptionIfExists);
     }
 
-    void LogStartupExceptionIfExists(Exception ex)
+
+    void LogStartupExceptionIfExists(Exception? ex)
     {
-        if (ex == null) return;
+        if (ex is null) return;
         Error("Exception whilst initializing Chaos: ", ex);
     }
 
@@ -89,8 +91,17 @@ public class Chaos : MelonMod
     {
         Stopwatch allSW = Stopwatch.StartNew();
 
-        #region Check datapath
+#if DEBUG
+        // ToArray to copy it to a separate collection
+        DebugDraw.Button("Stop all effects", GUIPosition.TOP_RIGHT, () => GlobalVariables.ActiveEffects.ToArray().ForEach(e => e.ForceEnd()));
+        using var dlc = new DebugLineCounter(LoggerInstance, DebugLineCounter.Kind.LINE_NUMBER, "Initializing");
+        dlc.UpdateProgress();
+#endif
+
+        _ = AsyncUtilities.WrapNoThrow(SetupLatePatching).RunOnFinish(LogStartupExceptionIfExists);
         
+        #region Check datapath
+
         // Mathf.Sqrt(fish);
         //if (isSteamVer && !(Path.GetFullPath(Path.Combine(Application.dataPath, "..")).EndsWith(@"BONEWORKS\BONEWORKS") || Application.dataPath.Contains("steamapps")))
         //    throw new ChaosModStartupException();
@@ -99,8 +110,16 @@ public class Chaos : MelonMod
 
         #region MelonPref Setup
 
+#if DEBUG
+        dlc.UpdateProgress();
+#endif
         // If MP's are gotten before they're registered in ML, an error is thrown.
+        Chaos.Log("Creating preference entries...");
         Prefs.Init();
+        Chaos.Log("Created preference entries, now retrieving values...");
+#if DEBUG
+        dlc.UpdateProgress();
+#endif
         Prefs.Get();
         Chaos.Log("Successfully initialized preferences.");
 
@@ -108,15 +127,54 @@ public class Chaos : MelonMod
 
         #region Load Timer
 
+#if DEBUG
+        dlc.UpdateProgress();
+#endif
         // Load the Chaos UI elements. Don't change scope in case it may screw something up. idk why it would, but we're dontunloadunusedasset'ing it.
         string uiName = isQuest ? "questuielements" : "uielements";
 
-        AssetBundle uiBundle = null;
-        byte[] uiBytes = null;
+        AssetBundle? uiBundle = null;
+        byte[] uiBytes = null!;
+#if DEBUG
+        int attempt = 1;
+#endif
         Assembly.UseEmbeddedResource($"BLChaos.Resources.{uiName}", bytes => uiBytes = bytes);
-        uiBundle = await AssetBundle.LoadFromMemoryAsync(uiBytes).ToTask();
 
 #if DEBUG
+        dlc.UpdateProgress();
+#endif
+        while (uiBundle == null)
+        {
+            try
+            {
+#if DEBUG
+                Chaos.Log("Attempting to load the UI assetbundle: attempt " + attempt);
+                attempt++;
+#endif
+                uiBundle = await AssetBundle.LoadFromMemoryAsync(uiBytes).ToTask();
+                if (uiBundle == null) throw new NullReferenceException("Failed to load UI assetbundle");
+            }
+            catch(VerificationException) // means INotifyCompletion is not implementing awaiters
+            {
+                throw;
+            }
+            catch
+            {
+                if (uiBundle == null)
+                {
+                    AssetBundle? bundle = AssetBundle.GetAllLoadedAssetBundles_Native().FirstOrDefault(b => b.AllAssetNames().Contains("Assets/UIStuff/prefabs/ChaosCanvas.prefab".ToLower()));
+                    if (bundle != null)
+                    {
+                        Chaos.Log("Found the assetbundle in the loaded bundles, despite the load task being cancelled. Whatever. We ball.");
+                        uiBundle = bundle;
+                        break;
+                    }
+                }
+            }
+        }
+
+#if DEBUG
+        dlc.UpdateProgress();
         Chaos.Log("Loaded essentials assetbundle. All asset paths are below:");
         uiBundle.GetAllAssetNames().ForEach(str => Chaos.Log(" - " + str));
 #endif
@@ -136,10 +194,16 @@ public class Chaos : MelonMod
         Chaos.Log("Loading effect resources, please wait...");
         // Load the AssetBundle straight from memory to avoid copying unnecessary files to disk
         string resourceName = isQuest ? "questeffectresources" : "effectresources";
-        byte[] effRes = null;
+        byte[]? effRes = null;
         Assembly.UseEmbeddedResource($"BLChaos.Resources.{resourceName}", bytes => effRes = bytes);
         GlobalVariables.EffectResources = await AssetBundle.LoadFromMemoryAsync(effRes).ToTask();
-        GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
+        //var t = AssetBundle.LoadFromMemoryAsync(effRes).ToTask();
+        //while (!t.IsCompleted)
+        //    await UniTask.Yield();
+        ////if (effRes is null)
+        ////    throw new Exception("Failed to load embedded assetbundle for effect resources");
+        ////GlobalVariables.EffectResources = AssetBundle.LoadFromMemory(effRes);
+        ////GlobalVariables.EffectResources.hideFlags = HideFlags.DontUnloadUnusedAsset; // IL2 BETTER NOT FUCK WITH MY SHIT
 
         // Unity doesn't like executing the same method on an assetbundle more than once, so I need to cache the paths here in my own readonly list, because for
         // whatever reason, other IEnumerables seemed to get nulled in IL2's shitfuck domain. s/o to oBjEcT wAs GaRbAgE cOlLeCtEd In ThE iL2CpP dOmAiN
@@ -161,7 +225,7 @@ public class Chaos : MelonMod
         effectSW.Stop();
 
         Stopwatch syncSW = Stopwatch.StartNew();
-        if (Prefs.syncEffects) Extras.EntanglementSyncHandler.Init();
+        if (Prefs.syncEffects) Extras.FusionSyncHandler.Init();
         syncSW.Stop();
 
         Stopwatch botSW = Stopwatch.StartNew();
@@ -179,12 +243,14 @@ public class Chaos : MelonMod
 
         Stopwatch miscSW = Stopwatch.StartNew();
 
+#if !NOBONELIB
         BoneMenu.Register();
-
+#endif
 #if DEBUG
 
-        DebugDraw.TrackVariable("ActiveEffects", GUIPosition.BOTTOM_RIGHT, () => GlobalVariables.ActiveEffects.Count);
+        dlc.UpdateProgress();
 
+        DebugDraw.TrackVariable("ActiveEffects", GUIPosition.BOTTOM_RIGHT, () => GlobalVariables.ActiveEffects.Count);
 
         // flatscreen debugging
         Task<TestResult> res = Task.FromResult(TestResult.INCONCLUSIVE);
@@ -195,7 +261,7 @@ public class Chaos : MelonMod
         foreach (EffectBase eb in asmEffects.OrderBy(e => e.Name).ToArray())
         {
             GUIPosition pos = eb.Types == EffectTypes.NONE ? GUIPosition.TOP_LEFT : GUIPosition.BOTTOM_LEFT;
-            DebugDraw.Button(eb.Name, pos, () => 
+            DebugDraw.Button(eb.Name, pos, () =>
             {
                 if (doTest)
                     res = eb.Test();
@@ -203,6 +269,8 @@ public class Chaos : MelonMod
                     eb.Run();
             });
         }
+
+        dlc.UpdateProgress();
 
 #endif
         started = true;
@@ -213,10 +281,11 @@ public class Chaos : MelonMod
         // basically just allow http connections. why? uhhhh.... testing necessitated it? i dont think it breaks anything so uhhhh cool ig
         ServicePointManager.ServerCertificateValidationCallback += (sender, cert, chain, sslPolicyErrors) => true;
 
-        Hooking.OnLevelInitialized += li => OnSceneWasInitialized(-1, li.barcode);
-
-        SceneStreamer.doAnyLevelLoad += new Action(() => { Chaos.Log("SCENESTREAMER: ANY LEVEL LOAD"); });
-        SceneStreamer.doAnyLevelUnload += new Action(() => { Chaos.Log("SCENESTREAMER: ANY LEVEL UNLOAD"); });
+#if NOBONELIB
+        SceneStreamer.doAnyLevelLoad += new Action(() => InitializeReferences(-1, SceneStreamer.Session._level.Barcode.ID));
+#else
+        Hooking.OnLevelLoaded += li => InitializeReferences(-1, li.barcode);
+#endif
 
         #endregion
 
@@ -224,26 +293,63 @@ public class Chaos : MelonMod
 
         allSW.Stop();
         // go straight to loggerinstance because it lets me use pretty colors :^)
-        LoggerInstance.Msg(ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.allEffects.Count} to be used in Chaos.");
-        LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect initialization: {effectSW.ElapsedMilliseconds}ms");
-        LoggerInstance.Msg(ConsoleColor.Blue, $" - Effect resource loading: {resSW.ElapsedMilliseconds}ms");
-        LoggerInstance.Msg(ConsoleColor.Blue, $" - Misc startup tasks: {miscSW.ElapsedMilliseconds}ms");
-        if (Prefs.syncEffects) LoggerInstance.Msg(ConsoleColor.Blue, $" - Fusion module find & start: {syncSW.ElapsedMilliseconds}ms");
-        if (Prefs.enableRemoteVoting) LoggerInstance.Msg(ConsoleColor.Blue, $" - Remote voter unpack & start: {botSW.ElapsedMilliseconds}ms");
+        LoggerInstance.Msg(System.ConsoleColor.Blue, $"Started successfully in {allSW.ElapsedMilliseconds}ms: {asmEffects.Count} total effects, with {EffectHandler.allEffects.Count} to be used in Chaos.");
+        LoggerInstance.Msg(System.ConsoleColor.Blue, $" - Effect initialization: {effectSW.ElapsedMilliseconds}ms");
+        LoggerInstance.Msg(System.ConsoleColor.Blue, $" - Effect resource loading: {resSW.ElapsedMilliseconds}ms");
+        LoggerInstance.Msg(System.ConsoleColor.Blue, $" - Misc startup tasks: {miscSW.ElapsedMilliseconds}ms");
+        if (Prefs.syncEffects) LoggerInstance.Msg(System.ConsoleColor.Blue, $" - Fusion module find & start: {syncSW.ElapsedMilliseconds}ms");
+        if (Prefs.enableRemoteVoting) LoggerInstance.Msg(System.ConsoleColor.Blue, $" - Remote voter unpack & start: {botSW.ElapsedMilliseconds}ms");
 
         #endregion
 
 #if DEBUG
-        UnityWebRequest www = UnityWebRequest.Get("https://extraes.xyz/api/accesscontrol/chaos/auth");
-        var req = www.SendWebRequest();
-        await AsyncUtilities.ToUniTask(req);
-        const long SUCCESS = 200;
-        if (req.webRequest.responseCode != SUCCESS)
-        {
-            Error("Expected " + SUCCESS + " but got " + req.webRequest.responseCode );
-            UnityEngine.Diagnostics.Utils.ForceCrash(UnityEngine.Diagnostics.ForcedCrashCategory.AccessViolation);
-        }
+        //UnityWebRequest www = UnityWebRequest.Get("https://extraes.xyz/api/accesscontrol/chaos/auth");
+        //var req = www.SendWebRequest();
+        //await AsyncUtilities.ToUniTask(req);
+        //const long SUCCESS = 200;
+        //if (req.webRequest.responseCode != SUCCESS)
+        //{
+        //    Error("Expected " + SUCCESS + " but got " + req.webRequest.responseCode);
+        //    UnityEngine.Diagnostics.Utils.ForceCrash(UnityEngine.Diagnostics.ForcedCrashCategory.AccessViolation);
+        //}
+
+        dlc.Success();
 #endif
+    }
+
+    private async Task SetupLatePatching()
+    {
+        Stopwatch sw = Stopwatch.StartNew();
+        while (!GlobalVariables.Player_RigManager)
+            await UniTask.Yield();
+        sw.Stop();
+        LoggerInstance.Msg($"Waited {sw.Elapsed.TotalSeconds:0.00} sec to run patches. Starting now.");
+
+        Stopwatch patchSW = Stopwatch.StartNew();
+
+        // System.Action -> Il2CppSystem.Action (which may be used in patchers) allocates in IL2CPP domain. Task.Run is liable to run in off-main thread, which IL2CPP may not know about.
+        // and IL2CPP is like my bitch ex that wants to know everything that's going on. difference is IL2CPP isnt getting the house.
+        Utilities.AttachIl2CppToThread();
+
+        //HarmonyInstance.CreateClassProcessor(typeof(thepatch)).Patch();
+        // this all happens before the first "await" so it should happen synchronously
+        foreach (var type in AsmTypes)
+        {
+            if (type.IsAbstract || type.IsInterface) continue;
+            if (type.GetInterface(nameof(IPatcher)) is null) continue;
+            InterfaceMapping patchImpl = type.GetInterfaceMap(typeof(IPatcher));
+
+#if DEBUG
+            Log("Executing patcher: " + type.Name);
+#endif
+            // not worth creating a delegate
+            patchImpl.TargetMethods.ForEach(m => m.Invoke(null, Array.Empty<object>()));
+
+        }
+
+        patchSW.Stop();
+
+        LoggerInstance.Msg($"Finished late-patching to avoid crashes. Patching took {patchSW.ElapsedMilliseconds}ms");
     }
 
     public override void OnApplicationQuit()
@@ -259,8 +365,9 @@ public class Chaos : MelonMod
     }
 
     // rename OnSceneWasInitialized because BL is built hella different i guess (addressables scene manager on crack i suppose)
-    public override void OnSceneWasInitialized(int buildIdx, string sceneName)
+    public void InitializeReferences(int buildIdx, string sceneName)
     {
+        if (Instances.Player_RigManager == null) return;
 #if DEBUG
         string otherName = SceneManager.GetActiveScene().name;
         Chaos.Log($"LOADEDSCENE {sceneName} IDX {buildIdx}, SCENEMANAGERACTIVE {otherName}");
@@ -270,7 +377,7 @@ public class Chaos : MelonMod
         {
             new TextureSwap().Run();
         }
-#endif
+#endif 
 
         // you already know what the fuck goin on
         if (EffectHandler.allEffects.Count < 1)
@@ -280,7 +387,7 @@ public class Chaos : MelonMod
 #endif
             while (true) { }
         }
-        if (!GlobalVariables.Player_PhysRig.INOC()) return;
+
 
 #if DEBUG
         Log("Finding scene references!");
@@ -297,7 +404,7 @@ public class Chaos : MelonMod
         GlobalVariables.Player_PhysRig =
             Instances.Player_PhysicsRig;
 
-        Transform pHead = Player.playerHead;
+        Transform pHead = GlobalVariables.Player_PhysRig.m_head;
 
         GameObject musicPlayer = new GameObject("ChaosMusicPlayer");
         musicPlayer.transform.parent = pHead.transform;
@@ -322,7 +429,7 @@ public class Chaos : MelonMod
         EffectHandler.advanceTimer = sceneName != "1378bdcaf9526974d98cc23b94c6ab5c" && // Void G114
                                      sceneName != "scene_GameBootstrap" &&              // OpenXR check
                                      sceneName != "77da2b1cce998aa4fb4fc76a7fd80e05";   // loading screen
-        
+
         Stats.PingVersion();
 #if DEBUG
         sw.Stop();
@@ -330,23 +437,23 @@ public class Chaos : MelonMod
 #endif
         Physics.gravity = new Vector3(0, -9.81f, 0);
 
-        
+
         // get the effect from effectonsceneload and run it
         if (!EffectHandler.advanceTimer) return;
 
         if (EffectHandler.allEffects.TryGetValue(Prefs.effectOnSceneLoad, out EffectBase effect))
         {
             Type t = effect.GetType();
-            EffectBase e = (EffectBase)Activator.CreateInstance(t);
+            EffectBase e = (EffectBase)Activator.CreateInstance(t)!;
             Chaos.Log($"Running effect '{e.Name}' (from preference) on scene load");
             e.Run();
         }
         else if (!string.IsNullOrWhiteSpace(Prefs.effectOnSceneLoad))
         {
             Chaos.Warn($"{nameof(Prefs.effectOnSceneLoad)} value '{Prefs.effectOnSceneLoad}' wasn't found in the effect dictionary! Check to make sure you matched the spelling and case of the effect name!");
-            
+
             // check for effects that have the same name but different capitalization, or maybe they left a space at the end
-            foreach(string name in EffectHandler.allEffects.Select(e => e.Key.ToLower()))
+            foreach (string name in EffectHandler.allEffects.Select(e => e.Key.ToLower()))
             {
                 if (name == Prefs.effectOnSceneLoad.Trim())
                 {
@@ -360,6 +467,12 @@ public class Chaos : MelonMod
 
     public override void OnUpdate()
     {
+        if (GlobalVariables.Player_PhysRig)
+        {
+            GlobalVariables.inFrontOfPlayer = GlobalVariables.Player_PhysRig.m_head.position + GlobalVariables.Player_PhysRig.m_head.forward * 2;
+            GlobalVariables.lookingAtPlayer = Quaternion.LookRotation(-GlobalVariables.Player_PhysRig.m_head.forward);
+        }
+
         foreach (EffectBase effect in GlobalVariables.ActiveEffects)
             effect.OnEffectUpdate();
         Extras.WebResponseHandler.Callback(); // bitchass unity doesnt like me doing shit from the websocket thread so here we are
@@ -431,16 +544,17 @@ public class Chaos : MelonMod
         if (!Directory.Exists(saveFolder)) Directory.CreateDirectory(saveFolder);
         if (File.Exists(exePath)) File.Delete(exePath);
 
-        using (Stream stream = Assembly.GetManifestResourceStream("BLChaos.Resources.BLChaosDiscordBot.zip"))
+        using (Stream stream = Assembly.GetManifestResourceStream("BLChaos.Resources.BLChaosDiscordBot.zip")!)
         {
             byte[] buffer = new byte[4096];
 
             // holy fucking shit i love using
             // no but fr zip the bot because it makes it significantly (~40mb) smaller, even with the dogwater deflate algorithm, and do all this in memory to avoid writing temp files to disk
-            using ZipFile zipFile = new ZipFile(stream);
-            using Stream zipStream = zipFile.GetInputStream(zipFile[0]);
-            using Stream fsOut = File.Create(exePath);
-            StreamUtils.Copy(zipStream, fsOut, buffer);
+            throw new NotImplementedException("The Chaos bot client is currently unsupported.");
+            // using ZipFile zipFile = new ZipFile(stream);
+            // using Stream zipStream = zipFile.GetInputStream(zipFile[0]);
+            // using Stream fsOut = File.Create(exePath);
+            // StreamUtils.Copy(zipStream, fsOut, buffer);
             // using () using () using () using () using () using () using () using () using () 
         }
 
@@ -484,7 +598,7 @@ public class Chaos : MelonMod
         if (EffectHandler.allEffects.Count == 0)
         {
             // Get all effects from the assembly
-            asmEffects = (from t in Assembly.GetTypes()
+            asmEffects = (from t in AsmTypes
                           where t.IsSubclassOf(typeof(EffectBase))
                             && t != typeof(StickDrift)
 #if DEBUG
@@ -549,14 +663,14 @@ public class Chaos : MelonMod
         {
             return from e in effects
                    where e.Types == EffectTypes.NONE || // is this optimization?
-                   IsEffectViable(e.Types)
+                   IsEffectAllowed(e.Types)
                    select e;
         }
 
         #endregion
     }
 
-    internal static bool IsEffectViable(EffectTypes eTypes)
+    internal static bool IsEffectAllowed(EffectTypes eTypes)
     {
         foreach ((EffectTypes type, bool allowed) in eTypesToPrefs)
             if (eTypes.HasFlag(type) && !allowed) return false; //todid: this fucking works?????
@@ -566,11 +680,11 @@ public class Chaos : MelonMod
     internal static void LiveUpdateEffects()
     {
         // I'm not sure what this would do, but it probably doesn't hurt...
-        if (!EffectHandler.Instance.INOC()) EffectHandler.Instance.gameObject.SetActive(false);
+        if (!EffectHandler.Instance == null) EffectHandler.Instance.gameObject.SetActive(false);
         PopulateEffects();
-        foreach (EffectBase e in GlobalVariables.ActiveEffects.Where(e => !IsEffectViable(e.Types))) e.ForceEnd(); // linqlinqlinqlinqlinqlinqlinqlinq
+        foreach (EffectBase e in GlobalVariables.ActiveEffects.Where(e => !IsEffectAllowed(e.Types))) e.ForceEnd(); // linqlinqlinqlinqlinqlinqlinqlinq
         EffectHandler.CopyAllToBag();
-        if (!EffectHandler.Instance.INOC()) EffectHandler.Instance.gameObject.SetActive(true);
+        if (!EffectHandler.Instance == null) EffectHandler.Instance.gameObject.SetActive(true);
     }
 
     #endregion
@@ -588,13 +702,15 @@ public class Chaos : MelonMod
         Chaos.Log($"Injecting effect {e.Name} (type {type.Name}) into the effect collections");
 #endif
         asmEffects.Add(e);
-        if (IsEffectViable(e.Types))
+        if (IsEffectAllowed(e.Types))
         {
             EffectHandler.allEffects.Add(e.Name, e);
             EffectHandler.bag.Add(e.Name, e);
         }
         if (Instance.started) e.RegisterPreferences();
     }
+
+    internal static void DispatchEffectRan(EffectBase effect) => Chaos.OnEffectRan?.InvokeSafeSync(effect);
 
     #region MelonLogger replacements
 

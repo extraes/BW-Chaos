@@ -1,17 +1,12 @@
-using BoneLib.BoneMenu.Elements;
-using Jevil;
 using Jevil.IMGUI;
 using Jevil.Prefs;
 using MelonLoader;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using MelonLoader.Utils;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
+
+#if !NOBONELIB
+using BoneLib.BoneMenu;
+#endif
 
 namespace BLChaos.Effects;
 
@@ -65,12 +60,14 @@ public class EffectBase
     public string Name { get; }
     public int Duration { get; }
     public EffectTypes Types { get; }
-    private static readonly Dictionary<string, MenuCategory> elements = new Dictionary<string, MenuCategory>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
-    public MenuCategory MenuElement
+#if !NOBONELIB
+    private static readonly Dictionary<string, Page> elements = new Dictionary<string, Page>(); // Allow effects to view their own menu elements. Why? Not sure, custom melonprefs maybe.
+    public Page Page
     {
         get { return elements[GetType().Name]; }
         set { elements[GetType().Name] = value; }
     }
+#endif
 
     public bool Active { get; private set; }
     public float StartTime { get; private set; }
@@ -121,7 +118,7 @@ public class EffectBase
 #endif
     }
 
-    private MethodInfo FindAutoCR()
+    private MethodInfo? FindAutoCR()
     {
         // LINQLINQLINQLINQLINQMYBELOVEDLINQLINQLINQLINQLINQILOVELINQLINQLINQLINQLINQLINQLINQLINQLINQLINQ
         return (from method in GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
@@ -135,9 +132,11 @@ public class EffectBase
     public void RegisterPreferences()
     {
         MelonPreferences_Category myMpCategory = MelonPreferences.CreateCategory(Name);
-        myMpCategory.SetFilePath(Path.Combine(MelonUtils.UserDataDirectory, "ChaosConfig.cfg"), true, false);
-        MenuCategory myBmCategory = BoneMenu.GetMenuCategoryFor(Name);
-        Preferences.RegisterUnder(GetType(), myMpCategory, myBmCategory);
+        myMpCategory.SetFilePath(Path.Combine(MelonEnvironment.UserDataDirectory, "ChaosConfig.cfg"), true, false);
+#if !NOBONELIB
+        Page myPage = BoneMenu.GetPageFor(Name);
+        Preferences.RegisterUnder(GetType(), myMpCategory, myPage);
+#endif
     }
 
     private void GetIndex()
@@ -182,17 +181,22 @@ public class EffectBase
 #endif
 
     protected void Log(UnityEngine.Object obj) => Log(obj != null ? $"<{obj.GetType().Name}> {obj.name} '{obj.ToString()}'" : "<null>");
-    protected void Log(object obj) => Log(obj != null ? obj.ToString() : "<null>");
+    protected void Log(object obj) => Log(obj != null ? obj.ToString()! : "<null>");
     protected void Log(string str) => Chaos.Log($"-> [{Name}] {str}");
+    protected void LogIfErrored(Exception? ex)
+    {
+        if (ex is not null)
+            Chaos.Error($"-> [{Name}] [ERROR] {ex}");
+    }
 
     public void Run()
     {
 #if DEBUG
         // If there's already an instance of this effect, abort immediately, the new effect system creates a new instance when ran. only IMGUI uses this, so it shouldnt be possible under normal circumstances
-        if (EffectHandler.allEffects.Values.Contains(this))
+        if (EffectHandler.allEffects.ContainsValue(this))
         {
             Chaos.Warn("The effect handler has an instance of this effect! This should not happen! Are you using IMGUI? Creating a new instance, running, then aborting!");
-            EffectBase newE = (EffectBase)Activator.CreateInstance(GetType());
+            EffectBase newE = (EffectBase)Activator.CreateInstance(GetType())!;
             newE.Run();
             return;
         }
@@ -205,7 +209,7 @@ public class EffectBase
 #endif
 
         if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken); // there can only be one autocr at a time
-        Chaos.OnEffectRan?.Invoke(this);
+        Chaos.DispatchEffectRan(this);
         if (Duration == 0)
         {
             OnEffectStart();
@@ -222,6 +226,7 @@ public class EffectBase
         {
             if (autoCRToken != null) MelonCoroutines.Stop(autoCRToken);
             if (coRunToken != null) MelonCoroutines.Stop(coRunToken);
+            LogIfErrored(Utilities.Try(OnEffectEnd));
             try { GlobalVariables.ActiveEffects.Remove(this); } catch { }
             Active = false;
             hasFinished = true;
@@ -269,7 +274,7 @@ public class EffectBase
             switch (type)
             {
                 case NetMsgType.STRING:
-                    HandleNetworkMessage(Encoding.ASCII.GetString(data));
+                    HandleNetworkMessage(Encoding.UTF8.GetString(data));
                     break;
                 case NetMsgType.BYTEARRAY:
                     HandleNetworkMessage(Utilities.SplitBytes(data));
@@ -294,7 +299,7 @@ public class EffectBase
 #if DEBUG
         Chaos.Log($"Effect {Name} is sending string data - '{data}'");
 #endif
-        _sendData?.Invoke(NetMsgType.STRING, myIndex, Encoding.ASCII.GetBytes(data));
+        _sendData?.Invoke(NetMsgType.STRING, myIndex, Encoding.UTF8.GetBytes(data));
     }
 
     protected void SendNetworkData(params byte[][] data)
@@ -317,7 +322,7 @@ public class EffectBase
     protected void SendNetworkData(byte[] data)
     {
 #if DEBUG
-        Chaos.Log($"Effect {Name} is sending {data.Length} bytes");
+        Log($"Sending {data.Length} bytes of data");
 #endif
 
         _sendData?.Invoke(NetMsgType.RAWBYTES, myIndex, data);

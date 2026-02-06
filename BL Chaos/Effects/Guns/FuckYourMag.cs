@@ -1,16 +1,13 @@
-﻿using BoneLib;
-using Jevil;
-using SLZ.Props.Weapons;
-using System.Collections;
-using UnityEngine;
+﻿#if !NOBONELIB
+#endif
 
 namespace BLChaos.Effects;
 
 internal class FuckYourMag : EffectBase
 {
     public FuckYourMag() : base("Fuck Your Magazine", 90, EffectTypes.HIDDEN) { }
-    [RangePreference(1, 10, 1)] static readonly float minWaitTime = 5;
-    [RangePreference(10, 20, 1)] static readonly float maxWaitTime = 10f;
+    [RangePreference(1, 10, 1)] static float minWaitTime = 5;
+    [RangePreference(10, 20, 1)] static float maxWaitTime = 10f;
 
     [AutoCoroutine]
     public IEnumerator CoRun()
@@ -18,9 +15,16 @@ internal class FuckYourMag : EffectBase
         yield return null;
         while (Active)
         {
-            Gun gun = Player.GetGunInHand(Utilities.GetRandomPlayerHand());
+#if NOBONELIB
+            foreach (Gun gun in GameObject.FindObjectsOfType<Gun>())
+            {
+                Utilities.Try(gun.EjectCartridge);
+            }
+#else
+            Gun gun = Player.GetComponentInHand<Gun>(Utilities.GetRandomPlayerHand());
 
             gun?.EjectCartridge(); //todo: test (old code = .magazineSocket?.MagazineRelease(); )
+#endif
 
             yield return new WaitForSecondsRealtime(Random.RandomRange(minWaitTime, maxWaitTime));
         }

@@ -1,13 +1,5 @@
-﻿using BoneLib;
-using BoneLib.Nullables;
-using HarmonyLib;
-using Jevil;
-using SLZ.Interaction;
-using SLZ.Marrow.Pool;
-using SLZ.Props.Weapons;
-using System;
-using System.Linq;
-using UnityEngine;
+﻿#if !NOBONELIB
+using Jevil.Patching;
 
 namespace BLChaos.Effects;
 
@@ -15,16 +7,6 @@ internal class WrongMag : EffectBase
 {
     public WrongMag() : base("Wrong Mag", 60) { }
     static Magazine[] mags = Utilities.FindAll<Magazine>().ToArray();
-    static Action<Hand> magGrabbed;
-
-    [HarmonyPatch(typeof(InventoryAmmoReceiver), nameof(InventoryAmmoReceiver.OnHandGrab))]
-    static class AmmoPouchPatch
-    {
-        public static void Postfix(Hand hand)
-        {
-            magGrabbed?.Invoke(hand);
-        }
-    }
 
     public override void OnEffectStart()
     {
@@ -33,10 +15,10 @@ internal class WrongMag : EffectBase
             mags = Utilities.FindAll<Magazine>().ToArray();
         }
 
-        magGrabbed += ChangeMag;
+        GameCallbacks.OnMagGrabbed += ChangeMag;
     }
 
-    public override void OnEffectEnd() => magGrabbed -= ChangeMag;
+    public override void OnEffectEnd() => GameCallbacks.OnMagGrabbed -= ChangeMag;
 
     //[AutoCoroutine]
     //public IEnumerator CoRun()
@@ -56,7 +38,7 @@ internal class WrongMag : EffectBase
         // stolen from MTINM
         // thx 4 open sauce, chap
         Magazine mag = mags.Random();
-        AssetPoolee magObject = await NullableMethodExtensions.PoolManager_SpawnAsync(mag.magazineState.magazineData.spawnable);
+        Poolee magObject = await AssetSpawner.SpawnAsync(mag.magazineState.magazineData.spawnable, Vector3.zero);
         Grip grip = magObject.GetComponent<Grip>();
         //magObject.transform.rotation = grip.transform.transform(hand).rotation;
         Vector3 localTarget = (grip.targetTransform != null) ? grip.targetTransform.localPosition : Vector3.zero;
@@ -69,3 +51,4 @@ internal class WrongMag : EffectBase
         grip.Snatch(hand, true);
     }
 }
+#endif

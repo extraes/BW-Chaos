@@ -40,7 +40,7 @@ namespace Assets.PostProcess
             cmd.SetProjectionMatrix(Camera.main.projectionMatrix);
             cmd.DrawMesh(mf.sharedMesh, rend.transform.localToWorldMatrix, mat, rend.subMeshStartIndex, 0);
             ctx.ExecuteCommandBuffer(cmd);
-            Debug.Log("Drew!");
+            //Debug.Log("Drew!");
             //Blitter.BlitTexture(cmd)
         }
     }

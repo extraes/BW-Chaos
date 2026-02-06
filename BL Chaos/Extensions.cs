@@ -1,19 +1,14 @@
-﻿using Jevil;
-using SLZ.Props.Weapons;
-using SLZ.Utilities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using Il2CppSLZ.Marrow.Audio;
 
 namespace BLChaos;
 
 public static class Extensions
 {
+    static readonly string[] Newline = { Environment.NewLine, };
     public static string RemoveFirstLines(this string s, int n)
     {
         string[] lines = s
-            .Split(Environment.NewLine.ToCharArray())
+            .Split(Newline, StringSplitOptions.None)
             .Skip(n)
             .ToArray();
 
@@ -23,8 +18,8 @@ public static class Extensions
 
     public static void Reset(this Transform transform)
     {
-        transform.position = Vector3.zero;
-        transform.rotation = Quaternion.identity;
+        //transform.position = Vector3.zero;
+        //transform.rotation = Quaternion.identity;
 
         transform.localScale = Vector3.one;
         transform.localPosition = Vector3.zero;
@@ -43,7 +38,7 @@ public static class Extensions
         return InHierarchyOf(t, parentName);
     }
 
-    public static bool IsChildOfRigManager(this Transform t) => InHierarchyOf(t, "[RigManager (Default Brett)]");
+    public static bool IsChildOfRigManager(this Transform t) => InHierarchyOf(t, GlobalVariables.Player_RigManager.name);
 
     public static void ForEach<T>(this IEnumerable<T> sequence, Action<T> fun)
     {
@@ -63,23 +58,23 @@ public static class Extensions
 
     public static void UseEmbeddedResource(this System.Reflection.Assembly assembly, string resourcePath, Action<byte[]> whatToDoWithResource)
     {
-        using System.IO.Stream stream = assembly.GetManifestResourceStream(resourcePath);
-        using System.IO.MemoryStream mStream = new((int)stream.Length); // Don't overallocate memory to the mstream (?)
-        // Copy the stream to a memorystream. Why? Don't know, ask .NET 4.7.2 designers.
+        using Stream stream = assembly.GetManifestResourceStream(resourcePath) ?? throw new Exception("Path not found: " + resourcePath);
+        using MemoryStream mStream = new((int)stream.Length); // Don't overallocate memory to the mstream (?)
+        // Copy the stream to a memorystream. Why? Don't know, ask .NET designers.
         stream.CopyTo(mStream);
         whatToDoWithResource(mStream.ToArray());
     }
 
-    public static T Random<T>(this IEnumerable<T> sequence)
-    {
-        return sequence.ElementAt(UnityEngine.Random.Range(0, sequence.Count()));
-    }
+    //public static T Random<T>(this IEnumerable<T> sequence)
+    //{
+    //    return sequence.ElementAt(UnityEngine.Random.Range(0, sequence.Count()));
+    //}
 
-    // Random w/ IEnumerable doesn't check for arrays, only ICollection
-    public static T Random<T>(this T[] sequence)
-    {
-        return sequence[UnityEngine.Random.Range(0, sequence.Length)];
-    }
+    //// Random w/ IEnumerable doesn't check for arrays, only ICollection
+    //public static T Random<T>(this T[] sequence)
+    //{
+    //    return sequence[UnityEngine.Random.Range(0, sequence.Length)];
+    //}
 
     public static string GetFullPath(this Transform t)
     {
@@ -173,17 +168,24 @@ public static class Extensions
 
     public static void PlayClip(this AudioPlayer player, AudioClip clip, float? volume = null)
     {
-        BoneLib.Nullables.NullableMethodExtensions.Play(player, clip, player._source.outputAudioMixerGroup, volume, null, null, null);
+#if NOBONELIB
+        throw new NotImplementedException();
+#else
+        var vol = new Il2CppSystem.Nullable<float>(volume ?? 0);
+        vol.hasValue = volume.HasValue;
+        player.Play(clip, player._source.outputAudioMixerGroup, vol, Utilities.NulledNullable<bool>(), Utilities.NulledNullable<float>(), Utilities.NulledNullable<float>(), Utilities.NulledNullable<float>());
+#endif
     }
 
     public static void ForceFireable(this Gun gun)
     {
         // thx swipez https://discord.com/channels/563139253542846474/656631681406468137/1069485703429374092
-        bool magState_inoc = gun.MagazineState is null || gun.MagazineState.WasCollected || gun.MagazineState == null;
-        if (!magState_inoc) gun.MagazineState.Refill();
-        else gun.InstantLoad();
+        //bool magState_inoc = gun.MagazineState is null || gun.MagazineState.WasCollected || gun.MagazineState == null;
+        //if (!magState_inoc) gun.MagazineState.Refill();
+        //else gun.InstantLoadAsync();
 
-        gun.CeaseFire();
-        gun.Charge();
+        //gun.CeaseFire();
+        //gun.Charge();
+        gun.InstantLoadAsync().Forget();
     }
 }

@@ -1,23 +1,14 @@
-﻿using Jevil.Patching;
-using MelonLoader;
-using System;
-using System.Collections;
-using System.Linq;
-using UnityEngine;
-using Random = UnityEngine.Random;
+﻿using MelonLoader;
 
 namespace BLChaos.Effects;
 
 internal class Lag : EffectBase
 {
     public Lag() : base("Lag", 60, EffectTypes.LAGGY) { }
-    [RangePreference(0, 1, 0.0625f)] static readonly float timeScale = 0.0625f;
+    [RangePreference(0, 1, 0.0625f)] static float timeScale = 0.0625f;
 
-    static Lag() => Disable.When(() => enabled, typeof(Control_GlobalTime).GetMethod(nameof(Control_GlobalTime.DECREASE_TIMESCALE)));
-    static bool enabled;
-
-    public override void OnEffectStart() => enabled = true;
-    public override void OnEffectEnd() => enabled = false;
+    public override void OnEffectStart() => GameDisabling.ActivateSlowmo.Add(this);
+    public override void OnEffectEnd() => GameDisabling.ActivateSlowmo.Remove(this);
 
     public override void HandleNetworkMessage(byte[] data)
     {

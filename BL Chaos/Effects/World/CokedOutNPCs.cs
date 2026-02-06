@@ -1,6 +1,7 @@
-﻿using Jevil;
-using PuppetMasta;
-using SLZ.AI;
+﻿using Il2CppPuppetMasta;
+using Il2CppSLZ.Bonelab;
+using Il2CppSLZ.Marrow.AI;
+using Il2CppSLZ.Marrow.PuppetMasta;
 
 namespace BLChaos.Effects;
 
@@ -16,12 +17,12 @@ internal class CokedOutNPCs : EffectBase
         foreach (AIBrain brain in Utilities.FindAll<AIBrain>())
         {
             BehaviourBaseNav beh = brain.behaviour;
-            if (beh is BehaviourPowerLegs leg)
+            if (beh.TryCast<BehaviourPowerLegs>() is BehaviourPowerLegs leg)
             {
                 leg.agroedSpeed *= 5f;
                 leg.roamSpeed *= 5f;
             }
-            else if (beh is BehaviourCrablet crab)
+            else if (beh.TryCast<BehaviourCrablet>() is BehaviourCrablet crab)
             {
                 crab.agroedSpeed *= 5f;
                 crab.roamSpeed *= 5f;
@@ -35,12 +36,12 @@ internal class CokedOutNPCs : EffectBase
         foreach (AIBrain brain in Utilities.FindAll<AIBrain>())
         {
             BehaviourBaseNav beh = brain.behaviour;
-            if (beh is BehaviourPowerLegs leg)
+            if (beh.TryCast<BehaviourPowerLegs>() is BehaviourPowerLegs leg)
             {
                 leg.agroedSpeed /= 5f;
                 leg.roamSpeed /= 5f;
             }
-            else if (beh is BehaviourCrablet crab)
+            else if (beh.TryCast<BehaviourCrablet>() is BehaviourCrablet crab)
             {
                 crab.agroedSpeed /= 5f;
                 crab.roamSpeed /= 5f;

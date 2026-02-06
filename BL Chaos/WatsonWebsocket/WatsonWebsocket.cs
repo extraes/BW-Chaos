@@ -1,13 +1,7 @@
-﻿using System;
-using System.IO;
-using System.Net;
+﻿using System.Net;
 using System.Net.Sockets;
 using System.Net.WebSockets;
-using System.Net.NetworkInformation;
-using System.Text;
 using System.Diagnostics;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace WatsonWebsocket
 {

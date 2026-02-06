@@ -8,7 +8,7 @@ Material:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_Name: ChaosPostMat
-  m_Shader: {fileID: 4800000, guid: 6a281986b371ae04594f0ee002bf4e16, type: 3}
+  m_Shader: {fileID: 4800000, guid: 8cd21034851053f4db3769bbeac414a0, type: 3}
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
@@ -20,6 +20,10 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
+    - _AltTex:
+        m_Texture: {fileID: 2800000, guid: 8e8b21a06e6c248af80d74688e991a26, type: 3}
+        m_Scale: {x: 1, y: 1}
+        m_Offset: {x: 0, y: 0}
     - _BaseMap:
         m_Texture: {fileID: 0}
         m_Scale: {x: 1, y: 1}
@@ -45,7 +49,7 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MainTex:
-        m_Texture: {fileID: 0}
+        m_Texture: {fileID: 2800000, guid: 6aa1aaa3fac6dd04d9d5ce86534c5e0f, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - _MetallicGlossMap:
@@ -97,6 +101,7 @@ Material:
     - _Glossiness: 0
     - _GlossyReflections: 0
     - _InterleaveScale: 200
+    - _MaxDifference: 0.34
     - _Metallic: 0
     - _MinSaturation_PostMult: 1
     - _OffsetFactor: 0
@@ -122,6 +127,7 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 1, g: 1, b: 1, a: 1}
+    - _ClipColor: {r: 0.027450982, g: 0.04705883, b: 0, a: 1}
     - _Color: {r: 1, g: 1, b: 1, a: 1}
     - _EmissionColor: {r: 0, g: 0, b: 0, a: 1}
     - _OverlayOffset: {r: 0, g: 0, b: 0, a: 0}

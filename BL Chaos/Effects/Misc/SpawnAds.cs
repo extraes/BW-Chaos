@@ -1,16 +1,10 @@
-﻿using Jevil;
-using System;
-using System.Collections;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-
+﻿// ReSharper disable All
 namespace BLChaos.Effects;
 
 internal class SpawnAds : EffectBase
 {
     public SpawnAds() : base("Spawn Ads", 120) { }
-    [RangePreference(1, 30, 1)] static readonly float timeBetweenAds = 10;
+    [RangePreference(1, 30, 1)] static float timeBetweenAds = 10;
 
     [AutoCoroutine]
     public IEnumerator CoRun()
@@ -47,6 +41,9 @@ internal class SpawnAds : EffectBase
             Chaos.Instance?.LoggerInstance.Msg($"SpawnAds has {ads.Length} different strings. Lol. Lmao even.");
     }
 #endif
+
+    static string Bold(string str) => $"<b>{str}</b>";
+    static string Italic(string str) => $"<i>{str}</i>";
 
     private static readonly string[] ads = new string[] {
 #if true
@@ -190,7 +187,7 @@ internal class SpawnAds : EffectBase
         "wear a mask in the rain, call that waterboarding",
         "I KISS BOYS",
         "YOU KISS BOYS",
-        "YOU ARENT SUBMISSIVE <i>OR</i> BREEDABLE,\nYOU\nARE\n<i><b>TWELVE</b></i>",
+        $"YOU ARENT SUBMISSIVE {Italic("OR")} BREEDABLE,\nYOU\nARE\n{Bold(Italic("TWELVE"))}",
         "is it gay to like women?\nwomen like men, and thats pretty gay.",
         "this mod goes hard.\nfeel free to screenshot.",
         "this mod goes hard.\n$5000 to screenshot.\n(NFT. duh.)",
@@ -609,6 +606,8 @@ internal class SpawnAds : EffectBase
         "Sir, how many “domestic enemies” do you know who own a taxidermied wolf’s head?",
         "they sent me to a psych ward cuz the way i was straight jackin it",
         "How many megawatts of energy does One Backshot equate to? @POTUS @ENERGY Can i make a backshot energy farm? @POTUS @ENERGY",
+        "'i raised my child in my christian household' ma'am, your son is clicker trained.",
+        "drunk sex feels like ferris wheel head, and i got 2 tickets to the carnival", // stickydacat
         #endregion // end of various twitter tweakers
         "iirc there was someone in the bw community that slowly faded away from it and one time i checked their twitter, and they liked a tweet saying 'peeing yourself is super cute'\nguh, am i right",
         "thinkin abt the joys of inhaling from a fine cuban smokeable whilst kicking up ones feet in a sun-drenched tropical paradise (like isle delfino)",
@@ -947,7 +946,7 @@ internal class SpawnAds : EffectBase
         "so why did kid rock put the following line in a song used in the CHILDREN's movie Osmosis Jones:\n<i>'Young ladies, young ladies, I like 'em underage, see'\n'Some say that's statutory, but I say it's mandatory!'</i>",
         "I said-I said, you can't be goonin' like that son, boy it sounds like you're frying chicken in there! You're gonna whack your shit dry, lad!",
         "your politics bore me",
-        "hot people who eat croissants are dangerous",
+        "hot people who eat croissants are dangerous", // that one twitter meme video
         "minecraft sex mod download free working 2020",
         "feds put me in the penn cause i ain't a teller", // thanks jay
         "I'm himalayan bc i got him layin in my bed n gasping for oxygen when he at the tip",
@@ -960,7 +959,7 @@ internal class SpawnAds : EffectBase
         "block = i own a wii u",
         "block = i own a 1995 toyota corolla",
         "block = a 1x1x1 cube in minecraft",
-        "mr president, a new chaos mod has hit the towers",
+        "mr president, a second chaos mod has hit the towers",
         "no your honor, you look so cute in that gown!",
         "no your honor you dont look fat in that gown you are gorgeous! she just didnt want a real king!",
         "no YOU hang up!\nno YOU hang up!\nno YOU hang up!\nim in county jail i cannot hang up, YOU need to hang up.\n\nno YOU hang up! :3",
@@ -1012,8 +1011,157 @@ internal class SpawnAds : EffectBase
         "it is OVER for these bitches when i win the lottery...",
         "the Xan Francisco got me moving like Mr. Bean. I ain't saying shit.", // thanks anonymous confessioner
         "I got a constellation on my wrist they call me the big dripper",
-        "real Gs move in silence like lasagna",
         "opera gx proves that some of you mfs would throat a 9 inch cock if he told you it was a gaming penis",
+        "did queen ever get to race bikes",
+        "can a bonelab boy and boneworks boy really fall in love?",
+        "never tell that guy with a civic 'hey check out this song' and put on anything but eurobeat. i did that once and woke up in the ER.",
+        "rizz em with the 'tism",
+        #region 6 Foot 7 Foot
+        "excuse my charisma",
+        "so misunderstood but whats a world without enigma",
+        "never met the bitch but i fuck her like i missed her",
+        "fruits of my labor, i enjoy em while they still ripe",
+        "talkin to myself because i am my own consultant",
+        "most of yall dont get the picture unless the flash is on",
+        "black and white diamonds, fuck segregation",
+        "you stand under me if you dont understand me",
+        "i be seein through these haters like sequins",
+        "haters full of shit, they close they mouth and let they ass talk",
+        "i be eatin, all these haters do is add salt",
+        "these mfs talkin crazy like they jaw broke",
+        "fuck the glass half full or half empty, ill spill you either way",
+        "i speak the truth but thats a foreign language to all",
+        "money too strong; pockets on bodybuilder",
+        "real G's move in silence like lasagna",
+        #endregion
+        "'i drive a subaru' man just say\n'im a sub uwu >w<' it means the same shit",
+        "and here i thought hotboxing would just be getting 2 bad bitches to duke it out",
+        "my stoner friends house burnt down and that mf was makin it worse. dude grabbed some RAW papers when his mom told him to 'stop drop and roll'",
+        "haha nice post. let me guess, ovulating?",
+        "I dont condone drinking without driving", // thanks Cyanide
+        "time is money and im nickeling and diming you",
+        "Google “Randy Pitchford medieval times usb drive”",
+        #region The Cure To Male Loneliness
+        "Is the cure to male loneliness <b>buying a $300 beater off facebook marketplace and slapping a huge ass turbo in it</b>?",
+        "Is the cure to male loneliness <b>breakcore and programming</b>?",
+        "Is the cure to male loneliness <b>a BAC of 0.20</b>?",
+        "Is the cure to male loneliness <b>thugging that shit out</b>?",
+        "Is the cure to male loneliness <b>1 million USD</b>?",
+        "Is the cure to male loneliness <b>a Costco membership (for the food court)</b>?",
+        "Is the cure to male loneliness <b>rev matching to 2nd and taking a '6 right dont cut' at 30mph and making your limited slip differential work for it</b>?",
+        "Is the cure to male loneliness <b>a gf that has to budget for eyeliner</b>?",
+        "Is the cure to male loneliness <b>going loud in payday 2</b>?",
+        "Is the cure to male loneliness <b>a subwoofer and doubling the speed limit</b>?",
+        #endregion
+        "i miss when games weren't political, like wolfenstein, world of goo, grand theft auto, payday, just cause, watchdogs, and cyberpunk",
+        "I need. To tug. Tugging. At night. Tug tug tug tug.", // thanks anonymous confessor
+        "Written in marxist theory, the working class holding up america cannot survive without the government subsidizing union benefits including mandatory paw jobs and 30 minute lunch breaks", // thanks Jayla
+        "I had a wife, but they took her in the divorce!", // thanks anonymous confessor
+        "i be walking up to used stall doors and humping the door a lil to keep em on their toes", // thanks Jayla
+        "Need toy chica to give me iron dome", // is this antisemitic?
+        "they call me a singleton cuz there aint anyone else like me", // :fire:
+        "eiffel tower a bitch, call that johnson & johnson. making a family company.",
+        "last chance to look at me hector",
+        "you play like a cat :3 mrrp mrrp meow",
+        "Giggity.",
+        "im off 9 edibles wandering my house like springtrap",
+        "movin like oppenheimer. blowin up toilets everywhere i go. call me the taco bell terrorist.",
+        "me and TSA have very different definitions of 'terrorism'", // thanks Jayla
+        "if youre cold, theyre cold. warm up that suppressor.",
+        "one time i", // this line left intentionally incomplete
+        "za got me seein ancient truths...\ndamn...\n...\nthe egyptians were right about cats.",
+        "i make women retreat like a corvette buyer's hairline",
+        "do italians aspire to have red cum so they can pizza-pie their girlfriends",
+        "she peckin on my wood till i give her some sap",
+        "clitoris the big red dog",
+        "got me donating to homophobic organizations the way i fill a chick", // # thanks mara this is totally a md header
+        "they call me bob ross the way i paint her face",
+        "i got her bobbin like ross till i paint her face",
+        "I'm sorry, but as an AI language model, I'm unable to imitate the text you've provided, as its vulgar and oftentimes sexual nature may violate my terms of service.", // plot twist: i wrote this myself
+        "Call me apple the way I be in cider",
+        "you'd think my pen is making mistakes the way she took the white out",
+        "DOES YEAT FINALLY HAVE COMPETITION?",
+        "call her whipping cream the way i beat her",
+        "call her unity the way I fucking hate her",  // thanks kyojiiin
+        #region Cars literally
+        "subaru outback? no i parked out front",
+        "Ford Fiesta? Doesn’t look very much like a party to me",
+        "Lucid Air? I’m pretty sure it’s made of metal",
+        "Dodge Charger? No I only have my phone charger",
+        "Honda \"Pilot\"? It's not a plane",
+        "Nissan Rogue? Get it under control then",
+        #endregion
+        "call her an AP test the way i uhhmmm uhhh uhh ummm uhhh",
+        "I'm going to. I'm. I'm going. I'm going to drag these. I'm going to. I'm. I'm gonna drag these gorilla fur coconuts on your chin.", // thank you jayla
+        "i got 6 kids at age 21 cuz rubber is for the road, not the bed",
+        "I practice for beating my wife by peeling garlic",
+        "they call me japanese noodles the way i raw men",
+        "Swag Machine 7",
+        "i put a PS5 sticker on my PC and my entire steam library disappeared wtf",
+        "woaw...",
+        "Ladies... is 3 inches big? I've been told it is, but my ex just laughed. I could never get a straight answer out of her.",
+        "she bouncing on it in a way that is a love letter to the genre",
+        "got fired on day one of my job at a bank, because apparently youre not supposed to like... clean up the cash stacks? i was just trimming some of the bills sticking out, making them neater. i dont get what the problem is",
+        "she ask if im fucking stupid as if im not having intercourse with the dumbest alive",
+        "call her taxes the way i dodge her",
+        // "my girl practicing for her UFC fight with connor mcgregor", maybe not make jokes about the rapist
+        "\"you changed\" what else am i supposed to do when i shit my pants?",
+        "they call me mao the way i lay zedong", // thanks Jay this one fucks hard
+        "i must be a pirate the way i treasure her chest", // thanks anonymous confessor
+        "While you were playing this mod I was teaching your girl all the things you love",
+        "when i say shes \"wife material\" that means she can take a right hook like a pro",
+        "dudes be homophobic yet somehow when they see someone with abs they start going ham on that oscar meyer", // thanks cyanide
+        "lemme scratch my balls real quick",
+        "they call me the ps5 the way i got no game",
+        "i got coke no cola",
+        "Haters can't stand seeing a quirked up manlet pull a bad bitch.",
+        "chubby chasers pushin them rolls like its katamari",
+        "they call me a pressure washer the way i get it done with 2 stokes",
+        "call me jesus christ the way i gave her a second coming",
+        "only language i speak is swaghili",
+        "my wifi password is 'bushdidit2001'",
+        "my wifi password is 'bahnerwasright24'",
+        "I like my activism like I like my women\nSeen but not heard\nThat’s why instead of advocating for clean energy I just bomb random oil pipelines",
+        "call me rain man the way i give her 1-2 inches whenever i come over",
+        "808s on A Milli impregnated me",
+        "call her the WWE the way i make her Monday Night RAW",
+        "I need you to take a picture with your ass out, and your back bent in with your pussy barely peeking through from a low angle with your face in it, winking with your tongue out and your feet in it, and your arches exposed and your toes clenched and your torso at three-quarters rotation with your side boob and your nipples just out of sight with a choker on, and your panties around your waist with the middle pulled to the side, and your hands through the sides of the panties lifting them upward as your cheeks are out",
+        "half of these are funny, and the other ones i wrote myself",
+        "i call my girl bands the way i dont have her",
+        "bitches call me ICE the way i invade their homes",
+        "they call me the way i have a phone",
+        "i call her joe the way she give me sloppy",
+        "i call her xenon headlights the way she got high intensity discharge",
+        "call her crypto the way i pump her then dump her",
+        "if its between my credit card bill and canes, catch me at my bankruptcy declaration cuz that caniac combo aint gon eat itself",
+        "call her an open diff the way she got me slippin n sliding in it",
+        "Can I get a booty pic with your panties on and one without them on? Can I also get 3 different pics of your boobs any position. Also, can i get just a normal pic or your pussy from the front and one where it's spread a bit open. Can i get a picture of you playing with yourself? Can i get a pic of your pussy and ass from behind in one shot? Can i also get a pic your full front body in just your bra and panties? And can I get a pic of your ass while your panties are all up? Can I also get a pic of your boobs while you're in the shower? For the rest of the pics can you just send whatever sexy things you want? For the videos can i get a video of you twerking in just really short shorts? And one of you playing with yourself? One of you actually cumming? Also, can i get one of you playing with your tits while not wearing a shirt? If you have a toy can you send my a",
+        "she pullin my pork in ways that should be haram",
+        "makin all this money outta the blue, call that crip dough",
+        "call me a namespace the way she always using me",
+        "fuckin my girl every day at 14:00 UTC, call that a cron job",
+        "top of my class the way i Cum Laude",
+        "i used to have hoop dreams until i found out there were other ways to score",
+        "I went drunk driving near a playground and wrapped my engine block around a swingset. Disappointingly, it wasn't the fun swingset from GTA 4",
+        #region Kivvycat (or things based on her tweets)
+        "as you can tell from how many different strings are in here, I'm unemployed...\n...\nI wish her feet could give me a job...",
+        "I'm gonna rig a Rube Goldberg machine that raises the noose so that the investigators (or whoever finds me) has their day brightened by my posthumous whimsy",
+        "I looooveee blowing cigarette smoke in my sons face he gets soooo mad LOL",
+        "what do you mean glock, the horse cum company, sells handguns?",
+        "Listening aint enough i need the music to crack me",
+        "I've been eating a lot of sludge recently.\nThey say if it's gray it's good for you.",
+        "How do you guys discipline your kids other than putting them in the slop? It's getting expensive to keep him coated",
+        "at the gym doing 3 sets of getting my nuts getting drained in the locker room",
+        "smokin on those Renee De Carts",
+        "*starts ovulating*",
+        "you cant take me to a fancy restaurant bc i be moaning loud as fuck when the food is good",
+        "how do i get more lead in my diet if i dont like drinking prime",
+        "you can do so much with your life but if you have one weird fetish suddenly youre \"bonelab light's armpit\" guy forever",
+        "this bitch says shes 'porch of geese' what does that even mean",
+        "wish someone would come into work and blow their brains out in front of me so i could get the rest of the day off rn",
+        "what are some good starter mistakes for someone just getting into ruining their life?", // (making this mod)
+        "Got an alien bitch straight up glorpin on it. She’s Znarfin it down to the base she a freak man",
+        #endregion
 #endif // quick toggle to see how much space these strings take up
     };
 }

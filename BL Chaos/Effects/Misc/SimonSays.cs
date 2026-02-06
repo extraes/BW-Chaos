@@ -1,16 +1,7 @@
-﻿using BoneLib;
-using HarmonyLib;
-using Jevil;
-using PuppetMasta;
-using SLZ.Interaction;
-using SLZ.Rig;
-using SLZ.VRMK;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using Random = UnityEngine.Random;
+﻿#if !NOBONELIB
+using Il2CppSLZ.Interaction;
+using Il2CppSLZ.Marrow.PuppetMasta;
+using Jevil.Patching;
 
 namespace BLChaos.Effects;
 
@@ -19,7 +10,10 @@ namespace BLChaos.Effects;
 // I tried to make it not bad. Clearly I have failed.
 internal class SimonSays : EffectBase
 {
-    public SimonSays() : base("Simon Says", 60, EffectTypes.DONT_SYNC) { }
+    public SimonSays() : base("Simon Says", 60, EffectTypes.DONT_SYNC)
+    {
+        DieDelegate = _ => Die();
+    }
     private enum SimonSaysType
     {
         die,
@@ -34,31 +28,32 @@ internal class SimonSays : EffectBase
     }
 
     readonly Dictionary<SimonSaysType, bool> conditions = new Dictionary<SimonSaysType, bool>();
-    [RangePreference(5, 30, 1)] static readonly int roundTime = 15;
-    private static Action killNpc;
-    private static Action jump;
-    private static Action buttonPress;
+    [RangePreference(5, 30, 1)] static int roundTime = 15;
+    private static Il2CppSystem.Action<PuppetMaster> DispatchNpcDeath = new Action<PuppetMaster>(_ => killNpc?.Invoke());
+    private static Action? killNpc;
+    private static Action? buttonPress;
+    private Action<RigManager> DieDelegate;
 
     public override void OnEffectStart()
     {
         ResetConditions();
 
-        jump += Jump;
-        killNpc += Kill;
-        buttonPress += ButtonPress;
-        Hooking.OnPlayerDeath += Die;
+        PuppetMaster.add_OnDeathStatsEvent(DispatchNpcDeath);
 
-        GameObject.FindObjectsOfType<ButtonToggle>().ForEach(b => b.onPress.AddListener(buttonPress));
+        GameCallbacks.OnJump += Jump;
+        GameCallbacks.OnPuppetMasterDeath += Kill;
+        GameCallbacks.OnButtonPress += ButtonPress;
+        Hooking.OnPlayerDeath += DieDelegate;
     }
 
     public override void OnEffectEnd()
     {
-        jump -= Jump;
-        killNpc -= Kill;
-        buttonPress -= ButtonPress;
-        Hooking.OnPlayerDeath -= Die;
+        Utilities.Try(() => PuppetMaster.remove_OnDeathStatsEvent(DispatchNpcDeath));
 
-        GameObject.FindObjectsOfType<ButtonToggle>().ForEach(b => b.onPress.RemoveListener(buttonPress));
+        GameCallbacks.OnJump -= Jump;
+        GameCallbacks.OnPuppetMasterDeath -= Kill;
+        GameCallbacks.OnButtonPress -= ButtonPress;
+        Hooking.OnPlayerDeath -= DieDelegate;
     }
 
     private void ResetConditions()
@@ -108,7 +103,7 @@ internal class SimonSays : EffectBase
                     // These cases are already handled by patches/hooks elsewhere
                     break;
                 case SimonSaysType.grabAGun:
-                    conditions[sst] = Player.GetGunInHand(Player.leftHand) || Player.GetGunInHand(Player.rightHand);
+                    conditions[sst] = Player.GetComponentInHand<Gun>(Player.LeftHand) || Player.GetComponentInHand<Gun>(Player.RightHand);
                     break;
                 case SimonSaysType.duck:
                     Vector3 posFeet = GlobalVariables.Player_PhysRig.rbFeet.transform.position;
@@ -121,13 +116,13 @@ internal class SimonSays : EffectBase
 #endif
                     break;
                 case SimonSaysType.dropYourItems:
-                    conditions[sst] = !(Player.GetObjectInHand(Player.leftHand) || Player.GetObjectInHand(Player.rightHand));
+                    conditions[sst] = !(Player.GetObjectInHand(Player.LeftHand) || Player.GetObjectInHand(Player.RightHand));
                     break;
                 case SimonSaysType.dontMove:
                     conditions[sst] = Vector3.Distance(startPos, GlobalVariables.Player_PhysRig.transform.position) < 1;
                     break;
                 case SimonSaysType.holdItemsInBothHands:
-                    conditions[sst] = !(Player.GetObjectInHand(Player.leftHand) == null || Player.GetObjectInHand(Player.rightHand) == null);
+                    conditions[sst] = !(Player.GetObjectInHand(Player.LeftHand) == null || Player.GetObjectInHand(Player.RightHand) == null);
                     break;
                 default:
                     break;
@@ -142,40 +137,9 @@ internal class SimonSays : EffectBase
     }
 
     private void Jump() => conditions[SimonSaysType.jump] = true;
-    private void Kill() => conditions[SimonSaysType.killAnNpc] = true;
+    private void Kill(PuppetMaster _) => conditions[SimonSaysType.killAnNpc] = true;
     private void Die() => conditions[SimonSaysType.die] = true;
     private void ButtonPress() => conditions[SimonSaysType.pushAButton] = true;
 
-    [HarmonyPatch(typeof(BehaviourBaseNav), nameof(BehaviourBaseNav.KillStart))]
-    public static class KillPatch
-    {
-        public static void Postfix()
-        {
-            killNpc?.Invoke();
-        }
-    }
-
-    [HarmonyPatch(typeof(ButtonToggle), nameof(ButtonToggle.Awake))]
-    public static class ButtonPatch
-    {
-        public static void Postfix(ButtonToggle __instance)
-        {
-            __instance.onPress.AddListener(buttonPress);
-        }
-    }
-
-    [HarmonyPatch(typeof(ControllerRig), "Jump")]
-    public class ControllerRigJumpPatch
-    {
-        public static void Postfix()
-        {
-            PhysGrounder physGrounder = GameObject.FindObjectOfType<PhysGrounder>();
-
-            // Only jump when on the ground
-            if (physGrounder.isGrounded)
-            {
-                jump?.Invoke();
-            }
-        }
-    }
 }
+#endif

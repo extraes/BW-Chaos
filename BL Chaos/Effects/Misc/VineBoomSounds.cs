@@ -1,9 +1,4 @@
-﻿using Il2CppSystem;
-using SLZ.SFX;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.Audio;
+﻿using Jevil.Patching;
 
 namespace BLChaos.Effects;
 
@@ -26,26 +21,25 @@ internal class VineBoomSounds : EffectBase
 
     public override void OnEffectStart()
     {
-        #region Initialize
         if (vineBoomSound == null) Init();
-        #endregion
 
         active = true;
+
+        GameCallbacks.OnPreAudioSourcePlay += Replace;
     }
 
     public override void OnEffectEnd()
     {
+        GameCallbacks.OnPreAudioSourcePlay -= Replace;
+
         active = false;
     }
 
     // basically yoinked from AudioReplacer (https://github.com/TrevTV/Boneworks-OpenSourceMods/blob/main/AudioReplacer/MelonLoaderMod.cs lines 61, 62)
-    [HarmonyLib.HarmonyPatch(typeof(AudioSource), nameof(AudioSource.Play), new System.Type[0] )]
-    [HarmonyLib.HarmonyPatch(typeof(AudioSource), nameof(AudioSource.Play), new System.Type[1] { typeof(ulong) } )]
-    static class AudioPlayerPatch
+    static void Replace(AudioSource __instance)
     {
-        static void Prefix(AudioSource __instance)
-        {
-            if (active) __instance.clip = vineBoomSound;
-        }
+        if (vineBoomSound != null)
+            __instance.clip = vineBoomSound;
     }
+    
 }

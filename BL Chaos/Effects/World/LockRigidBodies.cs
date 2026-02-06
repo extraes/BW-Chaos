@@ -1,19 +1,11 @@
-﻿using Jevil;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Text;
-using UnityEngine;
-using Random = UnityEngine.Random;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class LockRigidBodies : EffectBase
 {
     public LockRigidBodies() : base("Lock Random Items", 15) { }
 
     readonly Dictionary<Rigidbody, RigidbodyConstraints> dict = new Dictionary<Rigidbody, RigidbodyConstraints>();
-    [RangePreference(1, 150, 2)] static readonly float rbsPerFrame = 10;
+    [RangePreference(1, 150, 2)] static float rbsPerFrame = 10;
 
     public override void OnEffectEnd()
     {

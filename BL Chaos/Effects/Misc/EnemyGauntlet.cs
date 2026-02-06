@@ -1,26 +1,25 @@
-﻿using SLZ.Marrow.Pool;
-using BoneLib.Nullables;
-using System.Collections;
-using System.Linq;
-using UnityEngine;
-using Jevil;
-using Jevil.Spawning;
-using SLZ.Marrow.Data;
-
+﻿#if !NOBONELIB
 // maybe try adding shit from ultrakill?
 namespace BLChaos.Effects;
 
 internal class EnemyGauntlet : EffectBase
 {
     public EnemyGauntlet() : base("Enemy gauntlet", 120) { }
-    [RangePreference(0, 1, 0.05f)] static readonly float volume = 0.3f;
+    [RangePreference(0, 1, 0.05f)] static float volume = 0.3f;
 
     private static AudioClip clip;
     public override void OnEffectStart()
     {
         clip = clip != null ? clip : GlobalVariables.EffectResources.LoadAsset("assets/sounds/thecybergrind.mp3").Cast<AudioClip>();
 
-        GlobalVariables.MusicPlayer.Play(clip, GlobalVariables.MusicMixer, volume, null, null, null);
+        var nulledBool = new Il2CppSystem.Nullable<bool>(false);
+        nulledBool.hasValue = false;
+        var nulledFloat = new Il2CppSystem.Nullable<float>(0);
+        nulledFloat.hasValue = false;
+
+        var vol = new Il2CppSystem.Nullable<float>(volume);
+        vol.hasValue = true;
+        GlobalVariables.MusicPlayer.Play(clip, GlobalVariables.MusicMixer, vol, nulledBool, nulledFloat, nulledFloat);
     }
 
     public override void OnEffectEnd()
@@ -94,3 +93,4 @@ internal class EnemyGauntlet : EffectBase
         ForceEnd();
     }
 }
+#endif

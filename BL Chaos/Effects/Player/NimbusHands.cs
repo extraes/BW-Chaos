@@ -1,29 +1,25 @@
-﻿using BoneLib;
-using Jevil;
-using SLZ.Interaction;
-using UnityEngine;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class NimbusHands : EffectBase
 {
     public NimbusHands() : base("Nimbus Hands", 30) { }
-    [RangePreference(0, 10, 0.25f)] static readonly float forceMultiplier = 0.5f;
+    [RangePreference(0, 10, 0.25f)] static float forceMultiplier = 0.5f;
 
     public override void OnEffectStart()
     {
-        Utilities.ChangeStrength(Player.leftHand.physHand, 100, 5);
-        Utilities.ChangeStrength(Player.rightHand.physHand, 100, 5);
+        Utilities.ChangeStrength(Player.LeftHand.physHand, 100, 5);
+        Utilities.ChangeStrength(Player.RightHand.physHand, 100, 5);
     }
     public override void OnEffectEnd()
     {
-        Utilities.ChangeStrength(Player.leftHand.physHand);
-        Utilities.ChangeStrength(Player.rightHand.physHand);
+        Utilities.ChangeStrength(Player.LeftHand.physHand);
+        Utilities.ChangeStrength(Player.RightHand.physHand);
     }
     public override void OnEffectUpdate()
     {
         // only do it to one hand at a time because framerate is high enough to make it not matter
-        Hand hand = Time.frameCount % 2 == 0 ? Player.leftHand : Player.rightHand;
+        Hand hand = Time.frameCount % 2 == 0 ? Player.LeftHand : Player.RightHand;
         Vector3 vel = hand.rb.velocity;
 
         // make sure the velocity is velocity relative to the body
@@ -37,3 +33,4 @@ internal class NimbusHands : EffectBase
         GlobalVariables.Player_PhysRig.AddVelocityChange(-Vector3.ClampMagnitude(vel, 5 * forceMultiplier));
     }
 }
+#endif

@@ -1,43 +1,33 @@
 ﻿#if !NOBONELIB
 using BLChaos.Effects;
-using HarmonyLib;
-using MelonLoader;
-using BoneLib;
-using System;
-using System.Collections;
-using System.Linq;
-using System.Text;
-using UnityEngine;
-using Jevil.Prefs;
 using static BLChaos.Effects.EffectBase;
 using BoneLib.BoneMenu;
-using BoneLib.BoneMenu.Elements;
-using System.IO;
-using Il2CppMK.Glow;
+using MelonLoader.Utils;
 
 namespace BLChaos;
 
 public static class BoneMenu
 {
-    internal static MenuCategory boneMenuEntry;
-    internal static MenuCategory recentCategory;
-    internal static MenuCategory effectsCategory;
-    internal static MenuCategory preferencesCategory;
-    internal static MenuCategory debugCategory;
-    internal static MenuCategory[] effectsCategoriesAlphabetized = new MenuCategory[27]; // last one for numbers
+    internal static Page boneMenuEntry;
+    internal static Page recentCategory;
+    internal static Page effectsCategory;
+    internal static Page preferencesCategory;
+    internal static Page debugCategory;
+    internal static Page[] effectsCategoriesAlphabetized = new Page[27]; // last one for numbers
 
-    internal static MenuCategory GetMenuCategoryFor(string name)
+    internal static Page GetPageFor(string name)
     {
         char firstAlphanumericChar = name.First(c => char.IsLetterOrDigit(c));
 
         char firstCharUpper = char.ToUpper(firstAlphanumericChar);
         int alphabetizedIdx = char.IsDigit(firstCharUpper) ? effectsCategoriesAlphabetized.Length - 1 : firstCharUpper.CompareTo('A');
         if (effectsCategoriesAlphabetized[alphabetizedIdx] == null)
-            effectsCategoriesAlphabetized[alphabetizedIdx] = effectsCategory.CreateCategory("Effects starting with " + (char.IsDigit(firstCharUpper) ? "a number" : firstCharUpper), Color.white);
+            effectsCategoriesAlphabetized[alphabetizedIdx] = effectsCategory.CreatePage("Effects starting with " + (char.IsDigit(firstCharUpper) ? "a number" : firstCharUpper), Color.white);
 
-        MenuCategory ret = (MenuCategory)effectsCategoriesAlphabetized[alphabetizedIdx].Elements.FirstOrDefault(mc => mc.Name == name);
+        PageLinkElement? link = effectsCategoriesAlphabetized[alphabetizedIdx].Elements.FirstOrDefault(mc => mc.ElementName == name) as PageLinkElement;
+        Page? ret = link?.LinkedPage;
         
-        ret ??= effectsCategoriesAlphabetized[alphabetizedIdx].CreateCategory(name, Color.white); // create if doesnt exist
+        ret ??= effectsCategoriesAlphabetized[alphabetizedIdx].CreatePage(name, Color.white); // create if doesnt exist
         
         return ret;
     }
@@ -48,12 +38,12 @@ public static class BoneMenu
 
         if (boneMenuEntry == null)
         {
-            boneMenuEntry = MenuManager.CreateCategory("Chaos", Color.white);
-            recentCategory = boneMenuEntry.CreateCategory("Recent Effects", Color.white);
-            boneMenuEntry.CreateFunctionElement("Reset/refilter effects", Color.white, Chaos.LiveUpdateEffects);
-            preferencesCategory = boneMenuEntry.CreateCategory("Preferences", Color.white);
-            effectsCategory = boneMenuEntry.CreateCategory("Effects", Color.gray);
-            debugCategory = boneMenuEntry.CreateCategory("Debug", Color.gray);
+            boneMenuEntry = Page.Root.CreatePage("Chaos", Color.white);
+            recentCategory = boneMenuEntry.CreatePage("Recent Effects", Color.white);
+            boneMenuEntry.CreateFunction("Reset/refilter effects", Color.white, Chaos.LiveUpdateEffects);
+            preferencesCategory = boneMenuEntry.CreatePage("Preferences", Color.white);
+            effectsCategory = boneMenuEntry.CreatePage("Effects", Color.gray);
+            debugCategory = boneMenuEntry.CreatePage("Debug", Color.gray);
         }
 
         System.Collections.Generic.List<EffectBase> sorted = Chaos.asmEffects.OrderBy(e => e.Name).ToList();
@@ -63,24 +53,24 @@ public static class BoneMenu
             if (Chaos.isSteamVer && effect.Types.HasFlag(EffectTypes.USE_STEAM)) continue;
             
             // way overbuilt method of sorting categories. this could (should) be abstracted out into another method.
-            char firstChar = char.ToUpper(effect.Name.First(c => char.IsLetterOrDigit(c)));
+            char firstChar = char.ToUpper(effect.Name.First(char.IsLetterOrDigit));
             int idx = char.IsDigit(firstChar) ? effectsCategoriesAlphabetized.Length - 1 : firstChar.CompareTo('A');
             if (effectsCategoriesAlphabetized[idx] == null)
-                effectsCategoriesAlphabetized[idx] = effectsCategory.CreateCategory("Effects starting with " + (char.IsDigit(firstChar) ? "a number" : firstChar), Color.white);
+                effectsCategoriesAlphabetized[idx] = effectsCategory.CreatePage("Effects starting with " + (char.IsDigit(firstChar) ? "a number" : firstChar), Color.white);
             
-            MenuCategory ecat = effectsCategoriesAlphabetized[idx].CreateCategory(effect.Name, Color.white);
-            effect.MenuElement = ecat;
+            Page effectPage = effectsCategoriesAlphabetized[idx].CreatePage(effect.Name, Color.white);
+            effect.Page = effectPage;
 
             // As usual, make a force runner
-            ecat.CreateFunctionElement("Force run", Color.white, () =>
+            effectPage.CreateFunction("Force run", Color.white, () =>
             {
                 Type type = effect.GetType();
-                EffectBase e = (EffectBase)Activator.CreateInstance(type);
+                EffectBase e = Activator.CreateInstance(type) as EffectBase ?? throw new InvalidCastException($"Type {type.FullName} does not extend EffectBase");
                 e.Run();
                 Stats.EffectCalledManuallyCallback(effect);
             });
 
-            ecat.CreateBoolElement("Force enable/disable", Color.white, EffectHandler.allEffects.ContainsKey(effect.Name), addEffect =>
+            effectPage.CreateBool("Force enable/disable", Color.white, EffectHandler.allEffects.ContainsKey(effect.Name), addEffect =>
             {
 #if DEBUG
                 Chaos.Log("BoneMenu effect toggle for " + effect.Name + " pressed; Effect is currently " + (EffectHandler.allEffects.ContainsKey(effect.Name) ? "" : "not ") + "in the list; b == " + addEffect);
@@ -90,7 +80,7 @@ public static class BoneMenu
                     if (!EffectHandler.allEffects.ContainsKey(effect.Name))
                     {
                         EffectHandler.allEffects.Add(effect.Name, effect);
-                        if (!Chaos.IsEffectViable(effect.Types)) Prefs.ForceEnabledEffects.Add(effect.Name);
+                        if (!Chaos.IsEffectAllowed(effect.Types)) Prefs.ForceEnabledEffects.Add(effect.Name);
                     }
                 }
                 else
@@ -100,29 +90,34 @@ public static class BoneMenu
                         if (e.Name == effect.Name) e.ForceEnd();
                     }
                     EffectHandler.allEffects.Remove(effect.Name);
-                    if (Chaos.IsEffectViable(effect.Types)) Prefs.ForceDisabledEffects.Add(effect.Name);
+                    if (Chaos.IsEffectAllowed(effect.Types)) Prefs.ForceDisabledEffects.Add(effect.Name);
                 }
                 //(ecat.Elements[1] as BoolElement).set(EffectHandler.allEffects.ContainsKey(effect.Name)); // fallback cause i almost certainly fucked it
             });
 
-            ecat.CreateFunctionElement("Flags: " + effect.Types, Color.gray, () => { });
+            effectPage.CreateFunction("Flags: " + effect.Types, Color.gray, () => { });
 
             effect.RegisterPreferences();
         }
-        effectsCategory.Elements.Sort((me1, me2) => StringComparer.InvariantCultureIgnoreCase.Compare(me1.Name, me2.Name));
+        List<Element> elementsCopy = effectsCategory.Elements.ToList();
+        elementsCopy.Sort((me1, me2) => StringComparer.InvariantCultureIgnoreCase.Compare(me1.ElementName, me2.ElementName));
+        effectsCategory.RemoveAll();
+
+        foreach (Element item in elementsCopy)
+            effectsCategory.Add(item);
 
         #region Populate debug category
 
-        debugCategory.CreateFunctionElement("Log resource paths", Color.white, () => { GlobalVariables.ResourcePaths.ForEach(Chaos.Log); });
-        debugCategory.CreateFunctionElement("Log all enabled effects", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log(e.Value.Name)); });
-        debugCategory.CreateFunctionElement("Log effect syncing indices", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"{e.Value.Name}: {e.Value.EffectIndex}")); });
-        debugCategory.CreateFunctionElement("Log effect type names (useful for ChaosConfig)", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"Effect '{e.Value.Name}' = type '{e.Value.GetType().Name}'")); });
+        debugCategory.CreateFunction("Log resource paths", Color.white, () => { GlobalVariables.ResourcePaths.ForEach(Chaos.Log); });
+        debugCategory.CreateFunction("Log all enabled effects", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log(e.Value.Name)); });
+        debugCategory.CreateFunction("Log effect syncing indices", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"{e.Value.Name}: {e.Value.EffectIndex}")); });
+        debugCategory.CreateFunction("Log effect type names (useful for ChaosConfig)", Color.white, () => { EffectHandler.allEffects.ForEach(e => Chaos.Log($"Effect '{e.Value.Name}' = type '{e.Value.GetType().Name}'")); });
 
 #if DEBUG
-        debugCategory.CreateFunctionElement("Run all tests", Color.white, async () =>
+        debugCategory.CreateFunction("Run all tests", Color.white, async () =>
         {
-            string basePath = Path.Combine(MelonUtils.UserDataDirectory, "Chaos", "TestResult");
-            string chaosDir = Path.GetDirectoryName(basePath);
+            string basePath = Path.Combine(MelonEnvironment.UserDataDirectory, "Chaos", "TestResult");
+            string chaosDir = Path.GetDirectoryName(basePath) ?? throw new DirectoryNotFoundException($"Path {basePath} is not in a directory!");
 
             if (!Directory.Exists(chaosDir)) Directory.CreateDirectory(chaosDir);
             
@@ -134,7 +129,7 @@ public static class BoneMenu
             }
         });
 #endif
-        debugCategory.CreateFunctionElement("Log all preferences (w/o token & channel)", Color.white, () =>
+        debugCategory.CreateFunction("Log all preferences (w/o token & channel)", Color.white, () =>
         {
             foreach (System.Reflection.PropertyInfo prop in typeof(Prefs).GetProperties(System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Static))
             {
@@ -159,8 +154,16 @@ public static class BoneMenu
     // shortcut to recently ran effects
     private static void UpdateRecentEffect(EffectBase effect)
     {
-        recentCategory.Elements.Remove(effect.MenuElement);
-        recentCategory.Elements.Add(effect.MenuElement);
+        Element? pseudoLink =  recentCategory.Elements.FirstOrDefault(el => el.ElementName == effect.Page.Name);
+        if (pseudoLink is not null)
+            recentCategory.Remove(pseudoLink);
+        else
+            pseudoLink = recentCategory.CreateFunction(effect.Page.Name, Color.white, () => Menu.OpenPage(effect.Page));
+        
+        List<Element> copies = recentCategory.Elements.ToList();
+        copies.Insert(0, pseudoLink);
+        foreach (Element item in copies)
+            recentCategory.Add(pseudoLink);
     }
 }
 #endif

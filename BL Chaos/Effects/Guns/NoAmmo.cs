@@ -1,12 +1,4 @@
-﻿using Jevil;
-using SLZ.Combat;
-using SLZ.Marrow.Data;
-using SLZ.Player;
-using System.Linq;
-using System.Threading.Tasks;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class NoAmmo : EffectBase
 {

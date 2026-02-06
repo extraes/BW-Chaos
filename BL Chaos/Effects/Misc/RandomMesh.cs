@@ -1,14 +1,9 @@
-﻿using Jevil;
-using System.Linq;
-using UnityEngine;
-using Random = UnityEngine.Random;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class RandomMesh : EffectBase
 {
     public RandomMesh() : base("My Experience in Blender") { }
-    [RangePreference(0.02f, 2, 0.02f)] static readonly float scaleMultiplier = 0.5f;
+    [RangePreference(0.02f, 2, 0.02f)] static float scaleMultiplier = 0.5f;
 
     public override void HandleNetworkMessage(byte[] data)
     {
@@ -44,6 +39,8 @@ internal class RandomMesh : EffectBase
         rb.useGravity = true;
         MeshCollider col = go.AddComponent<MeshCollider>();
         col.convex = true;
+        MeshRenderer meshRenderer = go.GetComponent<MeshRenderer>();
+        meshRenderer.material = new Material(Shader.Find(Const.URP_LIT_NAME));
 
         byte[][] bytes = new byte[][]
         {

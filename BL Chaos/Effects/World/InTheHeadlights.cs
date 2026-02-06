@@ -1,12 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using System.Collections.Generic;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class InTheHeadlights : EffectBase
 {

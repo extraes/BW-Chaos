@@ -1,20 +1,14 @@
-﻿
-using BoneLib;
-using SLZ.Interaction;
-using System.Collections;
-using UnityEngine;
-using Random = UnityEngine.Random;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class DontLetHimGrabYou : EffectBase
 {
     public DontLetHimGrabYou() : base("DONT LET HIM GRAB YOU", 60) { }
-    [RangePreference(1, 10, 0.5f)] static readonly float minGrabTime = 3;
-    [RangePreference(2, 20, 0.5f)] static readonly float minWaitTime = 5;
-    [RangePreference(1, 10, 0.25f)] static readonly float forceMultiplier = 1;
+    [RangePreference(1, 10, 0.5f)] static float minGrabTime = 3;
+    [RangePreference(2, 20, 0.5f)] static float minWaitTime = 5;
+    [RangePreference(1, 10, 0.25f)] static float forceMultiplier = 1;
 
-    Hand hand = Player.leftHand;
+    Hand hand = Player.LeftHand;
     Vector3 dir = Random.onUnitSphere;
     bool enabled = false;
 
@@ -27,7 +21,7 @@ internal class DontLetHimGrabYou : EffectBase
         while (Active)
         {
             yield return new WaitForSeconds(Random.Range(minWaitTime, maxWaitTime));
-            hand = Random.value > 0.5f ? Player.leftHand : Player.rightHand;
+            hand = Random.value > 0.5f ? Player.LeftHand : Player.RightHand;
             dir = (Random.onUnitSphere + Vector3.up).normalized;
             enabled = true;
             yield return new WaitForSeconds(Random.Range(minGrabTime, maxGrabTime));
@@ -39,7 +33,8 @@ internal class DontLetHimGrabYou : EffectBase
     {
         if (enabled)
         {
-            hand.rb.AddForce(8 * forceMultiplier * dir, ForceMode.VelocityChange);
+            hand.rb.AddForce(1 * forceMultiplier * dir, ForceMode.VelocityChange);
         }
     }
 }
+#endif

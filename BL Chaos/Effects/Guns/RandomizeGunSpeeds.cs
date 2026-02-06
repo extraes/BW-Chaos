@@ -1,26 +1,11 @@
-﻿using BoneLib;
-using Cysharp.Threading.Tasks;
-using Jevil;
-using Jevil.Spawning;
-using MelonLoader;
-using MelonLoader.Assertions;
-using SLZ.Marrow.Pool;
-using SLZ.Props.Weapons;
-using System;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
-using Random = UnityEngine.Random;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class RandomizeGunSpeeds : EffectBase
 {
     public RandomizeGunSpeeds() : base("Randomize Gun Speeds") { }
-    [RangePreference(0, 100, 5)] static readonly float minSpeed = 5f;
-    [RangePreference(250, 15_000, 250)] static readonly float maxSpeed = 9000f;
+    [RangePreference(0, 100, 5)] static float minSpeed = 5f;
+    [RangePreference(250, 15_000, 250)] static float maxSpeed = 9000f;
 
 
     public override void HandleNetworkMessage(byte[][] data)
@@ -53,7 +38,7 @@ internal class RandomizeGunSpeeds : EffectBase
 #if DEBUG
     internal override async Task<TestResult> Test()
     {
-        AssetPoolee poolee = await Barcodes.ToSpawnable(JevilBarcode.MP5).SpawnAsync(Vector3.one, Quaternion.identity);
+        Poolee poolee = await Barcodes.ToSpawnable(JevilBarcode.MP5).SpawnAsync(Vector3.one, Quaternion.identity);
         Gun newGun = poolee.GetComponentInChildren<Gun>();
         float preRPM = newGun.roundsPerMinute;
 
@@ -68,3 +53,4 @@ internal class RandomizeGunSpeeds : EffectBase
     }
 #endif
 }
+#endif

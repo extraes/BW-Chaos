@@ -1,7 +1,4 @@
-﻿using Jevil;
-using MelonLoader;
-using System.Collections;
-using UnityEngine;
+﻿using MelonLoader;
 
 namespace BLChaos.Effects;
 
@@ -9,7 +6,7 @@ internal class Fling : EffectBase
 {
     public Fling() : base("Fling Everything", EffectTypes.AFFECT_GRAVITY) { }
     readonly int[] arr = new int[] { -1, 1 };
-    [RangePreference(0, 10, 0.125f)] static readonly float forceMultiplier = 1;
+    [RangePreference(0, 10, 0.125f)] static float forceMultiplier = 1;
 
     public override void OnEffectStart()
     {

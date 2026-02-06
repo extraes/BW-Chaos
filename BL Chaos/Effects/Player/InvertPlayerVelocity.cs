@@ -1,6 +1,4 @@
-﻿using Jevil;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class InvertPlayerVelocity : EffectBase
 {

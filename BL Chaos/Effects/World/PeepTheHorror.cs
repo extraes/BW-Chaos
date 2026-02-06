@@ -1,11 +1,8 @@
 ﻿using BoneLib.RandomShit;
-using Jevil;
 using MelonLoader;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using UnityEngine;
+using System.Runtime.InteropServices;
 using UnityEngine.UI;
 using UnityEngine.Video;
 
@@ -16,20 +13,28 @@ internal class PeepTheHorror : EffectBase
     public PeepTheHorror() : base("Peep the Horror", 120)
     {
         if (EffectHandler.Instance == null) return;
-        wristText = (Text)wristTextInfo.GetValue(EffectHandler.Instance);
-        wristImage = (Image)wristImageInfo.GetValue(EffectHandler.Instance);
-        players = new AudioSource[4];
+        wristText = (Text)wristTextInfo.GetValue(EffectHandler.Instance)!;
+        wristImage = (Image)wristImageInfo.GetValue(EffectHandler.Instance)!;
+
+        if (!Chaos.isSteamVer)
+        {
+            Il2CppOculus.Platform.Users.GetLoggedInUser().OnComplete(setName);
+        }
     }
 
-    readonly Dictionary<AudioSource, float> originalVolumes = new Dictionary<AudioSource, float>();
-    readonly Dictionary<MeshRenderer, Material> originalMaterials = new Dictionary<MeshRenderer, Material>();
-    readonly Dictionary<SkinnedMeshRenderer, Material> originalMaterialsSkinned = new Dictionary<SkinnedMeshRenderer, Material>();
-    [EffectPreference] static readonly string didYouPeepIt = "DID YOU? WAS IT FUN?";
-    static readonly FieldInfo wristTextInfo = typeof(EffectHandler).GetField("wristText", BindingFlags.Instance | BindingFlags.NonPublic);
-    static readonly FieldInfo wristImageInfo = typeof(EffectHandler).GetField("wristImage", BindingFlags.Instance | BindingFlags.NonPublic);
+#if DEBUG
+    static readonly Action<Il2CppOculus.Platform.Message<Il2CppOculus.Platform.Models.User>> setName = new(m => name = !m.IsError ? m.Data.DisplayName : throw new Exception(m.error.Message));
+#endif
+
+    readonly Dictionary<AudioSource, float> originalVolumes = new();
+    readonly Dictionary<MeshRenderer, Material> originalMaterials = new();
+    readonly Dictionary<SkinnedMeshRenderer, Material> originalMaterialsSkinned = new();
+    [EffectPreference] static string didYouPeepIt = "DID YOU? WAS IT FUN?";
+    static readonly FieldInfo wristTextInfo = typeof(EffectHandler).GetField("wristText", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new FieldAccessException("wristText");
+    static readonly FieldInfo wristImageInfo = typeof(EffectHandler).GetField("wristImage", BindingFlags.Instance | BindingFlags.NonPublic) ?? throw new FieldAccessException("wristImage");
     readonly Text wristText;
     readonly Image wristImage;
-    readonly AudioSource[] players;
+    readonly AudioSource[] players = new AudioSource[4];
     object notifRoutine;
     object textRoutine;
     object imgRoutine;
@@ -39,7 +44,7 @@ internal class PeepTheHorror : EffectBase
     static VideoPlayer videoPlayer;
     static Material mat;
     static string name;
-    static readonly string[] quotes =
+    static readonly string[] quotes = // giygas quotes
     {
         "It hurts, {0}...",
         "...I’m h...a...p...p...y...",
@@ -57,13 +62,17 @@ internal class PeepTheHorror : EffectBase
         "Please... {0}...",
     };
 
+    [MemberNotNull(nameof(clips), nameof(mat))]
     void Init()
     {
         didYouPeepIt.ToString(); // just so the compiler doesnt yell at me for unused variable
         if (Chaos.isSteamVer)
-            name = Steamworks.SteamClient.Name.Split(' ')[0]; // in case they have some goofball name like "fuxstik cs.money"
-        else
-            name = System.Security.Principal.WindowsIdentity.GetCurrent().Name; // https://stackoverflow.com/questions/1240373/how-do-i-get-the-current-username-in-net-using-c#1240379
+            name = SteamApi.Name.Split(' ')[0]; // in case they have some goofball name like "fuxstik cs.money"
+        //else if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+        //    name = System.Security.Principal.WindowsIdentity.GetCurrent().Name; // https://stackoverflow.com/questions/1240373/how-do-i-get-the-current-username-in-net-using-c#1240379
+        //else // name already set by static ctor, hopefully, lol.
+        //    name = Environment.UserName;
+
 
         clips = GlobalVariables.ResourcePaths.Where(p => p.Contains("sounds/giygas")).OrderBy(p => p.Substring(p.Length - 3).Last()).Select(GlobalVariables.EffectResources.LoadAsset).Select(a => a.Cast<AudioClip>()).ToArray();
 
@@ -89,6 +98,7 @@ internal class PeepTheHorror : EffectBase
 
         foreach (MeshRenderer renderer in Utilities.FindAll<MeshRenderer>())
         {
+            if (renderer == null) continue;
             if (renderer.transform.IsChildOfRigManager()) continue;
             originalMaterials.Add(renderer, renderer.material);
             renderer.material = mat;
@@ -96,6 +106,7 @@ internal class PeepTheHorror : EffectBase
 
         foreach (SkinnedMeshRenderer renderer in Utilities.FindAll<SkinnedMeshRenderer>())
         {
+            if (renderer == null) continue;
             originalMaterialsSkinned.Add(renderer, renderer.material);
             renderer.material = mat;
         }
@@ -145,10 +156,20 @@ internal class PeepTheHorror : EffectBase
         while (Active)
         {
             string formatted = string.Format(quotes.Random(), name);
+#if !NOBONELIB
             GameObject popup = PopupBoxManager.CreateNewPopupBox(formatted);
+            yield return null;
+            var rb = popup.GetComponentInChildren<Rigidbody>();
+            rb.detectCollisions = false;
+            rb.useGravity = false;
+            rb.velocity = new Vector3(0, -0.1f, 0);
+#endif
+
             //NotificationData notif = Notifications.SendNotification(formatted, Random.Range(10, 15));
             yield return new WaitForSecondsRealtime(Random.Range(10, 15) * Random.value);
+#if !NOBONELIB
             popup.Destroy();
+#endif
             //notif.End();
             yield return new WaitForSecondsRealtime(Random.Range(5, 20));
         }

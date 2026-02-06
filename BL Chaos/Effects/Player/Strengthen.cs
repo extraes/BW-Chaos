@@ -1,6 +1,4 @@
-﻿using BoneLib;
-using Jevil;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class Strengthen : EffectBase
@@ -9,13 +7,14 @@ internal class Strengthen : EffectBase
 
     public override void OnEffectStart()
     {
-        Utilities.ChangeStrength(Player.leftHand.physHand);
-        Utilities.ChangeStrength(Player.rightHand.physHand);
+        Utilities.ChangeStrength(Player.LeftHand.physHand);
+        Utilities.ChangeStrength(Player.RightHand.physHand);
     }
 
     public override void OnEffectEnd()
     {
-        Utilities.ChangeStrength(Player.leftHand.physHand);
-        Utilities.ChangeStrength(Player.rightHand.physHand);
+        Utilities.ChangeStrength(Player.LeftHand.physHand);
+        Utilities.ChangeStrength(Player.RightHand.physHand);
     }
 }
+#endif

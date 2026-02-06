@@ -80,3 +80,6 @@ dotnet_naming_style.pascal_case.word_separator =
 dotnet_naming_style.pascal_case.capitalization = pascal_case
 dotnet_style_explicit_tuple_names = true:suggestion
 dotnet_style_namespace_match_folder = true:suggestion
+
+# IDE0044: Add readonly modifier
+dotnet_style_readonly_field = false

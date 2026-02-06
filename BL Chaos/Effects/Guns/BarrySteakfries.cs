@@ -1,25 +1,27 @@
-﻿using BoneLib;
-using Cysharp.Threading.Tasks;
-using Jevil;
-using SLZ.Props.Weapons;
-using System.Threading.Tasks;
-using UnityEngine;
+﻿#if !NOBONELIB
+#endif
 
 namespace BLChaos.Effects;
 
 internal class BarrySteakfries : EffectBase
 {
     public BarrySteakfries() : base("Barry Steakfries", 60) { }
-    [RangePreference(0.25f, 50, 0.25f)] static readonly float forceMultiplier = 1;
+    [RangePreference(0.25f, 50, 0.25f)] static float forceMultiplier = 1;
 
     public override void OnEffectStart()
     {
+#if NOBONELIB
+        throw new NotImplementedException("This effect requires BoneLib to function");
+#else
         Hooking.OnPostFireGun += OnFire;
+#endif
     }
 
     public override void OnEffectEnd()
     {
+#if !NOBONELIB
         Hooking.OnPostFireGun -= OnFire;
+#endif
     }
 
     private void OnFire(Gun gun)

@@ -1,13 +1,9 @@
-﻿using Jevil;
-using System.Linq;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class TextureSwap : EffectBase
 {
     static Texture[] textures;
-    [RangePreference(0f, 1f, 0.05f)] static readonly float swapChance = 0.2f;
+    [RangePreference(0f, 1f, 0.05f)] static float swapChance = 0.2f;
     public TextureSwap() : base("Swap Random Textures") { Init(); }
 
     private void Init()
@@ -35,7 +31,7 @@ internal class TextureSwap : EffectBase
             if (Random.value < swapChance)
             {
                 if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
-                if (mesh.GetComponent<TMPro.TMP_Text>() != null) continue;
+                if (mesh.GetComponent<TMP_Text>() != null) continue;
 
                 Texture tex = textures.Random();
                 // fucking _BaseMap kys

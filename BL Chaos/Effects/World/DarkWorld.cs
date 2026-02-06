@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class DarkWorld : EffectBase
 {

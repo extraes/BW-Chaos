@@ -1,85 +1,82 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using SLZ.Marrow.SceneStreaming;
-using Jevil;
-using System.Collections.Generic;
-using static MelonLoader.MelonLogger;
+﻿using Il2CppSLZ.Marrow.SceneStreaming;
+using Il2CppSLZ.Marrow.Zones;
 
 namespace BLChaos.Effects;
 
-internal class NoMoreChunks : EffectBase
+internal class NoMoreChunks : EffectBase, IPatcher
 {
     public NoMoreChunks() : base("No More Chunks", 45) { }
 
     private struct TriggerEvent
     {
-        public ChunkTrigger trigger;
-        public Collider col;
-        public bool entered;
+        public SceneLoader loader;
+        public ChunkBatch cb;
+        public bool loaded;
     }
 
-    static bool CurrentlyActive;
+    static bool currentlyActive;
     static List<TriggerEvent> triggers = new();
 
-    static NoMoreChunks()
+    public static void Patch()
     {
-        Chaos.Instance.HarmonyInstance.Patch(typeof(ChunkTrigger).GetMethod(nameof(ChunkTrigger.OnTriggerEnter)), Utilities.ToHarmony(OnTriggerEnterPatch));
+        Chaos.Instance.HarmonyInstance.Patch(typeof(SceneLoader._LoadChunkBatch_d__11).GetMethod(nameof(SceneLoader._LoadChunkBatch_d__11.MoveNext)), Utilities.ToHarmony(LoadChunkBatchPatch));
+        Chaos.Instance.HarmonyInstance.Patch(typeof(SceneLoader._UnloadScenes_d__13).GetMethod(nameof(SceneLoader._UnloadScenes_d__13.MoveNext)), Utilities.ToHarmony(UnloadScenesPatch));
     }
 
     public override void OnEffectStart()
     {
-        CurrentlyActive = true;
+        currentlyActive = true;
     }
 
     public override void OnEffectEnd()
     {
-        CurrentlyActive = false;
+        currentlyActive = false;
 
         foreach (TriggerEvent te in triggers)
         {
-            if (te.trigger.INOC() || te.col.INOC()) continue;
+            if ((te.loader?.WasCollected ?? true) || (te.cb?.WasCollected ?? true)) continue;
 
-            if (te.entered)
-                te.trigger.OnTriggerEnter(te.col);
+            if (te.loaded)
+                te.loader.LoadChunkBatch(te.cb);
             else 
-                te.trigger.OnTriggerExit(te.col);
+                te.loader.UnloadScenes(te.cb);
         }
 
         triggers.Clear();
     }
 
-    static bool OnTriggerEnterPatch(ChunkTrigger __instance, Collider other)
+    static bool LoadChunkBatchPatch(SceneLoader._LoadChunkBatch_d__11 __instance)
     {
-        if (!CurrentlyActive)
+        if (!currentlyActive || __instance.__1__state != 0)
             return true;
+
+        __instance.__1__state = -1; // "cancels" this unitask
 
         TriggerEvent tEvent = new()
         {
-            trigger = __instance,
-            col = other,
-            entered = true,
+            loader = __instance.__4__this,
+            cb = __instance.chunkBatch,
+            loaded = true,
         };
         triggers.Add(tEvent);
         return false;
     }
 
-    static bool OnTriggerExitPatch(ChunkTrigger __instance, Collider other)
+    static bool UnloadScenesPatch(SceneLoader._UnloadScenes_d__13 __instance)
     {
-        if (!CurrentlyActive)
+        if (!currentlyActive)
             return true;
+
+        __instance.__1__state = -1; // "cancels" this unitask
 
         TriggerEvent tEvent = new()
         {
-            trigger = __instance,
-            col = other,
-            entered = false,
+            loader = __instance.__4__this,
+            //todo: why the fuck does that unitask not have a god damn chunkbatch field
+            //cb = __instance.,
+            loaded = true,
         };
         triggers.Add(tEvent);
         return false;
-
     }
 }

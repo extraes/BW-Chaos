@@ -1,8 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class PitchBlackWorld : EffectBase
 {
@@ -17,7 +13,7 @@ internal class PitchBlackWorld : EffectBase
         originalMats.Clear();
         if (BLACK == null)
         {
-            BLACK = new Material(Shader.Find("SLZ/Fill Color"));
+            BLACK = new Material(Shader.Find(Const.URP_LIT_NAME));
             BLACK.color = Color.black;
             //BLACK.mainTexture = new Texture2D(69, 420, TextureFormat.RGB24, false);
             BLACK.hideFlags = HideFlags.DontUnloadUnusedAsset;

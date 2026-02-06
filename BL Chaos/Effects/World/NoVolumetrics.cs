@@ -1,12 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using Jevil;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class NoVolumetrics : EffectBase
 {
@@ -22,7 +14,7 @@ internal class NoVolumetrics : EffectBase
 
     public override void OnEffectEnd()
     {
-        if (volRen.INOC())
+        if (volRen == null)
             volRen = GameObject.FindObjectOfType<VolumetricRendering>();
 
         volRen.enable();

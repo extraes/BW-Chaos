@@ -1,11 +1,5 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
+﻿using Il2CppSLZ.Marrow.Interaction;
 using System.Diagnostics;
-using Jevil;
 
 namespace BLChaos.Effects;
 
@@ -30,7 +24,7 @@ internal class RandomTeleport : EffectBase
         int count = 0;
 #endif
         Stopwatch sw = Stopwatch.StartNew();
-        Vector3 footpos = GlobalVariables.Player_PhysRig.rbFeet.transform.position;
+        Vector3 footpos = GlobalVariables.Player_PhysRig.m_head.transform.position;
         Vector3 location = footpos;
         while (!IsValid(location))
         {
@@ -58,7 +52,7 @@ internal class RandomTeleport : EffectBase
     void Tele(Vector3 footPos)
     {
         GlobalVariables.Player_RigManager.Teleport(footPos);
-        GlobalVariables.Player_RigManager.physicsRig.ResetHands(SLZ.Handedness.BOTH);
+        GlobalVariables.Player_RigManager.physicsRig.ResetHands(Handedness.BOTH);
     }
 
     bool IsValid(Vector3 worlspaceFootPos)

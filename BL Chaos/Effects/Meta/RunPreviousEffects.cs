@@ -1,9 +1,4 @@
-﻿using Jevil;
-using System;
-using System.Collections;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class RunPreviousEffects : EffectBase
 {

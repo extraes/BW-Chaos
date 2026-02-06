@@ -1,4 +1,5 @@
-﻿using HarmonyLib;
+﻿#if false
+using HarmonyLib;
 using SLZ.VRMK;
 using SLZ.Interaction;
 using SLZ.Marrow.Pool;
@@ -13,7 +14,6 @@ using BoneLib.RandomShit;
 
 namespace BLChaos;
 
-#if false
 public static class Utilities
 {
     static readonly HarmonyMethod skipMethod = new HarmonyMethod(typeof(Utilities), nameof(Utilities.SkipMethod));
@@ -24,9 +24,9 @@ public static class Utilities
     {
         int randomNum = UnityEngine.Random.Range(0, 2);
         if (randomNum == 1)
-            return Player.leftHand;
+            return Player.LeftHand;
         else
-            return Player.rightHand;
+            return Player.RightHand;
     }
 
     public static GameObject SpawnAd(string str)

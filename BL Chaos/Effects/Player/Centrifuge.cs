@@ -1,13 +1,9 @@
-﻿using Jevil;
-using System;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class Centrifuge : EffectBase
 {
     public Centrifuge() : base("Centrifuge", 15) { }
-    [RangePreference(0, 5, 0.125f)] static readonly float forceMultiplier = 1;
+    [RangePreference(0, 5, 0.125f)] static float forceMultiplier = 1;
 
     public override void OnEffectUpdate()
     {

@@ -1,10 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using Jevil.PostProcessing;
+﻿using Jevil.PostProcessing;
 
 namespace BLChaos.Effects;
 

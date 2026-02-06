@@ -1,9 +1,5 @@
-﻿using Jevil;
-using Jevil.Prefs;
+﻿using Jevil.Prefs;
 using MelonLoader;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
 using static BLChaos.Effects.EffectBase;
 
 namespace BLChaos;
@@ -41,8 +37,8 @@ public static class Prefs
     internal static bool proportionalVoting = true;
     [Pref("Enables the Discord/Twitch bot.")]
     internal static bool enableRemoteVoting = false;
-    //[Pref("Doesn't work - BONELAB Fusion isn't out.")]
-    internal const bool syncEffects = false; // todo: change to static instead of const, uncomment attribute
+    [Pref("Enables syncing effects via Fusion.")]
+    internal static bool syncEffects = false;
     [Pref("Keeps a list of effects that have been ran and doesn't run effects twice. Makes sure (nearly) all effects are ran before resetting the list.")]
     internal static bool useBagRandomizer = true;
     [Pref("Slowly changes the amount of time each effect takes over time. Only changes when an effect is ran.")]
@@ -71,7 +67,9 @@ public static class Prefs
 
 #if DEBUG
         lastEffectTested = prefEntries.MelonPrefsCategory.CreateEntry(nameof(lastEffectTested), -1);
-        prefEntries.BoneMenuCategory.CreateFunctionElement("Start/Resume Test", Color.white, TestingHelper.Start);
+#if !NOBONELIB
+        prefEntries.BoneMenuPage.CreateFunction("Start/Resume Test", Color.white, TestingHelper.Start);
+#endif
 #endif
 
         prefEntries.MelonPrefsCategory.SaveToFile();

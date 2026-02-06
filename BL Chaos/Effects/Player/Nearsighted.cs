@@ -1,11 +1,9 @@
-﻿using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class Nearsighted : EffectBase
 {
     public Nearsighted() : base("Nearsighted", 45) { }
-    [RangePreference(1, 25, 1)] static readonly int viewDistance = 10;
+    [RangePreference(1, 25, 1)] static int viewDistance = 10;
 
     public override void OnEffectStart()
     {

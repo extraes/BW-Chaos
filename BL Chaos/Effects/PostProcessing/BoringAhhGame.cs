@@ -1,21 +1,14 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Jevil.PostProcessing;
-using Random = UnityEngine.Random;
-using Jevil;
+﻿using Jevil.PostProcessing;
 using UnityEngine.Video;
-using System.IO;
-using BoneLib;
 
 namespace BLChaos.Effects;
 
 internal class BoringAhhGame : EffectBase
 {
     public BoringAhhGame() : base("Boring Ahh Game", 30, EffectTypes.POST_PROCESS) { }
+#pragma warning disable CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     static BoringAhhGame()
+#pragma warning restore CS8618 // Non-nullable field must contain a non-null value when exiting constructor. Consider declaring as nullable.
     {
         string tmpDir = Path.GetTempPath();
         string filePath = Path.Combine(tmpDir, "Subway Surfers.mp4");
@@ -42,9 +35,9 @@ internal class BoringAhhGame : EffectBase
 
     public override void OnEffectStart()
     {
-        if (aSource.INOC())
+        if (aSource == null)
         {
-            aSource = Player.playerHead.gameObject.AddComponent<AudioSource>();
+            aSource = GlobalVariables.Player_PhysRig.m_head.gameObject.AddComponent<AudioSource>();
             player.SetTargetAudioSource(0, aSource);
             aSource.volume = 0.4f;
             aSource.outputAudioMixerGroup = GlobalVariables.SFXMixer;
@@ -60,6 +53,7 @@ internal class BoringAhhGame : EffectBase
     public override void OnEffectEnd()
     {
         player.Stop();
+        PostProcessingManager.RemoveGlobalTexture(globalDesc);
         SharedPostProcessingMaterials.SideScreen.Disable();
     }
 }

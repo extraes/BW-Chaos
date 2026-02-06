@@ -1,6 +1,4 @@
-﻿using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class ZeroGravity : EffectBase
 {

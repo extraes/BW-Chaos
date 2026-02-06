@@ -1,7 +1,4 @@
-﻿using Jevil;
-using MelonLoader;
-using System.Linq;
-using UnityEngine;
+﻿using MelonLoader;
 using UnityEngine.Video;
 
 namespace BLChaos.Effects;
@@ -118,7 +115,7 @@ internal class ImportantInstructions : EffectBase
         if (videoPlayer.clip.name == "you should kys... NOW") MelonCoroutines.Start(LTG()); // todo: dont hardcode this (but wtf else do i do lol)
     }
 
-    private System.Collections.IEnumerator ModulateVolume()
+    private IEnumerator ModulateVolume()
     {
         float time = 0;
         yield return null;
@@ -136,13 +133,13 @@ internal class ImportantInstructions : EffectBase
         ForceEnd();
     }
 
-    private System.Collections.IEnumerator LTG()
+    private IEnumerator LTG()
     {
 #if DEBUG
         Log("Running LTG");
 #endif
         yield return new WaitForSeconds(5.833f);
         if (!Active) yield break;
-        if (!GlobalVariables.Player_Health.INOC()) GlobalVariables.Player_Health.Death();
+        if (!GlobalVariables.Player_Health == null) GlobalVariables.Player_Health.Death();
     }
 }

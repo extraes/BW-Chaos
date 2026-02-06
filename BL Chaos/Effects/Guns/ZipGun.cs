@@ -1,15 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using SLZ.Props.Weapons;
-using BoneLib;
-using Jevil;
-using System.Threading.Tasks;
-using Cysharp.Threading.Tasks;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class ZipGun : EffectBase
@@ -60,3 +49,4 @@ internal class ZipGun : EffectBase
     }
 #endif
 }
+#endif

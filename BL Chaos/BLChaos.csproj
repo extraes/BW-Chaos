@@ -1,361 +1,184 @@
-﻿<?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
   <PropertyGroup>
-    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{C33921DC-5778-4EEC-A2D0-E0AE522CC701}</ProjectGuid>
-    <OutputType>Library</OutputType>
-    <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>BLChaos</RootNamespace>
-    <AssemblyName>BLChaos</AssemblyName>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
-    <LangVersion>10</LangVersion>
-    <FileAlignment>512</FileAlignment>
-    <Deterministic>true</Deterministic>
-    <TargetFrameworkProfile />
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <Configurations>Debug;Release;Debug - Nobonelib</Configurations>
+    <Platforms>AnyCPU;x64</Platforms>
+    <LangVersion>11</LangVersion>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <DebugSymbols>true</DebugSymbols>
-    <DebugType>full</DebugType>
-    <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;NOBONELIB</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>false</Prefer32Bit>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
-  <PropertyGroup>
-    <StartupObject />
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'TESTEFFECTS|AnyCPU'">
-    <DebugSymbols>true</DebugSymbols>
-    <OutputPath>bin\TESTEFFECTS\</OutputPath>
-    <DefineConstants>TRACE;DEBUG;TEST_EFFECTS</DefineConstants>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <DebugType>full</DebugType>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <LangVersion>10</LangVersion>
-    <ErrorReport>prompt</ErrorReport>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <DebugType>embedded</DebugType>
   </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Nobonelib|AnyCPU'">
+    <DefineConstants>$(DefineConstants);NOBONELIB;DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug - Nobonelib|x64'">
+    <DefineConstants>$(DefineConstants);NOBONELIB;DEBUG</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Resources/FusionSync.dll" />
+    <None Remove="Resources/SubwaySurfers.mp4" />
+  </ItemGroup>
+
   <ItemGroup>
     <Reference Include="0Harmony">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\0Harmony.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/net6/0Harmony.dll</HintPath>
     </Reference>
     <Reference Include="Assembly-CSharp">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Assembly-CSharp.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Assembly-CSharp.dll</HintPath>
     </Reference>
-    <Reference Include="Assembly-CSharp-firstpass, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Assembly-CSharp-firstpass.dll</HintPath>
+    <Reference Include="BoneLib">
+      <HintPath>$(BONELAB_DIR)/Mods/BoneLib.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppFacepunch.Steamworks.Win64">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppFacepunch.Steamworks.Win64.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppFacepunch.Steamworks.Win64.dll</HintPath>
     </Reference>
     <Reference Include="Il2Cppmscorlib">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2Cppmscorlib.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2Cppmscorlib.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppSystem, Version=4.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppSystem.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppSystem.dll</HintPath>
     </Reference>
     <Reference Include="JeviLib">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\Mods\JeviLib.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/Mods/JeviLib.dll</HintPath>
     </Reference>
     <Reference Include="MelonLoader">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\net6\MelonLoader.dll</HintPath>
-    </Reference>
-    <Reference Include="Newtonsoft.Json">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Managed\Newtonsoft.Json.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/net6/MelonLoader.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppOculus.Platform">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppOculus.Platform.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppOculus.Platform.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppSLZ.Marrow">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppSLZ.Marrow.dll</HintPath>
-    </Reference>
-    <Reference Include="Il2CppSLZ.Marrow.SDK">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppSLZ.Marrow.SDK.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppSLZ.Marrow.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppSLZ.Serialize">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppSLZ.Serialize.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppSLZ.Serialize.dll</HintPath>
     </Reference>
-    <Reference Include="System" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.7.2\System.Drawing.dll</HintPath>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>$(BONELAB_DIR)/MelonLoader/net6/Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="System.Net.Http" />
     <Reference Include="Tomlet">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\net6\Tomlet.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/net6/Tomlet.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Common">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\net6\Il2CppInterop.Common.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/net6/Il2CppInterop.Common.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppInterop.Runtime">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\net6\Il2CppInterop.Runtime.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/net6/Il2CppInterop.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppUniTask">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppUniTask.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppUniTask.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppUniTask.Addressables">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppUniTask.Addressables.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppUniTask.Addressables.dll</HintPath>
     </Reference>
     <Reference Include="Il2CppUniTask.Linq">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Il2CppUniTask.Linq.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Il2CppUniTask.Linq.dll</HintPath>
     </Reference>
     <Reference Include="Unity.Addressables">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Unity.Addressables.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Unity.Addressables.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Core.Runtime">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Unity.RenderPipelines.Core.Runtime.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Unity.RenderPipelines.Core.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.RenderPipelines.Universal.Runtime">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Unity.RenderPipelines.Universal.Runtime.dll</HintPath>
     </Reference>
     <Reference Include="Unity.TextMeshPro, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Unity.TextMeshPro.dll</HintPath>
-    </Reference>
-    <Reference Include="Unity.XR.OpenVR">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\Unity.XR.OpenVR.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/Unity.TextMeshPro.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AndroidJNIModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.AndroidJNIModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.AndroidJNIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AnimationModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.AnimationModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.AnimationModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AssetBundleModule, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.AssetBundleModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.AssetBundleModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.AudioModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.AudioModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.AudioModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.CoreModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.CoreModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.CoreModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.GIModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.GIModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.GIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ImageConversionModule">
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.ImageConversionModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.ImageConversionModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.IMGUIModule">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Managed\UnityEngine.IMGUIModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.ParticleSystemModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.ParticleSystemModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.ParticleSystemModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.PhysicsModule">
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.PhysicsModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.TextRenderingModule, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.TextRenderingModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.TextRenderingModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UI, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.UI.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.UI.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UIModule, Version=3.7.1.6, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>C:\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.UIModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.UIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.UnityWebRequestModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.UnityWebRequestModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.UnityWebRequestModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.VideoModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\BONELAB\MelonLoader\Il2CppAssemblies\UnityEngine.VideoModule.dll</HintPath>
+      <HintPath>$(BONELAB_DIR)/MelonLoader/Il2CppAssemblies/UnityEngine.VideoModule.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Effects\Guns\DupeGun.cs" />
-    <Compile Include="Effects\Guns\ZipGun.cs" />
-    <Compile Include="Effects\Misc\SimulationInstability.cs" />
-    <Compile Include="Effects\Misc\StickDrift.cs" />
-    <Compile Include="Effects\Misc\UseTheForce.cs" />
-    <Compile Include="Effects\PostProcessing\QuestPort.cs" />
-    <Compile Include="Effects\PostProcessing\DownshiftAnim.cs" />
-    <Compile Include="Effects\PostProcessing\Downshift.cs" />
-    <Compile Include="Effects\PostProcessing\E32016.cs" />
-    <Compile Include="Effects\PostProcessing\BoringAhhGame.cs" />
-    <Compile Include="Effects\World\BouncyHouse.cs" />
-    <Compile Include="Effects\World\ReloadLevel.cs" />
-    <Compile Include="Effects\World\GorillaGrip.cs" />
-    <Compile Include="Effects\World\Teflon.cs" />
-    <Compile Include="Effects\World\LightBlowout.cs" />
-    <Compile Include="Effects\World\DistantSound.cs" />
-    <Compile Include="Effects\World\RandomGravity.cs" />
-    <Compile Include="Effects\World\DestroyLevel.cs" />
-    <Compile Include="Effects\World\RandomTeleport.cs" />
-    <Compile Include="Effects\World\InTheHeadlights.cs" />
-    <Compile Include="Effects\World\NoMoreChunks.cs" />
-    <Compile Include="Effects\World\NoVolumetrics.cs" />
-    <Compile Include="Extras\Exceptions.cs" />
-    <Compile Include="Stats.cs" />
-    <Compile Include="EffectConfig.cs" />
-    <Compile Include="EffectHandler.cs" />
-    <Compile Include="Effects\EffectBase.cs" />
-    <Compile Include="Effects\Guns\BarrySteakfries.cs" />
-    <Compile Include="Effects\Guns\ForceGunManual.cs" />
-    <Compile Include="Effects\Guns\GunSpeedup.cs" />
-    <Compile Include="Effects\Guns\GunSlowdown.cs" />
-    <Compile Include="Effects\Guns\RandomizeGunSpeeds.cs" />
-    <Compile Include="Effects\Guns\ExplosiveGuns.cs" />
-    <Compile Include="Effects\Guns\InaccurateGuns.cs" />
-    <Compile Include="Effects\Guns\NoAmmo.cs" />
-    <Compile Include="Effects\Guns\WrongMag.cs" />
-    <Compile Include="Effects\Guns\UpNAtomize.cs" />
-    <Compile Include="Effects\Meta\SlowTimer.cs" />
-    <Compile Include="Effects\Meta\MassEffect.cs" />
-    <Compile Include="Effects\Misc\SonicSpeed.cs" />
-    <Compile Include="Effects\Misc\SlowmoPunch.cs" />
-    <Compile Include="Effects\Misc\SpawnAds.cs" />
-    <Compile Include="Effects\Misc\SpawnDogAds.cs" />
-    <Compile Include="Effects\Misc\4xSpeed.cs" />
-    <Compile Include="Effects\Misc\ChangeSteamName.cs" />
-    <Compile Include="Effects\Misc\FakeCrash.cs" />
-    <Compile Include="Effects\Misc\GullibleOnTheCeiling.cs" />
-    <Compile Include="Effects\Misc\CaughtIn4K.cs" />
-    <Compile Include="Effects\Misc\ChesmondEffect.cs" />
-    <Compile Include="Effects\Misc\EnemyGauntlet.cs" />
-    <Compile Include="Effects\Misc\GetDoxxed.cs" />
-    <Compile Include="Effects\Misc\ImportantInstructions.cs" />
-    <Compile Include="Effects\Misc\ReplaceText.cs" />
-    <Compile Include="Effects\Meta\FasterTimer.cs" />
-    <Compile Include="Effects\Meta\RunPreviousEffects.cs" />
-    <Compile Include="Effects\Misc\RandomForces.cs" />
-    <Compile Include="Effects\Misc\PoolParty.cs" />
-    <Compile Include="Effects\Misc\MyMemeFolder.cs" />
-    <Compile Include="Effects\Meta\TripleThreat.cs" />
-    <Compile Include="Effects\Misc\RandomMesh.cs" />
-    <Compile Include="Effects\Misc\SimonSays.cs" />
-    <Compile Include="Effects\Player\InvertPlayerVelocity.cs" />
-    <Compile Include="Effects\Player\HighJump.cs" />
-    <Compile Include="Effects\Misc\InvincibleNullbody.cs" />
-    <Compile Include="Effects\Player\InstaDeath.cs" />
-    <Compile Include="Effects\Player\Nearsighted.cs" />
-    <Compile Include="Effects\Player\FlattenCameras.cs" />
-    <Compile Include="Effects\Player\Strengthen.cs" />
-    <Compile Include="Effects\Player\NimbusHands.cs" />
-    <Compile Include="Effects\Player\DontLetHimGrabYou.cs" />
-    <Compile Include="Effects\Player\CrabletCircle.cs" />
-    <Compile Include="Effects\Player\Cage.cs" />
-    <Compile Include="Effects\Player\Weaken.cs" />
-    <Compile Include="Effects\Template.cs" />
-    <Compile Include="Effects\Player\Butterfingers.cs" />
-    <Compile Include="Effects\Player\FuckYourItem.cs" />
-    <Compile Include="Effects\Player\Paralyze.cs" />
-    <Compile Include="Effects\Player\PointPush.cs" />
-    <Compile Include="Effects\Guns\FuckYourMag.cs" />
-    <Compile Include="Effects\Player\FlingPlayer.cs" />
-    <Compile Include="Effects\Player\Centrifuge.cs" />
-    <Compile Include="Effects\Player\Parkinsons.cs" />
-    <Compile Include="Effects\Player\NoRegen.cs" />
-    <Compile Include="Effects\Player\Immortality.cs" />
-    <Compile Include="Effects\Player\GetJumped.cs" />
-    <Compile Include="Effects\World\PitchBlackWorld.cs" />
-    <Compile Include="Effects\World\FlingEverything.cs" />
-    <Compile Include="Effects\Misc\Lag.cs" />
-    <Compile Include="Effects\World\FogRoll.cs" />
-    <Compile Include="Effects\World\GravityCube.cs" />
-    <Compile Include="Effects\World\InvertGravity.cs" />
-    <Compile Include="Effects\World\FartWithReverb.cs" />
-    <Compile Include="Effects\World\RepulsivePlayer.cs" />
-    <Compile Include="Effects\World\PointGravity.cs" />
-    <Compile Include="Effects\World\California.cs" />
-    <Compile Include="Effects\World\SlowShooting.cs" />
-    <Compile Include="Effects\World\CrabletRain.cs" />
-    <Compile Include="Effects\World\MagneticPlayer.cs" />
-    <Compile Include="Effects\World\RGBLights.cs" />
-    <Compile Include="Effects\Misc\RandomTimeScale.cs" />
-    <Compile Include="Effects\World\InvertVelocity.cs" />
-    <Compile Include="Effects\World\GarbageTextures.cs" />
-    <Compile Include="Effects\Misc\VineBoomSounds.cs" />
-    <Compile Include="Effects\World\ExtremeGravity.cs" />
-    <Compile Include="Effects\World\Grounded.cs" />
-    <Compile Include="Effects\World\DarkWorld.cs" />
-    <Compile Include="Effects\World\GravityHands.cs" />
-    <Compile Include="Effects\World\Aggro.cs" />
-    <Compile Include="Effects\World\Compton.cs" />
-    <Compile Include="Effects\World\ScrollingTextures.cs" />
-    <Compile Include="Effects\World\CokedOutNPCs.cs" />
-    <Compile Include="Effects\World\FreezeAll.cs" />
-    <Compile Include="Effects\World\Ejected.cs" />
-    <Compile Include="Effects\World\LockRigidBodies.cs" />
-    <Compile Include="Effects\World\Fold.cs" />
-    <Compile Include="Effects\World\LowGravity.cs" />
-    <Compile Include="Effects\World\PeepTheHorror.cs" />
-    <Compile Include="Effects\World\UnbakeLights.cs" />
-    <Compile Include="Effects\World\TextureSwap.cs" />
-    <Compile Include="Effects\World\VideoTextures.cs" />
-    <Compile Include="Effects\World\WhiteChristmas.cs" />
-    <Compile Include="Effects\World\ZeroGravity.cs" />
-    <Compile Include="Extensions.cs" />
-    <Compile Include="Extras\Attributes.cs" />
-    <Compile Include="Extras\EntanglementSyncHandler.cs" />
-    <Compile Include="Const.cs" />
-    <Compile Include="GlobalVariables.cs" />
-    <Compile Include="MelonLoaderMod.cs" />
-    <Compile Include="Prefs.cs" />
-    <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="BoneMenu.cs" />
-    <Compile Include="TestingHelper.cs" />
-    <Compile Include="WatsonWebsocket\MessageRecievedEventArgs.cs" />
-    <Compile Include="WatsonWebsocket\Statistics.cs" />
-    <Compile Include="WatsonWebsocket\WatsonWebsocket.cs" />
-    <Compile Include="Utilities.cs" />
-    <Compile Include="Extras\WebResponseHandler.cs" />
+    <EmbeddedResource Include="Resources/effectresources" />
   </ItemGroup>
   <ItemGroup>
-    <EmbeddedResource Include="Resources\EntanglementSync.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\effectresources" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\BLChaosDiscordBot.zip" />
-    <None Include="..\.editorconfig">
+    <EmbeddedResource Include="Resources/BLChaosDiscordBot.zip" />
+    <EmbeddedResource Include="Resources/FusionSync.dll" />
+    <EmbeddedResource Include="Resources/SubwaySurfers.mp4" />
+    <None Include="../.editorconfig">
       <Link>.editorconfig</Link>
     </None>
-    <EmbeddedResource Include="Resources\questeffectresources" />
-    <EmbeddedResource Include="Resources\questuielements" />
-    <EmbeddedResource Include="Resources\uielements" />
-    <None Include="WatsonWebsocket\WWSLICENSE.md" />
+    <EmbeddedResource Include="Resources/questeffectresources" />
+    <EmbeddedResource Include="Resources/questuielements" />
+    <EmbeddedResource Include="Resources/uielements" />
   </ItemGroup>
-  <ItemGroup>
-    <Analyzer Include="..\..\..\..\..\..\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\Extensions\Microsoft\Visual Studio Tools for Unity\Analyzers\Microsoft.Unity.Analyzers.dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <WCFMetadata Include="Connected Services\" />
-  </ItemGroup>
-  <ItemGroup>
-    <EmbeddedResource Include="Resources\SubwaySurfers.mp4" />
-  </ItemGroup>
-  <ItemGroup />
-  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-  <PropertyGroup>
-    <PostBuildEvent>COPY "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\BONELAB\Mods\"</PostBuildEvent>
-  </PropertyGroup>
+  <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Exec Command="cp &quot;$(TargetPath)&quot; &quot;$(BONELAB_DIR)/Mods/&quot;" />
+  </Target>
+
 </Project>

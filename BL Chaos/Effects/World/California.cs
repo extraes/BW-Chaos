@@ -1,7 +1,4 @@
-﻿using System;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class California : EffectBase
 {

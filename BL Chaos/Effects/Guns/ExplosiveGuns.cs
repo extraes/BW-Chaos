@@ -1,22 +1,19 @@
-﻿using BoneLib;
-using MelonLoader;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
+﻿using MelonLoader;
 
 namespace BLChaos.Effects;
 
 internal class ExplosiveGuns : EffectBase
 {
     public ExplosiveGuns() : base("Explosive Guns", 60) { }
-    [RangePreference(0.125f, 5, 0.125f)] static readonly float forceMultiplier = 1;
+    [RangePreference(0.125f, 5, 0.125f)] static float forceMultiplier = 1;
 
-    public override void OnEffectStart() => Hooking.OnPostFireGun += Hooking_OnPostFireGun;
+#if !NOBONELIB
+    public override void OnEffectStart() => BoneLib.Hooking.OnPostFireGun += Hooking_OnPostFireGun;
 
-    public override void OnEffectEnd() => Hooking.OnPostFireGun -= Hooking_OnPostFireGun;
+    public override void OnEffectEnd() => BoneLib.Hooking.OnPostFireGun -= Hooking_OnPostFireGun;
+#endif
 
-    private void Hooking_OnPostFireGun(SLZ.Props.Weapons.Gun obj)
+    private void Hooking_OnPostFireGun(Gun obj)
     {
         Vector3 origin = obj.firePointTransform.position;
 

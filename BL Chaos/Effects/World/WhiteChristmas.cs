@@ -1,7 +1,4 @@
-﻿using BoneLib;
-using SLZ.Interaction;
-using UnityEngine;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class WhiteChristmas : EffectBase
@@ -20,7 +17,7 @@ internal class WhiteChristmas : EffectBase
 
     public override void OnEffectUpdate()
     {
-        Hand hand = Time.frameCount % 2 == 0 ? Player.leftHand : Player.rightHand;
+        Hand hand = Time.frameCount % 2 == 0 ? Player.LeftHand : Player.RightHand;
         Vector3 dir = hand.transform.forward;
 
         if (Physics.Raycast(hand.transform.position + dir / 20, dir, out RaycastHit hitInfo, 50f))
@@ -34,3 +31,4 @@ internal class WhiteChristmas : EffectBase
         }
     }
 }
+#endif

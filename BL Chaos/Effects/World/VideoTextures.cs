@@ -1,7 +1,4 @@
-﻿using System.Linq;
-using UnityEngine;
-using UnityEngine.Video;
-using Random = UnityEngine.Random;
+﻿using UnityEngine.Video;
 
 namespace BLChaos.Effects;
 
@@ -12,10 +9,10 @@ internal class VideoTextures : EffectBase
     static VideoPlayer[] videoPlayers;
     static RenderTexture[] textures;
     static Material[] materials;
-    static readonly Shader vrstandard = Shader.Find(Const.URP_LIT_NAME);
-    [RangePreference(0f, 1f, 0.01f)] static readonly float swapChance = 0.2f;
+    static readonly Shader baseShader = Shader.Find(Const.URP_LIT_NAME);
+    [RangePreference(0f, 1f, 0.01f)] static float swapChance = 0.2f;
     // changing 2300 textures at once crashed my game (in sewers) lmao
-    [RangePreference(25, 2000, 25)] static readonly int limit = 500; // lest the game crash once more
+    [RangePreference(25, 2000, 25)] static int limit = 500; // lest the game crash once more
     public VideoTextures() : base("Video textures", EffectTypes.LAGGY) { }
 
 
@@ -49,7 +46,7 @@ internal class VideoTextures : EffectBase
             GameObject.DontDestroyOnLoad(textures[i]);
             videoPlayers[i].targetTexture = textures[i];
 
-            materials[i] = new Material(vrstandard);
+            materials[i] = new Material(baseShader);
             materials[i].name = textures[i].name;
             //materials[i].hideFlags = HideFlags.DontUnloadUnusedAsset;
             GameObject.DontDestroyOnLoad(materials[i]);
@@ -69,7 +66,7 @@ internal class VideoTextures : EffectBase
 
         if (isNetworked) return;
 
-        UnhollowerBaseLib.Il2CppArrayBase<MeshRenderer> rends = GameObject.FindObjectsOfType<MeshRenderer>();
+        var rends = GameObject.FindObjectsOfType<MeshRenderer>();
         int count = 0;
         foreach (MeshRenderer mesh in rends)
         {
@@ -77,7 +74,7 @@ internal class VideoTextures : EffectBase
             {
                 if (count++ > limit) return; // inline incrementing
                 if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
-                if (mesh.GetComponent<TMPro.TMP_Text>() != null) continue;
+                if (mesh.GetComponent<TMP_Text>() != null) continue;
 
                 Material mat = materials.Random();
                 SendNetworkData(mat.name + ";" + mesh.transform.GetFullPath());

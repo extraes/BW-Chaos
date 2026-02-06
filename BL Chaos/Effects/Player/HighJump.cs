@@ -1,11 +1,4 @@
-﻿using HarmonyLib;
-using Jevil;
-using SLZ.Rig;
-using SLZ.VRMK;
-using System;
-using UnityEngine;
-
-/* 
+﻿/* 
  * THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE
  * I TOOK IT FROM GITHUB AND CHANGED IT A LITTLE
  *      https://github.com/Evanaellio/HyperJump/blob/master/HyperJump/HyperJump.cs
@@ -13,6 +6,8 @@ using UnityEngine;
  *      IF ANY LAWYERS WANT TO SUE ME OVER IT, PLEASE DONT
  * THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE - THIS CODE IS NOT MINE
  */
+
+using Jevil.Patching;
 
 namespace BLChaos.Effects;
 
@@ -22,9 +17,9 @@ internal class HighJump : EffectBase
 
     [RangePreference(0, 25, 1)] public static float forwardJumpMult = 5f;
     [RangePreference(0, 50, 2)] public static float upJumpMult = 20f;
-    public static Action OnJump;
-    public override void OnEffectStart() => OnJump += HiJump;
-    public override void OnEffectEnd() => OnJump -= HiJump;
+    public static Action? onJump;
+    public override void OnEffectStart() => GameCallbacks.OnJump += HiJump;
+    public override void OnEffectEnd() => GameCallbacks.OnJump -= HiJump;
 
     private void HiJump()
     {
@@ -38,23 +33,6 @@ internal class HighJump : EffectBase
 
         // Apply jump velocity to the player
         rig.AddVelocityChange(verticalJump + forwardJump);
-    }
-
-
-    //todo: fix
-    //[HarmonyPatch(typeof(ControllerRig), nameof(ControllerRig.Jump))]
-    public class ControllerRigJumpPatch
-    {
-        public static void Postfix()
-        {
-            PhysGrounder physGrounder = Instances.Player_PhysicsRig.physG;
-
-            // Only jump when on the ground
-            if (physGrounder.isGrounded)
-            {
-                OnJump?.Invoke();
-            }
-        }
     }
 }
 

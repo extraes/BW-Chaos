@@ -1,13 +1,6 @@
 ﻿#if DEBUG
 using BoneLib.RandomShit;
 using MelonLoader;
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using UnityEngine;
 
 namespace BLChaos;
 
@@ -45,7 +38,9 @@ internal static class TestingHelper
         }
 
         Chaos.Log("All effects ran!");
+#if !NOBONELIB
         PopupBoxManager.CreateNewPopupBox("All effects ran! You can now rest peacefully.");
+#endif
         Prefs.lastEffectTested.Value = -1;
     }
 }

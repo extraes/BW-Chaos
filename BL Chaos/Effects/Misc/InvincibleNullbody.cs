@@ -1,12 +1,5 @@
-﻿using BoneLib.Nullables;
-using Jevil;
-using Jevil.Spawning;
-using PuppetMasta;
-using SLZ.AI;
-using SLZ.Marrow.Data;
-using SLZ.Marrow.Pool;
-using System.Linq;
-using UnityEngine;
+﻿using Il2CppSLZ.Marrow.AI;
+using Il2CppSLZ.Marrow.PuppetMasta;
 
 namespace BLChaos.Effects;
 
@@ -23,7 +16,7 @@ internal class PunchingBagNullbody : EffectBase
             return;
         }
 
-        AssetPoolee nullbody = await nbSpawnable.SpawnAsync(Vector3.zero, Quaternion.identity);
+        Poolee nullbody = await nbSpawnable.SpawnAsync(Vector3.zero, Quaternion.identity);
         PuppetMaster pm = nullbody.GetComponentInChildren<PuppetMaster>();
         Utilities.MoveAndFacePlayer(nullbody.gameObject);
         nullbody.gameObject.SetActive(true);
@@ -43,7 +36,7 @@ internal class PunchingBagNullbody : EffectBase
             return;
         }
 
-        AssetPoolee nullbody = await nbSpawnable.SpawnAsync(Vector3.zero, Quaternion.identity);
+        Poolee nullbody = await nbSpawnable.SpawnAsync(Vector3.zero, Quaternion.identity);
         Utilities.MoveAndFacePlayer(nullbody.gameObject);
         SendNetworkData(nullbody.transform.SerializePosRot());
         nullbody.gameObject.SetActive(true);

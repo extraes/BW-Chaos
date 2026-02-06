@@ -1,9 +1,5 @@
-﻿
+﻿#if !NOBONELIB
 using BoneLib.RandomShit;
-using Jevil;
-using System;
-using System.Collections.Generic;
-using UnityEngine;
 
 namespace BLChaos.Effects;
 
@@ -24,9 +20,9 @@ internal class ItSaysGullibleOnTheCeiling : EffectBase
         myID = signID;
         SendNetworkData(BitConverter.GetBytes(signID), sign.transform.position.ToBytes());
 
-        GameObject.Destroy(sign.GetComponent<SLZ.Props.ObjectDestructable>());
-        GameObject.Destroy(sign.GetComponent<SLZ.SFX.ImpactSFX>());
-        GameObject.Destroy(sign.GetComponent<SLZ.Interaction.InteractableHost>());
+        GameObject.Destroy(sign.GetComponent<Il2CppSLZ.Marrow.ObjectDestructible>());
+        GameObject.Destroy(sign.GetComponent<Il2CppSLZ.Marrow.ImpactSFX>());
+        GameObject.Destroy(sign.GetComponent<Il2CppSLZ.Marrow.InteractableHost>());
         Rigidbody rb = sign.GetComponent<Rigidbody>();
         rb.detectCollisions = false;
         rb.useGravity = false;
@@ -53,9 +49,9 @@ internal class ItSaysGullibleOnTheCeiling : EffectBase
         {
             // Create a new sign if one with the given ID doesn't already exist
             GameObject newSign = PopupBoxManager.CreateNewPopupBox("gullible");
-            GameObject.Destroy(newSign.GetComponent<SLZ.Props.ObjectDestructable>());
-            GameObject.Destroy(newSign.GetComponent<SLZ.SFX.ImpactSFX>());
-            GameObject.Destroy(newSign.GetComponent<SLZ.Interaction.InteractableHost>());
+            GameObject.Destroy(sign.GetComponent<Il2CppSLZ.Marrow.ObjectDestructible>());
+            GameObject.Destroy(sign.GetComponent<Il2CppSLZ.Marrow.ImpactSFX>());
+            GameObject.Destroy(sign.GetComponent<Il2CppSLZ.Marrow.InteractableHost>());
             Rigidbody rb = sign.GetComponent<Rigidbody>();
             rb.detectCollisions = false;
             rb.useGravity = false; // disable gravity because otherwise itll fall in the 4 frame interval
@@ -70,3 +66,4 @@ internal class ItSaysGullibleOnTheCeiling : EffectBase
 
     public override void OnEffectEnd() => signs.Values.ForEach(s => s.Destroy());
 }
+#endif

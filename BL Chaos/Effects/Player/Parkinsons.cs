@@ -1,12 +1,9 @@
-﻿using Jevil;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class Parkinsons : EffectBase
 {
     public Parkinsons() : base("Parkinsons", 30) { }
-    [RangePreference(0, 25, 0.125f)] static readonly float forceMultiplier = 1;
+    [RangePreference(0, 25, 0.125f)] static float forceMultiplier = 1;
 
     public override void OnEffectUpdate()
     {

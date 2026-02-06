@@ -1,10 +1,4 @@
-﻿using BoneLib;
-using System;
-using System.Net.Http;
-using System.Text;
-using UnityEngine;
-
-namespace BLChaos;
+﻿namespace BLChaos;
 
 internal static class Stats
 {
@@ -20,7 +14,11 @@ internal static class Stats
 
     public static void PingVersion()
     {
-        if (!Player.handsExist) return;
+#if NOBONELIB
+        if (GlobalVariables.Player_PhysRig == null || GlobalVariables.Player_PhysRig.m_handRt == null) return;
+#else
+        if (!Player.HandsExist) return;
+#endif
 
         if (!PlayerPrefs.HasKey(prefsKey))
         {
@@ -52,7 +50,8 @@ internal static class Stats
         catch (Exception ex)
         {
             Chaos.Log("Exception was thrown by web client whilst attempting to increment stat for effect " + effect.GetType().Name);
-            throw ex;
+            Chaos.Warn(ex);
+            throw;
         }
 #else
         catch { }

@@ -1,12 +1,9 @@
-﻿using Jevil;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class FlingPlayer : EffectBase
 {
     public FlingPlayer() : base("Fling Player") { }
-    [RangePreference(0, 5, 0.25f)] static readonly float forceMultiplier = 1f;
+    [RangePreference(0, 5, 0.25f)] static float forceMultiplier = 1f;
     readonly int[] arr = new int[] { -1, 1 };
 
     public override void OnEffectStart()

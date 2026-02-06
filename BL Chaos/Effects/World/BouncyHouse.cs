@@ -1,10 +1,4 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using System.Collections.Generic;
+﻿using Il2CppInterop.Runtime;
 using System.Diagnostics;
 
 namespace BLChaos.Effects;
@@ -14,6 +8,10 @@ internal class BouncyHouse : EffectBase
     public BouncyHouse() : base("Bouncy House", 90) { }
     Dictionary<Collider, PhysicMaterial> originalMaterials = new Dictionary<Collider, PhysicMaterial>();
     static PhysicMaterial pMat;
+    //[EffectPreference("Bouncifies everything instead of just the player")] static bool bouncifyAll = false;
+    // this shit is so stupid bruh if anyone makes this over 1 its gonna be a fucking perpetual and exponential motion machine
+    [RangePreference(0, 10f, 0.25f)] public static float mult = 1;
+    List<Bouncifier> bouncifiers = new();
 
     public override void OnEffectStart()
     {
@@ -38,6 +36,13 @@ internal class BouncyHouse : EffectBase
             if (colMat.Key == null) continue;
             colMat.Key.material = colMat.Value;
         }
+
+        foreach (Bouncifier bouncifier in bouncifiers)
+        {
+            if (bouncifier == null) continue;
+            
+            GameObject.Destroy(bouncifier);
+        }
     }
 
     [AutoCoroutine]
@@ -51,7 +56,7 @@ internal class BouncyHouse : EffectBase
         {
             if (sw.ElapsedMilliseconds > 3) // only take up 3ms of frame time.
             {
-                Log("Waiting a frame after taking 3ms on current frame!");
+                Log("Waiting a frame after taking 3ms on current frame for collider materials!");
                 yield return null;
                 sw.Restart();
             }
@@ -59,5 +64,48 @@ internal class BouncyHouse : EffectBase
             originalMaterials[col] = col.sharedMaterial;
             col.material = pMat;
         }
+
+        yield return null;
+
+        //var rbs = GameObject.FindObjectsOfType<Rigidbody>();
+        //var rbs = bouncifyAll ? GameObject.FindObjectsOfType<Rigidbody>() : GlobalVariables.Player_RigManager.GetComponentsInChildren<Rigidbody>();
+        var rbs = GameObject.FindObjectsOfTypeAll(Il2CppType.Of<Rigidbody>()).Select(o => o.TryCast<Rigidbody>()).ToArray();
+        Log($"Adding bouncifier to {rbs.Length} rigidbodies");
+        foreach (Rigidbody? rb in rbs)
+        {
+            if (rb == null)
+                continue;
+
+            if (sw.ElapsedMilliseconds > 3) // only take up 3ms of frame time.
+            {
+                Log("Waiting a frame after taking 3ms on current frame!");
+                yield return null;
+                sw.Restart();
+            }
+
+            if (Bouncifier.gameobjectsWithBouncifiers.Contains(rb.gameObject.GetInstanceID()))
+            {
+                Bouncifier bouncer = rb.gameObject.AddComponent<Bouncifier>();
+                bouncer.rb = rb;
+                bouncifiers.Add(bouncer);
+            }
+        }
+    }
+}
+
+[RegisterTypeInIl2Cpp]
+internal class Bouncifier : MonoBehaviour
+{
+    public Bouncifier(IntPtr ptr) : base(ptr) { }
+    public static readonly HashSet<int> gameobjectsWithBouncifiers = new();
+
+    public Rigidbody rb; // set by CoRun
+
+    public void Awake() => gameobjectsWithBouncifiers.Add(gameObject.GetInstanceID());
+    public void OnDestroy() => gameobjectsWithBouncifiers.Remove(gameObject.GetInstanceID());
+
+    public void OnCollisionEnter(Collision c)
+    {
+        rb.AddForce(c.impulse * BouncyHouse.mult);
     }
 }

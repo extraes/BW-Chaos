@@ -1,16 +1,6 @@
-﻿using Jevil;
-using SLZ.Interaction;
-using System;
-using System.Drawing;
-using System.Drawing.Imaging;
-using System.IO;
-using System.Runtime.InteropServices;
-using System.Text;
-using UnhollowerBaseLib;
-using UnityEngine;
+﻿using Il2CppInterop.Runtime.InteropTypes.Arrays;
 using UnityEngine.Experimental.Rendering;
 using Color = UnityEngine.Color;
-using Random = UnityEngine.Random;
 
 namespace BLChaos.Effects;
 
@@ -23,7 +13,7 @@ internal class GarbageTextures : EffectBase
     static readonly int texDepth = 3;
     static Texture2D[] textures = new Texture2D[texCount];
 
-    [RangePreference(0f, 1f, 0.02f)] static readonly float swapChance = 0.2f;
+    [RangePreference(0f, 1f, 0.02f)] static float swapChance = 0.2f;
     public GarbageTextures() : base("Garble Random Textures") { Init(); }
 
     private void Init()
@@ -68,7 +58,7 @@ internal class GarbageTextures : EffectBase
 
     public override void OnEffectStart()
     {
-        if (textures == null || textures[0].INOC()) Init();
+        if (textures == null || textures[0] == null) Init();
 
         if (isNetworked) return;
 
@@ -77,8 +67,8 @@ internal class GarbageTextures : EffectBase
             if (Random.value < swapChance)
             {
                 if (mesh.name.ToLower().Contains("text") || mesh.name.ToLower().Contains("ui")) continue;
-                if (mesh.GetComponent<TMPro.TMP_Text>() != null) continue;
-                mesh.material.SetTexture("_MainTex", textures.Random());
+                if (mesh.GetComponent<TMP_Text>() != null) continue;
+                mesh.material.SetTexture("_MainTex", textures!.Random());
                 Color col = Random.ColorHSV();
                 mesh.material.color = col;
 

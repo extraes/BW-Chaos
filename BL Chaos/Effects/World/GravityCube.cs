@@ -1,8 +1,4 @@
-﻿using BoneLib;
-using System.Collections;
-using UnityEngine;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class GravityCube : EffectBase
 {
@@ -15,7 +11,8 @@ internal class GravityCube : EffectBase
     {
         previousGrav = Physics.gravity;
 
-        Vector3 spawnPosition = Player.rightController.transform.position + Player.rightController.transform.forward;
+        var controller = GlobalVariables.Player_RigManager.ControllerRig.rightController.transform;
+        Vector3 spawnPosition = controller.position + controller.forward;
         gravObject = GameObject.CreatePrimitive(PrimitiveType.Cube).transform;
         gravObject.position = spawnPosition;
         gravObject.rotation = Random.rotation;

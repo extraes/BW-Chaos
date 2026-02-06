@@ -1,20 +1,5 @@
-﻿using System;
-using UnityEngine;
-using MelonLoader;
-using BoneLib;
-using System.Collections;
-using System.Linq;
-using Random = UnityEngine.Random;
-using UnityEngineInternal;
-using SLZ.Combat;
-using SLZ.Props.Weapons;
-using SLZ.Marrow.Pool;
-using Jevil;
-using System.Threading.Tasks;
-using Jevil.Spawning;
-using SLZ.Marrow.Data;
-using SLZ.Marrow.Warehouse;
-using Cysharp.Threading.Tasks;
+﻿#if !NOBONELIB
+#endif
 
 namespace BLChaos.Effects;
 
@@ -27,30 +12,36 @@ internal class DupeGun : EffectBase
 
     public override void OnEffectStart()
     {
+#if NOBONELIB
+        throw new NotImplementedException("This effect requires BoneLib to function");
+#else
         Hooking.OnPostFireGun += Hooking_OnPostFireGun;
+#endif
     }
     public override void OnEffectEnd()
     {
+#if !NOBONELIB
         Hooking.OnPostFireGun -= Hooking_OnPostFireGun;
+#endif
     }
 
     private void Hooking_OnPostFireGun(Gun gun)
     {
         if (!Physics.Raycast(gun.firePointTransform.position, gun.firePointTransform.forward, out RaycastHit hitInfo, 100)) return;
 
-        AssetPoolee poolee = hitInfo.collider.GetComponentInParent<AssetPoolee>();
+        Poolee poolee = hitInfo.collider.GetComponentInParent<Poolee>();
         if (poolee == null) return;
 
         for (int i = 0; i < dupeAmount; i++)
-            poolee.spawnableCrate.Spawn(hitInfo.point, Quaternion.identity);
+            poolee.SpawnableCrate.Spawn(hitInfo.point, Quaternion.identity);
     }
 
 #if DEBUG
     internal override async Task<TestResult> Test()
     {
         Spawnable gymBlock = Barcodes.ToSpawnable(JevilBarcode.GYM_BLOCK_B);
-        AssetPool spawnablePool = AssetSpawner._instance._barcodeToPool[gymBlock.crateRef.Barcode];
-        int preSpawned = spawnablePool.spawned.Count;
+        Pool spawnablePool = AssetSpawner._instance._barcodeToPool[gymBlock.crateRef.Barcode];
+        int preSpawned = spawnablePool._spawned.Count;
         int postSpawned;
         Log("Prespawn count: " + preSpawned);
 
@@ -72,7 +63,7 @@ internal class DupeGun : EffectBase
             Log("Test errored on fire, expectedly");
         }
 
-        postSpawned = spawnablePool.spawned.Count;
+        postSpawned = spawnablePool._spawned.Count;
         Log("Postspawn count: " + postSpawned);
         return Res(preSpawned < postSpawned);
     }

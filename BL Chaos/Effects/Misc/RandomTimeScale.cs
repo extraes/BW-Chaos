@@ -1,31 +1,17 @@
-﻿using Jevil.Patching;
-using MelonLoader;
-using System;
-using System.Collections;
-using UnityEngine;
-using Random = UnityEngine.Random;
+﻿using MelonLoader;
 
 namespace BLChaos.Effects;
 
 internal class RandomTimeScale : EffectBase
 {
     public RandomTimeScale() : base("Random slowmo", 90) { }
-    static bool active;
 
-    static RandomTimeScale()
-    {
-        Disable.When(() => active, typeof(Control_GlobalTime).GetMethod(nameof(Control_GlobalTime.DECREASE_TIMESCALE)));
-    }
-
-    public override void OnEffectStart()
-    {
-        active = true;
-    }
+    public override void OnEffectStart() => GameDisabling.ActivateSlowmo.Add(this);
 
     public override void OnEffectEnd()
     {
         Time.timeScale = 1;
-        active = false;
+        GameDisabling.ActivateSlowmo.Remove(this);
     }
 
     [AutoCoroutine]

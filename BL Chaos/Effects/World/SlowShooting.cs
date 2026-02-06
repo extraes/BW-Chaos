@@ -1,8 +1,5 @@
-﻿using BoneLib;
+﻿#if !NOBONELIB
 using MelonLoader;
-using SLZ.Props.Weapons;
-using System.Collections;
-using UnityEngine;
 
 namespace BLChaos.Effects;
 
@@ -10,7 +7,7 @@ internal class SlowShooting : EffectBase
 {
     public SlowShooting() : base("SUPERSHOT", 90) { }
 
-    private object coroutine;
+    private object? coroutine;
 
     public override void OnEffectStart()
     {
@@ -40,3 +37,4 @@ internal class SlowShooting : EffectBase
         Hooking.OnPostFireGun -= OnPostGunFire;
     }
 }
+#endif

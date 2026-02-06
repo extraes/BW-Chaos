@@ -1,12 +1,5 @@
-﻿using Jevil;
-using SLZ.Marrow.Warehouse;
-using Steamworks;
-using System;
-using System.Collections;
-using System.IO;
-using System.Linq;
-using System.Text;
-using UnityEngine;
+﻿using Il2CppSLZ.Marrow.AI;
+using Il2CppSLZ.Marrow.Warehouse;
 using Wait = UnityEngine.WaitForSecondsRealtime;
 
 namespace BLChaos.Effects;
@@ -46,7 +39,7 @@ internal class CaughtIn4K : EffectBase
         #region Read start menu shortcuts
 
         // Get prefEntries from User's start menu
-        System.Collections.Generic.List<string> shortcuts =
+        List<string> shortcuts =
             (from file in Directory.GetFiles(Environment.GetFolderPath(Environment.SpecialFolder.StartMenu), "*.lnk", SearchOption.AllDirectories)
              select Path.GetFileName(file)).ToList();
 
@@ -190,9 +183,9 @@ internal class CaughtIn4K : EffectBase
             SpawnAd("hey, if weeb shit gets on the list, then furry shit gets put on the list");
             yield return new Wait(8f);
         }
-
+        
         // femboy npc for the fatherless
-        if (Utilities.FindAll<SLZ.AI.AIBrain>().Any(ab => ab.name.ToLower().Contains("femb")))
+        if (Utilities.FindAll<AIBrain>().Any(ab => ab.name.ToLower().Contains("femb")))
         {
             SpawnAd("please touch grass");
             yield return new Wait(3f);
@@ -315,10 +308,10 @@ internal class CaughtIn4K : EffectBase
     {
         wasCaught = __caught_pleaseignore;
         // this literally just creates an ad and puts it in front of the player. code is not pretty sometimes.
-        GameObject ad = BoneLib.RandomShit.PopupBoxManager.CreateNewPopupBox(text);
-        Transform phead = GlobalVariables.Player_PhysRig.torso.rbHead.transform;
-        ad.transform.position = phead.position + phead.forward.normalized;
-        ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
+        GameObject ad = Utilities.SpawnAd(text);
+        //Transform phead = GlobalVariables.Player_PhysRig.torso.rbHead.transform;
+        //ad.transform.position = phead.position + phead.forward.normalized;
+        //ad.transform.rotation = Quaternion.LookRotation(ad.transform.position - phead.position);
 
         SendNetworkData(ad.transform.SerializePosRot(), Encoding.ASCII.GetBytes(text));
         return ad;

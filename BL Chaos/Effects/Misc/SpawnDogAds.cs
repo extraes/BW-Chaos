@@ -1,16 +1,12 @@
-﻿using BoneLib.RandomShit;
-using Jevil.Waiting;
-using Newtonsoft.Json;
-using System.Collections;
-using System.Net.Http;
-using UnityEngine;
+﻿#if !NOBONELIB
+using BoneLib.RandomShit;
 
 namespace BLChaos.Effects;
 
 internal class SpawnDogAd : EffectBase
 {
     public SpawnDogAd() : base("Spawn Dog Ads", 75) { }
-    [RangePreference(0.25f, 10, 0.25f)] static readonly float waitTime = 2.5f;
+    [RangePreference(0.25f, 10, 0.25f)] static float waitTime = 2.5f;
     const string API = "http://shibe.online/api/shibes";
     static readonly HttpClient httpClient = new();
 
@@ -25,3 +21,4 @@ internal class SpawnDogAd : EffectBase
         }
     }
 }
+#endif

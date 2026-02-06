@@ -1,23 +1,20 @@
-﻿using Il2CppSystem;
-using SLZ.SFX;
-using System.Collections.Generic;
-using System.Linq;
-using UnityEngine;
-using UnityEngine.Audio;
+﻿using System.Diagnostics.CodeAnalysis;
+using Jevil.Patching;
 
 namespace BLChaos.Effects;
 
 internal class Compton : EffectBase
 {
-    static AudioClip[] clips;
+    static AudioClip[] clips = Array.Empty<AudioClip>();
     static bool active = false;
     public Compton() : base("Compton", 30) { Init(); }
 
+    [MemberNotNull(nameof(clips))]
     private void Init()
     {
         clips = Resources.FindObjectsOfTypeAll<AudioClip>().Where(c => c.name.ToLower().Contains("gunshot")).ToArray();
         foreach (AudioClip clip in clips) clip.hideFlags = HideFlags.DontUnloadUnusedAsset;
-
+        
 #if DEBUG
         Log("Got our clips! They are:");
         foreach (AudioClip clip in clips) Log("   " + clip.name);
@@ -27,25 +24,23 @@ internal class Compton : EffectBase
     public override void OnEffectStart()
     {
         #region Initialize
-        if (clips == null || clips.Length == 0 || clips[0] == null) Init();
+        if (clips.Length == 0 || clips[0] == null) Init();
         #endregion
 
         active = true;
+
+        GameCallbacks.OnPreAudioSourcePlay += ReplaceClip;
     }
 
     public override void OnEffectEnd()
     {
         active = false;
+        GameCallbacks.OnPreAudioSourcePlay -= ReplaceClip;
     }
 
     // basically yoinked from AudioReplacer (https://github.com/TrevTV/Boneworks-OpenSourceMods/blob/main/AudioReplacer/MelonLoaderMod.cs lines 61, 62)
-    [HarmonyLib.HarmonyPatch(typeof(AudioSource), nameof(AudioSource.Play), new System.Type[0])]
-    [HarmonyLib.HarmonyPatch(typeof(AudioSource), nameof(AudioSource.Play), new System.Type[1] { typeof(ulong) })]
-    static class AudioPlayerPatch
+    static void ReplaceClip(AudioSource instance)
     {
-        static void Prefix(AudioSource __instance)
-        {
-            if (active) __instance.clip = clips.Random();
-        }
+        instance.clip = clips.Random();
     }
 }

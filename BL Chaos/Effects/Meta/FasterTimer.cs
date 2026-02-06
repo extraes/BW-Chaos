@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace BLChaos.Effects;
+﻿namespace BLChaos.Effects;
 
 internal class FastTimer : EffectBase
 {

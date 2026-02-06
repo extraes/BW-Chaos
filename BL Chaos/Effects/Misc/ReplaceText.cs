@@ -1,6 +1,4 @@
 ﻿using System.Reflection;
-using TMPro;
-using UnityEngine;
 
 namespace BLChaos.Effects;
 
@@ -8,7 +6,7 @@ internal class ReplaceText : EffectBase
 {
     public ReplaceText() : base("Replace text") { }
     private static readonly string[] spawnAdStrings = typeof(SpawnAds).GetField("ads", BindingFlags.NonPublic | BindingFlags.Static).GetValue(null) as string[];
-    [RangePreference(0, 1f, 0.05f)] static readonly float replaceChance = 0.25f;
+    [RangePreference(0, 1f, 0.05f)] static float replaceChance = 0.25f;
 
 
     public override void OnEffectStart()

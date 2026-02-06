@@ -1,6 +1,4 @@
 ﻿using MelonLoader;
-using System;
-using UnityEngine;
 
 namespace BLChaos.Effects;
 
@@ -41,7 +39,7 @@ internal class FakeCrash : EffectBase
     }
 
     [AutoCoroutine]
-    public System.Collections.IEnumerator InitiateCrash()
+    public IEnumerator InitiateCrash()
     {
         yield return null;
         // Sleep the game for 500ms, then wait half the sfx's length to let unity play it

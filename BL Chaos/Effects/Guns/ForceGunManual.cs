@@ -1,8 +1,4 @@
-﻿
-
-using BoneLib;
-using SLZ.Props.Weapons;
-
+﻿#if !NOBONELIB
 namespace BLChaos.Effects;
 
 internal class ForceGunManual : EffectBase
@@ -11,14 +7,14 @@ internal class ForceGunManual : EffectBase
 
     public override void OnEffectStart()
     {
-        Gun g = Player.GetGunInHand(Player.rightHand);
+        Gun g = Player.GetComponentInHand<Gun>(Player.RightHand);
         if (g != null)
         {
             g.fireMode = Gun.FireMode.MANUAL;
             g.slideState = Gun.SlideStates.LOCKED;
         }
 
-        g = Player.GetGunInHand(Player.leftHand);
+        g = Player.GetComponentInHand<Gun>(Player.LeftHand);
         if (g != null)
         {
             g.fireMode = Gun.FireMode.MANUAL;
@@ -27,3 +23,4 @@ internal class ForceGunManual : EffectBase
     }
 
 }
+#endif
