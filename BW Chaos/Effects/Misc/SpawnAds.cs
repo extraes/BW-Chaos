@@ -65,6 +65,7 @@ internal class SpawnAds : EffectBase
         "gee thanks il2cpp for fucking my shit up",
         "franzj presents",
         "install gentoo",
+        "fuck alexa GET HOME ASSISTANT INSTEAD",
         "who shit myself",
         "INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO INSTALL GENTOO",
         "stop playing vr games and get some pussy",
